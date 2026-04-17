@@ -108,6 +108,34 @@ final class SpeechPlayer {
         spokenSubRange = nil
     }
 
+    /// Jump to the next sentence. If we're playing, keep playing
+    /// from there; if paused/idle, move the cursor but don't start.
+    func nextSentence() {
+        guard !sentences.isEmpty else { return }
+        let target = min((state.sentenceIndex ?? -1) + 1, sentences.count - 1)
+        seek(to: target)
+    }
+
+    /// Jump to the previous sentence. Same play-or-cursor logic.
+    func previousSentence() {
+        guard !sentences.isEmpty else { return }
+        let target = max((state.sentenceIndex ?? 0) - 1, 0)
+        seek(to: target)
+    }
+
+    private func seek(to index: Int) {
+        let wasPlaying = state.isPlaying
+        synth.stopSpeaking(at: .immediate)
+        pcm.stop()
+        spokenSubRange = nil
+        nextIndex = index
+        if wasPlaying {
+            speakCurrent()
+        } else {
+            state = .paused(sentenceIndex: index)
+        }
+    }
+
     private func speakCurrent() {
         guard nextIndex < sentences.count else {
             state = .idle

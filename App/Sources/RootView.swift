@@ -61,6 +61,21 @@ struct RootView: View {
         ) { _ in
             startExport()
         }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.playPauseNotification)
+        ) { _ in
+            player.togglePlayPause()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.nextSentenceNotification)
+        ) { _ in
+            player.nextSentence()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.prevSentenceNotification)
+        ) { _ in
+            player.previousSentence()
+        }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
         .animation(.easeOut(duration: 0.18), value: document)
     }

@@ -2,10 +2,13 @@ import SwiftUI
 
 struct AppScene: Scene {
     /// Menu commands need a reference to the current RootView to
-    /// invoke its export flow. We key the NotificationCenter
-    /// pathway off this so the command can originate from any
-    /// window without us plumbing bindings through the hierarchy.
+    /// invoke its flows. NotificationCenter keeps command→view
+    /// plumbing decoupled so the command can originate from any
+    /// window without threading bindings through the hierarchy.
     static let exportNotification = Notification.Name("app.rhea.mac.export")
+    static let playPauseNotification = Notification.Name("app.rhea.mac.playPause")
+    static let nextSentenceNotification = Notification.Name("app.rhea.mac.nextSentence")
+    static let prevSentenceNotification = Notification.Name("app.rhea.mac.prevSentence")
 
     var body: some Scene {
         WindowGroup("Rhea") {
@@ -22,6 +25,31 @@ struct AppScene: Scene {
                     )
                 }
                 .keyboardShortcut("E", modifiers: [.command, .shift])
+            }
+
+            CommandMenu("Playback") {
+                Button("Play / Pause") {
+                    NotificationCenter.default.post(
+                        name: AppScene.playPauseNotification, object: nil
+                    )
+                }
+                .keyboardShortcut(.space, modifiers: [])
+
+                Divider()
+
+                Button("Previous Sentence") {
+                    NotificationCenter.default.post(
+                        name: AppScene.prevSentenceNotification, object: nil
+                    )
+                }
+                .keyboardShortcut(.leftArrow, modifiers: [])
+
+                Button("Next Sentence") {
+                    NotificationCenter.default.post(
+                        name: AppScene.nextSentenceNotification, object: nil
+                    )
+                }
+                .keyboardShortcut(.rightArrow, modifiers: [])
             }
         }
     }
