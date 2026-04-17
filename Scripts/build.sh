@@ -142,14 +142,14 @@ else
     sdk_path="$(xcrun --sdk macosx --show-sdk-path)"
     [[ -d "$sdk_path" ]] || fail "Could not locate macOS SDK via xcrun"
 
-    sources=(
-        "App/Sources/RheaApp.swift"
-        "App/Sources/AppScene.swift"
-        "App/Sources/Colors.swift"
-        "App/Sources/Typography.swift"
-        "App/Sources/DropTarget/DroppedDocument.swift"
-        "App/Sources/DropTarget/DropTargetView.swift"
-    )
+    # Glob every Swift file under App/Sources so we don't drift as
+    # new modules land. macOS bash 3.2 has no `mapfile`, so use a
+    # null-delimited read loop.
+    sources=()
+    while IFS= read -r -d '' file; do
+        sources+=("$file")
+    done < <(find App/Sources -type f -name '*.swift' -print0)
+    [[ ${#sources[@]} -gt 0 ]] || fail "No .swift files found under App/Sources"
 
     rm -rf "$APP_BUNDLE"
     mkdir -p "$APP_BUNDLE/Contents/MacOS"

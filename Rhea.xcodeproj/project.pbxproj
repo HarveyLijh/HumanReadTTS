@@ -13,7 +13,12 @@
 		2B00000000000000000A0004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0004 /* Typography.swift */; };
 		2B00000000000000000A0005 /* DropTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0005 /* DropTargetView.swift */; };
 		2B00000000000000000A0006 /* DroppedDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0006 /* DroppedDocument.swift */; };
+		2B00000000000000000A0007 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0007 /* RootView.swift */; };
+		2B00000000000000000A0011 /* PDFViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0011 /* PDFViewerView.swift */; };
+		2B00000000000000000A0012 /* PDFDocumentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0012 /* PDFDocumentLoader.swift */; };
+		2B00000000000000000A0021 /* MarkdownPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
+		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,8 +38,13 @@
 		2A00000000000000000A0004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0005 /* DropTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0006 /* DroppedDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroppedDocument.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0007 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0010 /* Rhea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rhea.entitlements; sourceTree = "<group>"; };
+		2A00000000000000000A0011 /* PDFViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFViewerView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0012 /* PDFDocumentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoader.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPlaceholderView.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0001 /* DropTargetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,9 +93,12 @@
 			children = (
 				2A00000000000000000A0001 /* RheaApp.swift */,
 				2A00000000000000000A0002 /* AppScene.swift */,
+				2A00000000000000000A0007 /* RootView.swift */,
 				2A00000000000000000A0003 /* Colors.swift */,
 				2A00000000000000000A0004 /* Typography.swift */,
 				1B00000000000000000A0004 /* DropTarget */,
+				1B00000000000000000A0008 /* PDFViewer */,
+				1B00000000000000000A0009 /* Markdown */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -97,6 +110,23 @@
 				2A00000000000000000A0006 /* DroppedDocument.swift */,
 			);
 			path = DropTarget;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0008 /* PDFViewer */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0011 /* PDFViewerView.swift */,
+				2A00000000000000000A0012 /* PDFDocumentLoader.swift */,
+			);
+			path = PDFViewer;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0009 /* Markdown */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */,
+			);
+			path = Markdown;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0005 /* Tests */ = {
@@ -111,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				2A00000000000000000B0001 /* DropTargetTests.swift */,
+				2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -233,10 +264,14 @@
 			files = (
 				2B00000000000000000A0001 /* RheaApp.swift in Sources */,
 				2B00000000000000000A0002 /* AppScene.swift in Sources */,
+				2B00000000000000000A0007 /* RootView.swift in Sources */,
 				2B00000000000000000A0003 /* Colors.swift in Sources */,
 				2B00000000000000000A0004 /* Typography.swift in Sources */,
 				2B00000000000000000A0005 /* DropTargetView.swift in Sources */,
 				2B00000000000000000A0006 /* DroppedDocument.swift in Sources */,
+				2B00000000000000000A0011 /* PDFViewerView.swift in Sources */,
+				2B00000000000000000A0012 /* PDFDocumentLoader.swift in Sources */,
+				2B00000000000000000A0021 /* MarkdownPlaceholderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B00000000000000000B0001 /* DropTargetTests.swift in Sources */,
+				2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

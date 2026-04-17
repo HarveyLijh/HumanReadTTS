@@ -3,7 +3,7 @@ import SwiftUI
 struct AppScene: Scene {
     var body: some Scene {
         WindowGroup("Rhea") {
-            DropTargetView()
+            RootView()
                 .frame(minWidth: 600, minHeight: 400)
         }
         .windowResizability(.contentMinSize)
