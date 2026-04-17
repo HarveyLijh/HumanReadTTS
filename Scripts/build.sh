@@ -238,8 +238,13 @@ fi
 
 if [[ $run -eq 1 ]]; then
     say "Launching Rhea.app"
-    open "$APP_BUNDLE"
-    note "Quit the app or close the window to return."
+    # Direct exec instead of `open` because LaunchServices
+    # validates the ad-hoc signature against TCC state and can
+    # stall for 30+ seconds on every fresh signature when the
+    # bundle lives under ~/Documents. Direct exec skips that.
+    "$APP_BUNDLE/Contents/MacOS/Rhea" >/dev/null 2>&1 &
+    disown
+    note "Launched via direct exec. Quit the app to return."
 fi
 
 printf "\n%s%sNext:%s drop a .pdf or .md file onto the Rhea window — the path appears.\n" \
