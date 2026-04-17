@@ -27,7 +27,12 @@ via File → Export Audiobook… (⌘⇧E).
 | ⌘O | Open File… |
 | ⌘⇧E | Export Audiobook… |
 | ⌘⇧R | Read Clipboard (from menubar) |
+| ⌘⇧S | Read Clipboard (global, works from any app) |
 | ⌘, | Open Settings |
+
+Services menu: any app's *Services → Read with Rhea* reads the current
+selection aloud. Shortcut is user-configurable in System Settings →
+Keyboard → Keyboard Shortcuts → Services.
 
 ## Milestone coverage
 
@@ -40,12 +45,12 @@ security-scoped bookmarks.
 
 ### Month 2
 - M2.1 ✅ Kokoro on-device English TTS, downloadable model, voice picker
+- M2.2 ✅ Kokoro prefetch-next-sentence (zero gap on sentence advance)
 - M2.4 ✅ Word-level highlight via `willSpeakRange` (system voices; Kokoro sentence-level)
 - M2.5 ✅ Settings tabs, speed/pitch sliders, voice override
+- M2.6 ✅ Services menu "Read with Rhea" + ⌘⇧S global hotkey (Carbon)
 - M2.7 ✅ Markdown renderer with Preview/Source toggle, proper block separators
-- M2.2 ⏳ pre-buffering polish (one-shot-per-sentence ships live)
-- M2.3 ⏳ WhisperKit forced alignment (Kokoro word timestamps)
-- M2.6 ⏳ Services menu + ⌘⇧S global hotkey
+- M2.3 ⏳ WhisperKit forced alignment (Kokoro word timestamps) — needs WhisperKit SPM dep + model
 
 ### Month 3 — partial
 - M3.5 ✅ Research-PDF heuristics (inline citation + figure/table caption stripping)
@@ -85,6 +90,7 @@ Under `/tmp/rhea-e2e/`:
 - `41-settings-playback.png` — Voice picker, speed/pitch, research toggles
 - `42-settings-pronunciation.png` — dictionary empty state + add form
 - `43-settings-analytics.png` — privacy toggle + off state
+- `100-m26-m22-live_Rhea_window_0_*.png` — post-M2.2/M2.6 smoke capture
 
 ## Fixture paths (left alone)
 | Path | Size | Content |
@@ -120,11 +126,10 @@ f761cb9 test: e2e integration suite + Scripts/test.sh + Kokoro URL fix
 Full log: `git log --oneline`.
 
 ## What I'd pick up next
-1. **M2.6 Services menu + global hotkey** — NSServices registration (needs a custom Info.plist, moderate pbxproj work).
-2. **Stable Developer-ID signing** — kills the LaunchServices hang permanently.
-3. **M2.3 WhisperKit forced alignment** — Kokoro word timestamps; also fixes word-highlight drift under Pronunciation / Research transformations.
-4. **Chapter markers in m4a** — promote to proper `.m4b`; needs AVAssetWriter rewrite of AudioExporter.
-5. **M3.1 Qwen3-TTS bilingual** — another SwiftPM dep + model catalog entry + per-sentence engine routing.
-6. **M2.2 streaming synthesis** — paragraph pre-buffering for zero-gap playback boundaries.
+1. **M2.3 WhisperKit forced alignment** — add WhisperKit SPM dep + `whisper-base` model-catalog entry; feed Kokoro PCM into Whisper for per-word timestamps so the word-highlight layer works on the Kokoro path. Also fixes word-highlight drift under Pronunciation / Research transformations.
+2. **M3.1–M3.4 Qwen3-TTS bilingual** — largest remaining scope; no mature Swift port exists, would need an MLX port or a local process bridge. Alternative: ship a simpler Kokoro-en + system-zh fallback and defer Qwen3.
+3. **Chapter markers in m4a** — promote to proper `.m4b`; rewrite AudioExporter on AVAssetWriter with a chapter text track.
+4. **Stable Developer-ID signing + notarised DMG** — M3.6/M3.7. Kills the LaunchServices hang permanently and unblocks the Homebrew Cask path.
+5. **M4.2 voice cloning** — blocked on a usable voice-clone model with a Swift / MLX port.
 
 Sleep well. Coffee works on me too.
