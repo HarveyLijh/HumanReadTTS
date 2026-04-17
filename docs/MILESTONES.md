@@ -23,11 +23,14 @@
 4. **Word-level highlighted synchronized scroll.** The Speechify interaction UX, but on a layout-preserving PDF view (not reflow).
 5. **Native macOS citizenship.** Share Sheet, Shortcuts, system-wide hotkey, Spotlight, menu-bar playback control, m4b audiobook export with chapter markers.
 
-**License & distribution strategy (dual-license, MacWhisper playbook):**
+**License & distribution strategy (fully open source):**
 
-- **Open-source (Apache-2.0):** Swift MLX ports, PDF-cleanup heuristics, word-level alignment logic. Published as standalone Swift packages. This is where GitHub stars and OSS community goodwill accrue.
-- **Commercial (Mac App Store, one-time purchase):** the polished Rhea app. Free tier (English only, system voices) + Pro unlock ($29 one-time) for Qwen3-TTS/CosyVoice bilingual + research features + Zotero integration.
-- No subscription. Ever. This is the explicit counter-position against Speechify/Voice Dream.
+- **Apache-2.0**, end to end. The whole app, not just the Swift package building blocks. Source lives at `github.com/harveylijh/rhea`.
+- **Distribution: notarized Developer-ID `.dmg` via GitHub Releases**, plus a Homebrew Cask once the release cadence stabilizes. **No Mac App Store submission**, at least for v1. The comparable unfunded-solo / small-team Mac apps in this segment ship outside MAS — Ollama, LM Studio, MacWhisper, Raycast, Rectangle, Stats, Transmission, VLC. Rationale and trade-offs are recorded in [`docs/decisions.md` ADR-001](../docs/decisions.md).
+- **Funding (if/when traction warrants): GitHub Sponsors.** No subscription, no Pro unlock, no in-app purchase. Ever. This is the explicit counter-position against Speechify, Voice Dream, and the broader SaaS-ification of reading tools.
+- **Practical knock-on effects** of dropping MAS: no embedded-Python sandbox gymnastics, no GPL-in-bundle worry (Apache-2.0 + GPL subprocess in a separate process is fine under the standard "mere aggregation" reading), no 30% Apple cut, no MAS review latency, full `CGEventTap`-based global hotkey on the table.
+
+> **Downstream sections that still reference MAS-era assumptions (M3.7, §5 risk row "MAS review rejects embedded Python," §8 open question 1) are pending revision and will be updated in a follow-up pass.**
 
 ---
 
