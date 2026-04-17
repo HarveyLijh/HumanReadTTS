@@ -9,6 +9,7 @@ struct AppScene: Scene {
     static let playPauseNotification = Notification.Name("app.rhea.mac.playPause")
     static let nextSentenceNotification = Notification.Name("app.rhea.mac.nextSentence")
     static let prevSentenceNotification = Notification.Name("app.rhea.mac.prevSentence")
+    static let openFileNotification = Notification.Name("app.rhea.mac.openFile")
 
     var body: some Scene {
         WindowGroup("Rhea") {
@@ -18,6 +19,15 @@ struct AppScene: Scene {
         .windowResizability(.contentMinSize)
         .defaultSize(width: 800, height: 600)
         .commands {
+            CommandGroup(after: .newItem) {
+                Button("Open File…") {
+                    NotificationCenter.default.post(
+                        name: AppScene.openFileNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("O", modifiers: [.command])
+            }
+
             CommandGroup(after: CommandGroupPlacement.importExport) {
                 Button("Export Audiobook…") {
                     NotificationCenter.default.post(

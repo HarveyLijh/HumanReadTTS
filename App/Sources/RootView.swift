@@ -1,4 +1,6 @@
 import SwiftUI
+import AppKit
+import UniformTypeIdentifiers
 
 /// The window's content owner. Wraps a `Library` sidebar around the
 /// document detail view and keeps the drop edge live across both
@@ -75,6 +77,11 @@ struct RootView: View {
             NotificationCenter.default.publisher(for: AppScene.prevSentenceNotification)
         ) { _ in
             player.previousSentence()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.openFileNotification)
+        ) { _ in
+            promptForOpenFile()
         }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
         .animation(.easeOut(duration: 0.18), value: document)
@@ -157,6 +164,27 @@ struct RootView: View {
         .padding(10)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
         .padding(.top, 12)
+    }
+
+    /// Present NSOpenPanel for the File → Open File… menu (⌘O).
+    private func promptForOpenFile() {
+        let panel = NSOpenPanel()
+        panel.title = "Open a PDF, Markdown, or EPUB"
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [.pdf, .epub]
+        // Also allow .md / .markdown — allowedContentTypes accepts UTType
+        if let md = UTType(filenameExtension: "md") {
+            panel.allowedContentTypes.append(md)
+        }
+        if let markdown = UTType(filenameExtension: "markdown") {
+            panel.allowedContentTypes.append(markdown)
+        }
+        if panel.runModal() == .OK,
+           let url = panel.url,
+           let next = DroppedDocument(url: url) {
+            adopt(next)
+        }
     }
 
     /// Called from the File → Export Audiobook menu command.
