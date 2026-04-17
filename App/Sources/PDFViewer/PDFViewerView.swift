@@ -11,6 +11,7 @@ struct PDFViewerView: View {
 
     @State private var loadResult: LoadResult = .loading
     @State private var blocks: [DocumentBlock] = []
+    @State private var sentences: [Sentence] = []
 
     var body: some View {
         Group {
@@ -26,7 +27,9 @@ struct PDFViewerView: View {
                         statusFooter(pageCount: document.pageCount)
                     }
                     .task(id: url) {
-                        blocks = await PDFTextExtractor.extract(document)
+                        let extracted = await PDFTextExtractor.extract(document)
+                        blocks = extracted
+                        sentences = await SentenceSegmenter.segment(extracted)
                     }
             case .failed:
                 errorState
@@ -35,6 +38,7 @@ struct PDFViewerView: View {
         .task(id: url) {
             loadResult = .loading
             blocks = []
+            sentences = []
             if let document = await PDFDocumentLoader.load(url: url) {
                 loadResult = .loaded(document)
             } else {
@@ -50,7 +54,8 @@ struct PDFViewerView: View {
             text = "no extractable text · \(pages)"
         } else {
             let blockCount = blocks.count == 1 ? "1 block" : "\(blocks.count) blocks"
-            text = "\(blockCount) · \(pages)"
+            let sentenceCount = sentences.count == 1 ? "1 sentence" : "\(sentences.count) sentences"
+            text = "\(blockCount) · \(sentenceCount) · \(pages)"
         }
         return Text(text)
             .font(.system(size: 11))

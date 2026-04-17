@@ -19,9 +19,12 @@
 		2B00000000000000000A0021 /* MarkdownPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */; };
 		2B00000000000000000A0031 /* DocumentBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0031 /* DocumentBlock.swift */; };
 		2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0032 /* PDFTextExtractor.swift */; };
+		2B00000000000000000A0033 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0033 /* Sentence.swift */; };
+		2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0034 /* SentenceSegmenter.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
+		2B00000000000000000B0004 /* SentenceSegmenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0004 /* SentenceSegmenterTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,9 +51,12 @@
 		2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPlaceholderView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0031 /* DocumentBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBlock.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0032 /* PDFTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractor.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0033 /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0034 /* SentenceSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenter.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0001 /* DropTargetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0003 /* PDFTextExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractorTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0004 /* SentenceSegmenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -141,6 +147,8 @@
 			children = (
 				2A00000000000000000A0031 /* DocumentBlock.swift */,
 				2A00000000000000000A0032 /* PDFTextExtractor.swift */,
+				2A00000000000000000A0033 /* Sentence.swift */,
+				2A00000000000000000A0034 /* SentenceSegmenter.swift */,
 			);
 			path = Document;
 			sourceTree = "<group>";
@@ -159,6 +167,7 @@
 				2A00000000000000000B0001 /* DropTargetTests.swift */,
 				2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */,
 				2A00000000000000000B0003 /* PDFTextExtractorTests.swift */,
+				2A00000000000000000B0004 /* SentenceSegmenterTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -291,6 +300,8 @@
 				2B00000000000000000A0021 /* MarkdownPlaceholderView.swift in Sources */,
 				2B00000000000000000A0031 /* DocumentBlock.swift in Sources */,
 				2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */,
+				2B00000000000000000A0033 /* Sentence.swift in Sources */,
+				2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,6 +312,7 @@
 				2B00000000000000000B0001 /* DropTargetTests.swift in Sources */,
 				2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */,
 				2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */,
+				2B00000000000000000B0004 /* SentenceSegmenterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
