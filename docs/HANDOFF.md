@@ -15,10 +15,11 @@ Status snapshot — delete or rewrite when back.
 - **M2.5** Settings window (⌘,) with Playback / Models / Pronunciation / Analytics tabs; per-utterance speed + pitch; voice override
 - **M2.7** Proper Markdown reader with NSAttributedString rendering + Preview/Source toggle
 
+- **M2.4** Word-level highlight via `willSpeakRange` for system voices — two-layer amber (soft sentence wash + brighter word). Kokoro path still sentence-level (needs WhisperKit for word timing).
+
 Not yet in Month 2:
 - **M2.2** Proper streaming synthesis / pre-buffering (current one-shot-per-sentence is fine for real-time, but paragraph pre-buffering is a polish item)
-- **M2.3** WhisperKit forced alignment for word timestamps
-- **M2.4** Word-level highlight (needs M2.3 or willSpeakRange heuristics)
+- **M2.3** WhisperKit forced alignment for precise Kokoro word timestamps (word highlight would drop to Kokoro voices too)
 - **M2.6** Services menu "Read with Rhea" + global hotkey
 
 ### Month 3 (partial)
@@ -91,10 +92,11 @@ Ordered oldest → newest:
 ## Next steps I'd pick up when you wake me
 In priority order:
 1. **M2.6 Services menu + global hotkey** — NSServices registration + NSEvent monitor. Needs Info.plist surgery (custom plist file to get NSServices).
-2. **M2.4 Word-level highlight** — use AVSpeechSynthesizer's `willSpeakRange` delegate for system voices; Kokoro word-level needs M2.3 WhisperKit.
-3. **Integration tests for SpeechPlayer routing** — we have logic-level coverage; a test that verifies kokoro:-prefixed voice id does NOT hit AVSpeechSynthesizer would close the loop.
-4. **Stable signing identity** — kills the LaunchServices hang permanently, makes `open` work normally.
+2. **Integration tests for SpeechPlayer routing** — we have logic-level coverage; a test that verifies kokoro:-prefixed voice id does NOT hit AVSpeechSynthesizer would close the loop.
+3. **Stable signing identity** — kills the LaunchServices hang permanently, makes `open` work normally.
+4. **M2.3 WhisperKit forced alignment** — so Kokoro also gets word-level highlight and pronunciation/citation-transformed text still highlights correctly.
 5. **Chapter markers in exported m4a** — promote to proper `.m4b` with per-block chapter metadata.
+6. **M3.1 Qwen3-TTS bilingual** — adds `swift-qwen3-tts` SwiftPM dep, another model entry in the catalog, engine routing by detected language per sentence.
 
 ## Test fixture requests (still optional)
 Only needed if you want real-world content to show up in the
