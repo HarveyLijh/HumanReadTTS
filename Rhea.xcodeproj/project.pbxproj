@@ -28,6 +28,12 @@
 		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
 		2B00000000000000000A0061 /* SpeechSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0061 /* SpeechSettings.swift */; };
 		2B00000000000000000A0062 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0062 /* SettingsView.swift */; };
+		2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0063 /* ModelsSettingsView.swift */; };
+		2B00000000000000000A0071 /* ModelEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0071 /* ModelEntry.swift */; };
+		2B00000000000000000A0072 /* ModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0072 /* ModelCatalog.swift */; };
+		2B00000000000000000A0073 /* ModelStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0073 /* ModelStorage.swift */; };
+		2B00000000000000000A0074 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0074 /* ModelDownloader.swift */; };
+		2B00000000000000000A0075 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0075 /* ModelManager.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
@@ -67,6 +73,12 @@
 		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0061 /* SpeechSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSettings.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0062 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0063 /* ModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0071 /* ModelEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEntry.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0072 /* ModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalog.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0073 /* ModelStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStorage.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0074 /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0075 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0001 /* DropTargetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0003 /* PDFTextExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractorTests.swift; sourceTree = "<group>"; };
@@ -129,6 +141,7 @@
 				1B00000000000000000A000B /* Playback */,
 				1B00000000000000000A000C /* Library */,
 				1B00000000000000000A000D /* Settings */,
+				1B00000000000000000A000E /* Models */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -194,8 +207,21 @@
 			children = (
 				2A00000000000000000A0061 /* SpeechSettings.swift */,
 				2A00000000000000000A0062 /* SettingsView.swift */,
+				2A00000000000000000A0063 /* ModelsSettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A000E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0071 /* ModelEntry.swift */,
+				2A00000000000000000A0072 /* ModelCatalog.swift */,
+				2A00000000000000000A0073 /* ModelStorage.swift */,
+				2A00000000000000000A0074 /* ModelDownloader.swift */,
+				2A00000000000000000A0075 /* ModelManager.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0005 /* Tests */ = {
@@ -354,6 +380,12 @@
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
 				2B00000000000000000A0061 /* SpeechSettings.swift in Sources */,
 				2B00000000000000000A0062 /* SettingsView.swift in Sources */,
+				2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */,
+				2B00000000000000000A0071 /* ModelEntry.swift in Sources */,
+				2B00000000000000000A0072 /* ModelCatalog.swift in Sources */,
+				2B00000000000000000A0073 /* ModelStorage.swift in Sources */,
+				2B00000000000000000A0074 /* ModelDownloader.swift in Sources */,
+				2B00000000000000000A0075 /* ModelManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

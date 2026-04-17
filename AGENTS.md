@@ -16,3 +16,4 @@ Use `@/.trellis/` to learn:
 Keep this managed block so 'trellis update' can refresh the instructions.
 
 <!-- TRELLIS:END -->
+- If using XcodeBuildMCP, use the installed XcodeBuildMCP skill before calling XcodeBuildMCP tools.

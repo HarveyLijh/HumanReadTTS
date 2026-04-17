@@ -18,8 +18,12 @@ struct SettingsView: View {
             playbackTab
                 .tabItem { Label("Playback", systemImage: "play.circle") }
                 .tag(0)
+
+            ModelsSettingsView()
+                .tabItem { Label("Models", systemImage: "cube.box") }
+                .tag(1)
         }
-        .frame(width: 480, height: 360)
+        .frame(width: 520, height: 420)
     }
 
     private var playbackTab: some View {
