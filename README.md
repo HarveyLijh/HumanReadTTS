@@ -33,10 +33,19 @@ There is no Tuist, no XcodeGen, no `tuist generate` step. The
 
 | Task | Command |
 | --- | --- |
-| Build (Debug, no signing) | `xcodebuild -project Rhea.xcodeproj -scheme Rhea -configuration Debug build CODE_SIGNING_ALLOWED=NO` |
-| Build (Release) | `xcodebuild -project Rhea.xcodeproj -scheme Rhea -configuration Release build` |
-| Run tests | `xcodebuild -project Rhea.xcodeproj -scheme Rhea test` |
+| Build + run (no Xcode required) | `Scripts/build.sh --run` |
+| Build only (debug) | `Scripts/build.sh` |
+| Build + run (release, optimized) | `Scripts/build.sh --release --run` |
+| Wipe build/ first | `Scripts/build.sh --clean --run` |
+| Build via xcodebuild (Debug) | `xcodebuild -project Rhea.xcodeproj -scheme Rhea -configuration Debug build CODE_SIGNING_ALLOWED=NO` |
+| Run tests (requires full Xcode) | `xcodebuild -project Rhea.xcodeproj -scheme Rhea test` |
 | Open in Xcode | `open Rhea.xcodeproj` |
+
+`Scripts/build.sh` auto-detects whether you have full Xcode or only the
+Command Line Tools. Without Xcode it compiles directly with `swiftc` and
+assembles a minimal `.app` bundle in `build/Rhea.app`. With Xcode it
+delegates to `xcodebuild` against the project file (canonical path).
+Unit tests require full Xcode.
 
 In Xcode: select the `Rhea` scheme, press ⌘R.
 

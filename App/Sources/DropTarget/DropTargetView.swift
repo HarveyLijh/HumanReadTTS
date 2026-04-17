@@ -72,7 +72,12 @@ struct DropTargetView: View {
     }
 }
 
+// `#Preview` relies on a macro plugin that ships with Xcode. The
+// `Scripts/build.sh` swiftc fallback for machines without full Xcode
+// defines `RHEA_CLI_BUILD` to skip this block.
+#if DEBUG && !RHEA_CLI_BUILD
 #Preview {
     DropTargetView()
         .frame(width: 800, height: 600)
 }
+#endif
