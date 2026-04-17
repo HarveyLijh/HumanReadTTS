@@ -43,6 +43,9 @@
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
 		2B00000000000000000B0004 /* SentenceSegmenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0004 /* SentenceSegmenterTests.swift */; };
+		2B00000000000000000B0005 /* MarkdownRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0005 /* MarkdownRendererTests.swift */; };
+		2B00000000000000000B0006 /* ModelStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0006 /* ModelStorageTests.swift */; };
+		2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +93,9 @@
 		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0003 /* PDFTextExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractorTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0004 /* SentenceSegmenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenterTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0005 /* MarkdownRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRendererTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0006 /* ModelStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStorageTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalogReachabilityTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -251,6 +257,9 @@
 				2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */,
 				2A00000000000000000B0003 /* PDFTextExtractorTests.swift */,
 				2A00000000000000000B0004 /* SentenceSegmenterTests.swift */,
+				2A00000000000000000B0005 /* MarkdownRendererTests.swift */,
+				2A00000000000000000B0006 /* ModelStorageTests.swift */,
+				2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -466,6 +475,9 @@
 				2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */,
 				2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */,
 				2B00000000000000000B0004 /* SentenceSegmenterTests.swift in Sources */,
+				2B00000000000000000B0005 /* MarkdownRendererTests.swift in Sources */,
+				2B00000000000000000B0006 /* ModelStorageTests.swift in Sources */,
+				2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

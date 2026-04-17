@@ -23,16 +23,21 @@ enum ModelCatalog {
         upstreamURL: URL(string: "https://github.com/mlalma/kokoro-ios")
     )
 
-    private static let kokoroBase = "https://media.githubusercontent.com/media/mlalma/KokoroTestApp/main/KokoroTestApp/Resources"
+    // Two different hosts because one file is LFS-tracked and the
+    // other isn't: the 600 MB safetensors model has to go through
+    // the Git LFS media redirect, but the 14 MB voices.npz is
+    // below GitHub's inline-blob threshold and served directly by
+    // raw.githubusercontent.com. Verified with the
+    // ModelCatalogReachabilityTests HEAD-request suite.
+    private static let kokoroModelURL = URL(string:
+        "https://media.githubusercontent.com/media/mlalma/KokoroTestApp/main/Resources/kokoro-v1_0.safetensors"
+    )!
+    private static let kokoroVoicesURL = URL(string:
+        "https://raw.githubusercontent.com/mlalma/KokoroTestApp/main/Resources/voices.npz"
+    )!
 
     private static let kokoroFiles: [ModelFile] = [
-        ModelFile(
-            relativePath: "kokoro-v1_0.safetensors",
-            downloadURL: URL(string: "\(kokoroBase)/kokoro-v1_0.safetensors")!
-        ),
-        ModelFile(
-            relativePath: "voices.npz",
-            downloadURL: URL(string: "\(kokoroBase)/voices.npz")!
-        )
+        ModelFile(relativePath: "kokoro-v1_0.safetensors", downloadURL: kokoroModelURL),
+        ModelFile(relativePath: "voices.npz", downloadURL: kokoroVoicesURL),
     ]
 }
