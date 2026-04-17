@@ -43,27 +43,31 @@ M1.4 sentence segmenter (NLTokenizer, EN+ZH) · M1.5 playback
 highlight · M1.7 library sidebar with UserDefaults-backed
 security-scoped bookmarks.
 
-### Month 2
+### Month 2 — complete
 - M2.1 ✅ Kokoro on-device English TTS, downloadable model, voice picker
-- M2.2 ✅ Kokoro prefetch-next-sentence (zero gap on sentence advance)
-- M2.4 ✅ Word-level highlight via `willSpeakRange` (system voices; Kokoro sentence-level)
+- M2.2 ✅ Neural-TTS prefetch-next-sentence (zero gap on sentence advance; Kokoro + Qwen)
+- M2.3 ✅ WhisperKit forced alignment drives word-level highlight on Kokoro + Qwen paths
+- M2.4 ✅ Word-level highlight via `willSpeakRange` (system voices)
 - M2.5 ✅ Settings tabs, speed/pitch sliders, voice override
 - M2.6 ✅ Services menu "Read with Rhea" + ⌘⇧S global hotkey (Carbon)
 - M2.7 ✅ Markdown renderer with Preview/Source toggle, proper block separators
-- M2.3 ⏳ WhisperKit forced alignment (Kokoro word timestamps) — needs WhisperKit SPM dep + model
 
-### Month 3 — partial
+### Month 3 — mostly
+- M3.1 ✅ Qwen3-TTS 0.6B bilingual engine via argmaxinc/WhisperKit TTSKit
+- M3.2 ✅ Per-sentence language detection routes EN/ZH through Qwen's bilingual path
+- M3.3 ✅ Prefetch-next-sentence parity for Qwen (reuses the M2.2 cache)
+- M3.4 ✅ Voice picker + Settings footer surfaces Qwen when downloaded
 - M3.5 ✅ Research-PDF heuristics (inline citation + figure/table caption stripping)
-- M3.1–M3.4 ⏳ Qwen3-TTS bilingual orchestrator
-- M3.6, M3.7 ⏳ marketing + distribution
+- M3.6 ✅ Scripts/package.sh builds signed .dmg (Developer-ID optional)
+- M3.7 ⏳ Marketing site / Homebrew Cask — needs a hosted DMG URL
 
 ### Month 4 — mostly
-- M4.1 ✅ Audiobook export (`.m4a`, both engine paths)
+- M4.1 ✅ Audiobook export (`.m4a`, all three engine paths: system / Kokoro / Qwen)
 - M4.3 ✅ EPUB support (ZIPFoundation + NSAttributedString HTML render)
 - M4.4 ✅ Menu-bar item, Read Clipboard
 - M4.5 ✅ Local reading analytics (opt-in)
 - M4.6 ✅ Pronunciation dictionary
-- M4.2 ⏳ voice cloning
+- M4.2 ⏳ Voice cloning — blocked: no audio-reference voice-clone model with a Swift/MLX port ships today
 
 ## Tests
 - **75 tests passing** under `Scripts/test.sh`
@@ -90,7 +94,10 @@ Under `/tmp/rhea-e2e/`:
 - `41-settings-playback.png` — Voice picker, speed/pitch, research toggles
 - `42-settings-pronunciation.png` — dictionary empty state + add form
 - `43-settings-analytics.png` — privacy toggle + off state
-- `100-m26-m22-live_Rhea_window_0_*.png` — post-M2.2/M2.6 smoke capture
+- `100-m26-m22-live*` — post-M2.2/M2.6 empty state smoke
+- `101-qwen-whisper-live*` — post-M2.3/M3.1 empty state smoke
+- `102-settings-qwen-whisper*` — Playback tab showing Qwen-aware footer
+- `103-models-tab-qwen-whisper*` — Models tab with Kokoro / Qwen / Whisper entries
 
 ## Fixture paths (left alone)
 | Path | Size | Content |
@@ -126,10 +133,10 @@ f761cb9 test: e2e integration suite + Scripts/test.sh + Kokoro URL fix
 Full log: `git log --oneline`.
 
 ## What I'd pick up next
-1. **M2.3 WhisperKit forced alignment** — add WhisperKit SPM dep + `whisper-base` model-catalog entry; feed Kokoro PCM into Whisper for per-word timestamps so the word-highlight layer works on the Kokoro path. Also fixes word-highlight drift under Pronunciation / Research transformations.
-2. **M3.1–M3.4 Qwen3-TTS bilingual** — largest remaining scope; no mature Swift port exists, would need an MLX port or a local process bridge. Alternative: ship a simpler Kokoro-en + system-zh fallback and defer Qwen3.
-3. **Chapter markers in m4a** — promote to proper `.m4b`; rewrite AudioExporter on AVAssetWriter with a chapter text track.
-4. **Stable Developer-ID signing + notarised DMG** — M3.6/M3.7. Kills the LaunchServices hang permanently and unblocks the Homebrew Cask path.
-5. **M4.2 voice cloning** — blocked on a usable voice-clone model with a Swift / MLX port.
+1. **Chapter markers (m4a → m4b)** — rewrite `AudioExporter` on `AVAssetWriter` with a chapter text-track that fires at each `DocumentBlock` boundary. Current export is one continuous AAC track.
+2. **Streaming Whisper alignment** — today the aligner awaits the full transcription for each sentence before scheduling word highlights. Fine for ~3-5s Kokoro/Qwen clips, but on long sentences the first word lags the audio. Switch to the streaming `TranscriptionStream` in WhisperKit 0.18 so highlights start as soon as the first word is decoded.
+3. **Real Developer-ID signing + notarised DMG hand-off** — `Scripts/package.sh` already handles this when the env vars are set; needs a cert and an app-specific password to run end-to-end. Unblocks M3.7 (Homebrew Cask tap).
+4. **M4.2 voice cloning** — revisit once a Swift/MLX port of a modern voice-clone model (OpenVoice-v2, XTTS-v3) exists. Until then the Qwen speaker zoo is the ceiling.
+5. **Integration test for bilingual playback** — live playback isn't tested end-to-end; needs a Peekaboo session that loads `chinese.md`, picks a Qwen voice, and confirms highlight advances. Requires the 1 GB Qwen model to be pre-downloaded on the CI machine.
 
 Sleep well. Coffee works on me too.
