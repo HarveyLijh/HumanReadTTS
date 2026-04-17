@@ -134,6 +134,32 @@ if [[ $use_xcodebuild -eq 1 ]]; then
     fi
 
     [[ -d "$APP_BUNDLE" ]] || fail "xcodebuild reported success but $APP_BUNDLE is missing"
+
+    # Xcode's SwiftPM auto-embed is unreliable for some products
+    # (KokoroSwift specifically doesn't always land in the bundle
+    # even though it's linked). If any framework exists under
+    # build/PackageFrameworks/ and not under the app's Frameworks/,
+    # copy + re-sign it into place. Prevents dyld from falling back
+    # to the absolute-path rpath into ~/Documents, which macOS TCC
+    # can stall in until the user clicks "Allow".
+    pkgframeworks="$BUILD_DIR/PackageFrameworks"
+    appframeworks="$APP_BUNDLE/Contents/Frameworks"
+    if [[ -d "$pkgframeworks" ]]; then
+        mkdir -p "$appframeworks"
+        for fw in "$pkgframeworks"/*.framework; do
+            [[ -d "$fw" ]] || continue
+            name="$(basename "$fw")"
+            if [[ ! -d "$appframeworks/$name" ]]; then
+                say "Embedding missing framework: $name"
+                cp -R "$fw" "$appframeworks/"
+                codesign --force --sign - "$appframeworks/$name" >/dev/null 2>&1 || true
+            fi
+        done
+        # Re-sign the app bundle as a whole so the new frameworks
+        # are covered by the outer signature.
+        codesign --force --sign - --deep "$APP_BUNDLE" >/dev/null 2>&1 || true
+    fi
+
     ok "Built $APP_BUNDLE"
 else
     say "Full Xcode not detected — building with swiftc + Command Line Tools ($config)"
