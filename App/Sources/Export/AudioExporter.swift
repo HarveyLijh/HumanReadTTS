@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import NaturalLanguage
 import os
 
 // AVSpeechSynthesizer + AVAudioPCMBuffer aren't formally Sendable,
@@ -54,13 +55,16 @@ enum AudioExporter {
         let settings = SpeechSettings.shared
         let voiceID = settings.voiceIdentifier ?? ""
         let useKokoro = voiceID.hasPrefix("kokoro:")
+        let useQwen = voiceID.hasPrefix("qwen:")
         let kokoroVoice = useKokoro ? String(voiceID.dropFirst("kokoro:".count)) : nil
+        let qwenVoice = useQwen ? String(voiceID.dropFirst("qwen:".count)) : nil
 
-        // File format: AAC at Kokoro's 24 kHz for the Kokoro path,
-        // 22.05 kHz for the system path (AVSpeechSynthesizer's
-        // native output rate on most voices). We pick a single
-        // rate per export so the AVAudioFile can stay simple.
-        let sampleRate: Double = useKokoro ? 24_000 : 22_050
+        // File format: AAC at 24 kHz for the neural paths (both
+        // Kokoro and Qwen3-TTS output at 24k), 22.05 kHz for the
+        // system path (AVSpeechSynthesizer's native output rate on
+        // most voices). One rate per export so the AVAudioFile can
+        // stay simple.
+        let sampleRate: Double = (useKokoro || useQwen) ? 24_000 : 22_050
         let fileSettings: [String: Any] = [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
             AVSampleRateKey: sampleRate,
@@ -104,6 +108,14 @@ enum AudioExporter {
                         text: spokenText, voiceID: kokoroVoice, speed: Float(settings.rate)
                     )
                     buffer = try makeBuffer(samples: samples, format: pcmFormat)
+                } else if useQwen, let qwenVoice {
+                    let samples = try await synthesizeWithQwen(
+                        text: spokenText,
+                        voiceID: qwenVoice,
+                        language: Self.languageCode(for: sentence.text),
+                        speed: Float(settings.rate)
+                    )
+                    buffer = try makeBuffer(samples: samples, format: pcmFormat)
                 } else {
                     buffer = try await synthesizeWithSystem(
                         text: spokenText, settings: settings, format: pcmFormat
@@ -136,6 +148,27 @@ enum AudioExporter {
         } catch {
             throw ExportError.synthesisFailed(error.localizedDescription)
         }
+    }
+
+    // MARK: Qwen path
+
+    private static func synthesizeWithQwen(
+        text: String, voiceID: String, language: String, speed: Float
+    ) async throws -> [Float] {
+        await QwenEngine.shared.loadIfNeeded()
+        do {
+            return try await QwenEngine.shared.synthesize(
+                text: text, voiceID: voiceID, language: language, speed: speed
+            )
+        } catch {
+            throw ExportError.synthesisFailed(error.localizedDescription)
+        }
+    }
+
+    private static func languageCode(for text: String) -> String {
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(text)
+        return recognizer.dominantLanguage?.rawValue ?? "en"
     }
 
     // MARK: System voice path
