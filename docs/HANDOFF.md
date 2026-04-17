@@ -84,9 +84,10 @@ Scripts/test.sh --network         # + 3 live URL checks
 ### Launch note
 `Scripts/build.sh --run` uses direct-exec instead of `open`.
 LaunchServices stalls for 30+ seconds on every fresh ad-hoc
-signature when the bundle lives under `~/Documents`. Proper fix
-is a stable Developer-ID signing identity — will adopt when we
-sign for notarised .dmg distribution per MILESTONES §0.
+signature when the bundle lives under `~/Documents`. Direct-exec
+sidesteps it entirely — the stall only bites the `open` /
+double-click path, which users of a released DMG won't hit
+(they install to `/Applications`).
 
 ## Peekaboo E2E screenshots
 Under `/tmp/rhea-e2e/`:
@@ -135,7 +136,7 @@ Full log: `git log --oneline`.
 ## What I'd pick up next
 1. **Chapter markers (m4a → m4b)** — rewrite `AudioExporter` on `AVAssetWriter` with a chapter text-track that fires at each `DocumentBlock` boundary. Current export is one continuous AAC track.
 2. **Streaming Whisper alignment** — today the aligner awaits the full transcription for each sentence before scheduling word highlights. Fine for ~3-5s Kokoro/Qwen clips, but on long sentences the first word lags the audio. Switch to the streaming `TranscriptionStream` in WhisperKit 0.18 so highlights start as soon as the first word is decoded.
-3. **Real Developer-ID signing + notarised DMG hand-off** — `Scripts/package.sh` already handles this when the env vars are set; needs a cert and an app-specific password to run end-to-end. Unblocks M3.7 (Homebrew Cask tap).
+3. **M3.7 Homebrew Cask tap** — point it at a GitHub-hosted unsigned DMG (shipping unsigned is fine for OSS; the README + release notes tell users how to right-click → Open on first run). Paid Developer-ID signing is optional polish, not a blocker.
 4. **M4.2 voice cloning** — revisit once a Swift/MLX port of a modern voice-clone model (OpenVoice-v2, XTTS-v3) exists. Until then the Qwen speaker zoo is the ceiling.
 5. **Integration test for bilingual playback** — live playback isn't tested end-to-end; needs a Peekaboo session that loads `chinese.md`, picks a Qwen voice, and confirms highlight advances. Requires the 1 GB Qwen model to be pre-downloaded on the CI machine.
 

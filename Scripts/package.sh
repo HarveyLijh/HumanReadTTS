@@ -14,6 +14,11 @@
 #   NOTARY_TEAM_ID             e.g. "XXXXXXXXXX"
 #   NOTARY_PASSWORD            app-specific password (create at appleid.apple.com)
 #
+# For an OSS project that doesn't want the $99/yr paid program, the
+# unsigned path is fine — just ship the DMG and tell users to
+# right-click → Open on first launch (the script prints the exact
+# text to include in the release notes).
+#
 # Usage:
 #   Scripts/package.sh             # build + sign (if creds) + DMG
 #   Scripts/package.sh --notarize  # + submit to Apple + staple
@@ -148,3 +153,20 @@ if [[ "$notarize" == "1" ]]; then
 fi
 
 printf "\n%s%s%s\n" "$c_amber" "Ready: $DMG_PATH" "$c_reset"
+
+if [[ -z "${DEVELOPER_ID_APPLICATION:-}" ]]; then
+    cat <<EOF
+
+${c_dim}# Unsigned DMG — ship it as-is. Include this note with the download:
+#
+#   First-run instructions for users:
+#     1. Download and mount the DMG, drag Rhea to /Applications.
+#     2. First launch: right-click Rhea.app → Open → click "Open" in
+#        the Gatekeeper dialog. (Double-clicking shows a blocked
+#        dialog with no "Open" button — that's macOS's quirk.)
+#     3. Works normally every time after that.
+#
+#   Or paste this one-liner in Terminal to remove the quarantine flag:
+#     xattr -dr com.apple.quarantine /Applications/Rhea.app${c_reset}
+EOF
+fi

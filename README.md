@@ -12,7 +12,9 @@ in [`docs/decisions.md`](docs/decisions.md).
 
 - macOS 15 Sequoia or newer (Apple Silicon)
 - Xcode 16 or newer (Swift 6 toolchain)
-- An Apple developer team for code signing in `Release` builds
+- Free Apple ID works for local dev and unsigned DMGs. Paid
+  Developer Program ($99/yr) is only needed for signed +
+  notarised DMGs — see the Distribution section below.
 
 ## First-time setup
 
@@ -101,6 +103,31 @@ arrives in M1.4 when sentence segmentation lands.
 
 Apache-2.0, OSS, .dmg via GitHub Releases + Homebrew Cask. **Not** going
 to the Mac App Store. See ADR-001 and `docs/decisions.md` for context.
+
+### Building a DMG
+
+```sh
+Scripts/package.sh            # unsigned DMG under dist/
+Scripts/package.sh --notarize # signed + Apple-notarised (needs paid program)
+```
+
+Without `DEVELOPER_ID_APPLICATION` in the env, the script ships an
+ad-hoc-signed DMG. Works fine — Gatekeeper just shows a one-time
+warning when a downloader opens the app. Paste the following into
+the GitHub Release notes so users know what to do:
+
+> **First-run instructions**
+> 1. Mount the DMG and drag Rhea into /Applications.
+> 2. Right-click Rhea.app → **Open** → click **Open** in the dialog.
+>    (Plain double-click shows a "blocked" dialog with no Open button
+>    — that's a macOS Gatekeeper quirk. Right-click bypasses it.)
+> 3. Opens normally from then on.
+>
+> Or run `xattr -dr com.apple.quarantine /Applications/Rhea.app` in
+> Terminal to drop the quarantine flag without the right-click dance.
+
+Signing + notarisation is optional polish. If you want to enable it,
+see the env-var list at the top of `Scripts/package.sh`.
 
 ## Conventions
 
