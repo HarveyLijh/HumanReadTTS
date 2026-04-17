@@ -23,6 +23,13 @@ final class MenuBarCommand {
               !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return
         }
+        readText(text)
+    }
+
+    /// Segment arbitrary text into sentences, load into the
+    /// menubar player, and start playback. Shared entry point for
+    /// the clipboard reader and the system Services provider.
+    func readText(_ text: String) {
         Task { @MainActor in
             let block = DocumentBlock(text: text, pageIndex: 0, offsetInPage: 0)
             let sentences = await SentenceSegmenter.segment([block])

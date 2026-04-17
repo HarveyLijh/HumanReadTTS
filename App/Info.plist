@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSServices</key>
+    <array>
+        <dict>
+            <key>NSMenuItem</key>
+            <dict>
+                <key>default</key>
+                <string>Read with Rhea</string>
+            </dict>
+            <key>NSMessage</key>
+            <string>readSelection</string>
+            <key>NSPortName</key>
+            <string>Rhea</string>
+            <key>NSSendTypes</key>
+            <array>
+                <string>NSStringPboardType</string>
+                <string>public.plain-text</string>
+                <string>public.utf8-plain-text</string>
+            </array>
+            <key>NSKeyEquivalent</key>
+            <dict>
+                <key>default</key>
+                <string>S</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

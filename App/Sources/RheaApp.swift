@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct RheaApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegateShim.self) private var appDelegate
     @State private var menuBar = MenuBarCommand.shared
 
     var body: some Scene {
