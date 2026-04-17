@@ -8,18 +8,18 @@ final class SentenceSegmenterTests: XCTestCase {
     }
 
     func test_emptyBlock_producesNoSentences() {
-        let blocks = [DocumentBlock(text: "", pageIndex: 0)]
+        let blocks = [DocumentBlock(text: "", pageIndex: 0, offsetInPage: 0)]
         XCTAssertEqual(SentenceSegmenter.segmentSync(blocks), [])
     }
 
     func test_whitespaceOnlyBlock_producesNoSentences() {
-        let blocks = [DocumentBlock(text: "   \n  \n", pageIndex: 0)]
+        let blocks = [DocumentBlock(text: "   \n  \n", pageIndex: 0, offsetInPage: 0)]
         XCTAssertEqual(SentenceSegmenter.segmentSync(blocks), [])
     }
 
     func test_english_threeSentencesInOneBlock() {
         let blocks = [
-            DocumentBlock(text: "Hello there. How are you? Fine, thanks.", pageIndex: 0)
+            DocumentBlock(text: "Hello there. How are you? Fine, thanks.", pageIndex: 0, offsetInPage: 0)
         ]
         let sentences = SentenceSegmenter.segmentSync(blocks)
         XCTAssertEqual(sentences.map(\.text), [
@@ -32,7 +32,7 @@ final class SentenceSegmenterTests: XCTestCase {
 
     func test_chinese_twoSentencesInOneBlock() {
         let blocks = [
-            DocumentBlock(text: "你好。今天天气很好。", pageIndex: 0)
+            DocumentBlock(text: "你好。今天天气很好。", pageIndex: 0, offsetInPage: 0)
         ]
         let sentences = SentenceSegmenter.segmentSync(blocks)
         XCTAssertEqual(sentences.count, 2)
@@ -42,8 +42,8 @@ final class SentenceSegmenterTests: XCTestCase {
 
     func test_multipleBlocks_carryCorrectBlockIndex() {
         let blocks = [
-            DocumentBlock(text: "First block, one sentence.", pageIndex: 0),
-            DocumentBlock(text: "Second block here. And a second sentence.", pageIndex: 1),
+            DocumentBlock(text: "First block, one sentence.", pageIndex: 0, offsetInPage: 0),
+            DocumentBlock(text: "Second block here. And a second sentence.", pageIndex: 1, offsetInPage: 0),
         ]
         let sentences = SentenceSegmenter.segmentSync(blocks)
         XCTAssertEqual(sentences.count, 3)
@@ -52,7 +52,7 @@ final class SentenceSegmenterTests: XCTestCase {
 
     func test_offsets_roundTripToOriginalText() {
         let text = "Alpha sentence. Beta sentence! Gamma?"
-        let blocks = [DocumentBlock(text: text, pageIndex: 0)]
+        let blocks = [DocumentBlock(text: text, pageIndex: 0, offsetInPage: 0)]
         let sentences = SentenceSegmenter.segmentSync(blocks)
         let ns = text as NSString
 
@@ -70,7 +70,7 @@ final class SentenceSegmenterTests: XCTestCase {
         // 你好 is 2 UTF-16 code units, 。 is 1, so sentence offsets
         // in UTF-16 units must reconstruct the same substring.
         let text = "你好。今天天气很好。"
-        let blocks = [DocumentBlock(text: text, pageIndex: 0)]
+        let blocks = [DocumentBlock(text: text, pageIndex: 0, offsetInPage: 0)]
         let sentences = SentenceSegmenter.segmentSync(blocks)
         let ns = text as NSString
 
