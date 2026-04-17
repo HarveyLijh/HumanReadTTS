@@ -24,7 +24,8 @@ struct PDFViewerView: View {
                 PDFViewRepresentable(
                     document: document,
                     blocks: blocks,
-                    activeSentence: activeSentence
+                    activeSentence: activeSentence,
+                    spokenSubRange: player.spokenSubRange
                 )
                 .ignoresSafeArea()
                 .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
@@ -107,6 +108,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     let document: PDFDocument
     let blocks: [DocumentBlock]
     let activeSentence: Sentence?
+    let spokenSubRange: NSRange?
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -133,10 +135,11 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         removeHighlight(coordinator: coordinator)
 
         guard let sentence = activeSentence,
-              let selection = selection(for: sentence) else { return }
+              let sentenceSelection = selection(for: sentence) else { return }
 
-        let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
-        for lineSelection in selection.selectionsByLine() {
+        // Sentence-wide soft wash.
+        let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+        for lineSelection in sentenceSelection.selectionsByLine() {
             for page in lineSelection.pages {
                 let bounds = lineSelection.bounds(for: page)
                 let annotation = PDFAnnotation(
@@ -144,12 +147,45 @@ private struct PDFViewRepresentable: NSViewRepresentable {
                     forType: .highlight,
                     withProperties: nil
                 )
-                annotation.color = amber
+                annotation.color = soft
                 page.addAnnotation(annotation)
                 coordinator.annotations.append((annotation, page))
             }
         }
-        view.go(to: selection)
+
+        // Brighter word-level sub-highlight on top for system voices
+        // that deliver willSpeakRange callbacks. The range is in the
+        // *spoken* text; for PDFs the rendered and spoken text lines
+        // up in the common case (no transformations), so mapping
+        // sentence.offsetInBlock + sub.location into the page works.
+        if let sub = spokenSubRange,
+           let wordSelection = wordSelection(for: sentence, subRange: sub) {
+            let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+            for lineSelection in wordSelection.selectionsByLine() {
+                for page in lineSelection.pages {
+                    let bounds = lineSelection.bounds(for: page)
+                    let annotation = PDFAnnotation(
+                        bounds: bounds,
+                        forType: .highlight,
+                        withProperties: nil
+                    )
+                    annotation.color = bright
+                    page.addAnnotation(annotation)
+                    coordinator.annotations.append((annotation, page))
+                }
+            }
+        }
+
+        view.go(to: sentenceSelection)
+    }
+
+    private func wordSelection(for sentence: Sentence, subRange: NSRange) -> PDFSelection? {
+        guard sentence.blockIndex < blocks.count else { return nil }
+        let block = blocks[sentence.blockIndex]
+        guard let page = document.page(at: block.pageIndex) else { return nil }
+        let pageOffset = block.offsetInPage + sentence.offsetInBlock + subRange.location
+        let range = NSRange(location: pageOffset, length: subRange.length)
+        return page.selection(for: range)
     }
 
     private func removeHighlight(coordinator: Coordinator) {
