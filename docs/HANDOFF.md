@@ -40,6 +40,17 @@ Not yet in Month 4:
 - **M4.2** Voice cloning
 - Small polish items (reader navigation, chapter markers in m4b)
 
+## Keyboard shortcuts
+| Key | Action |
+| --- | --- |
+| Space | Play / Pause |
+| ← | Previous sentence |
+| → | Next sentence |
+| ⌘O | Open File… |
+| ⌘⇧E | Export Audiobook… |
+| ⌘⇧R | Read Clipboard (from menubar) |
+| ⌘, | Open Settings |
+
 ## Tests
 - **75 tests passing** under `Scripts/test.sh`
 - Suites: DroppedDocument, Library, MarkdownRenderer, ModelCatalogReachability, ModelStorage, PDFDocumentLoader, PDFTextExtractor, PronunciationDictionary, ReadingStats, ResearchCleanup, SentenceSegmenter
