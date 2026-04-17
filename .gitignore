@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+Packages/*/.build/
+.swiftpm/
+Package.resolved
+
+# Local config (signing identity, team ID)
+Configs/Local.xcconfig
+
+# Tooling
+.tuist-generated/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Trellis personal
+.trellis/.developer

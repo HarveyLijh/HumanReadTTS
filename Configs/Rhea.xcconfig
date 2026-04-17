@@ -1,0 +1,37 @@
+// Shared build settings for the Rhea project.
+// Per-machine overrides (DEVELOPMENT_TEAM, signing identity) live in
+// Configs/Local.xcconfig, which is gitignored. The `?` on the include
+// makes the local override optional so CI builds with no Local.xcconfig
+// still resolve.
+
+#include? "Local.xcconfig"
+
+// --- Versioning -----------------------------------------------------
+
+CURRENT_PROJECT_VERSION = 1
+MARKETING_VERSION = 0.1.0
+
+// --- Swift toolchain ------------------------------------------------
+
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete
+
+// --- Deployment ------------------------------------------------------
+
+MACOSX_DEPLOYMENT_TARGET = 15.0
+SDKROOT = macosx
+SUPPORTED_PLATFORMS = macosx
+ARCHS = arm64
+
+// --- Bundle ----------------------------------------------------------
+
+PRODUCT_BUNDLE_IDENTIFIER = app.rhea.mac
+
+// --- Signing (overridden per-machine in Local.xcconfig) -------------
+
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+
+// --- Hardening (Release only — see Rhea.entitlements) ---------------
+
+ENABLE_HARDENED_RUNTIME = YES

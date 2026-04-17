@@ -1,0 +1,9 @@
+// Per-machine overrides. Copy this file to Local.xcconfig and fill in
+// your developer team ID. Local.xcconfig is gitignored.
+//
+//   cp Configs/Local.xcconfig.example Configs/Local.xcconfig
+//
+// Find your team ID at https://developer.apple.com/account →
+// Membership Details → Team ID (10 character alphanumeric).
+
+DEVELOPMENT_TEAM = ABCDE12345

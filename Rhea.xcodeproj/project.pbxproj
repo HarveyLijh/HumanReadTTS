@@ -1,0 +1,497 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2B00000000000000000A0001 /* RheaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0001 /* RheaApp.swift */; };
+		2B00000000000000000A0002 /* AppScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0002 /* AppScene.swift */; };
+		2B00000000000000000A0003 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0003 /* Colors.swift */; };
+		2B00000000000000000A0004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0004 /* Typography.swift */; };
+		2B00000000000000000A0005 /* DropTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0005 /* DropTargetView.swift */; };
+		2B00000000000000000A0006 /* DroppedDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0006 /* DroppedDocument.swift */; };
+		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6B00000000000000000A0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A00000000000000000A0001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A00000000000000000A0001;
+			remoteInfo = Rhea;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2A00000000000000000A0001 /* RheaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RheaApp.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0002 /* AppScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppScene.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0003 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0005 /* DropTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0006 /* DroppedDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroppedDocument.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0010 /* Rhea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rhea.entitlements; sourceTree = "<group>"; };
+		2A00000000000000000B0001 /* DropTargetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
+		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
+		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A00000000000000000FFFF2 /* RheaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RheaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3A00000000000000000A0002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A00000000000000000B0002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1B00000000000000000A0001 = {
+			isa = PBXGroup;
+			children = (
+				1B00000000000000000A0002 /* App */,
+				1B00000000000000000A0005 /* Tests */,
+				1B00000000000000000A0007 /* Configs */,
+				1B00000000000000000A00FF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0002 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1B00000000000000000A0003 /* Sources */,
+				2A00000000000000000A0010 /* Rhea.entitlements */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0003 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0001 /* RheaApp.swift */,
+				2A00000000000000000A0002 /* AppScene.swift */,
+				2A00000000000000000A0003 /* Colors.swift */,
+				2A00000000000000000A0004 /* Typography.swift */,
+				1B00000000000000000A0004 /* DropTarget */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0004 /* DropTarget */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0005 /* DropTargetView.swift */,
+				2A00000000000000000A0006 /* DroppedDocument.swift */,
+			);
+			path = DropTarget;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0005 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				1B00000000000000000A0006 /* AppTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0006 /* AppTests */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000B0001 /* DropTargetTests.swift */,
+			);
+			path = AppTests;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0007 /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000C0001 /* Rhea.xcconfig */,
+				2A00000000000000000C0002 /* Local.xcconfig.example */,
+			);
+			path = Configs;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A00FF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000FFFF1 /* Rhea.app */,
+				2A00000000000000000FFFF2 /* RheaTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4A00000000000000000A0001 /* Rhea */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A00000000000000000A0002 /* Build configuration list for PBXNativeTarget "Rhea" */;
+			buildPhases = (
+				3A00000000000000000A0001 /* Sources */,
+				3A00000000000000000A0002 /* Frameworks */,
+				3A00000000000000000A0003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Rhea;
+			productName = Rhea;
+			productReference = 2A00000000000000000FFFF1 /* Rhea.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4A00000000000000000B0001 /* RheaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A00000000000000000A0003 /* Build configuration list for PBXNativeTarget "RheaTests" */;
+			buildPhases = (
+				3A00000000000000000B0001 /* Sources */,
+				3A00000000000000000B0002 /* Frameworks */,
+				3A00000000000000000B0003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6A00000000000000000A0001 /* PBXTargetDependency */,
+			);
+			name = RheaTests;
+			productName = RheaTests;
+			productReference = 2A00000000000000000FFFF2 /* RheaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1A00000000000000000A0001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1700;
+				LastUpgradeCheck = 1700;
+				TargetAttributes = {
+					4A00000000000000000A0001 = {
+						CreatedOnToolsVersion = 17.0;
+					};
+					4A00000000000000000B0001 = {
+						CreatedOnToolsVersion = 17.0;
+						TestTargetID = 4A00000000000000000A0001;
+					};
+				};
+			};
+			buildConfigurationList = 5A00000000000000000A0001 /* Build configuration list for PBXProject "Rhea" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1B00000000000000000A0001;
+			productRefGroup = 1B00000000000000000A00FF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4A00000000000000000A0001 /* Rhea */,
+				4A00000000000000000B0001 /* RheaTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3A00000000000000000A0003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A00000000000000000B0003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3A00000000000000000A0001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B00000000000000000A0001 /* RheaApp.swift in Sources */,
+				2B00000000000000000A0002 /* AppScene.swift in Sources */,
+				2B00000000000000000A0003 /* Colors.swift in Sources */,
+				2B00000000000000000A0004 /* Typography.swift in Sources */,
+				2B00000000000000000A0005 /* DropTargetView.swift in Sources */,
+				2B00000000000000000A0006 /* DroppedDocument.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A00000000000000000B0001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B00000000000000000B0001 /* DropTargetTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6A00000000000000000A0001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A00000000000000000A0001 /* Rhea */;
+			targetProxy = 6B00000000000000000A0001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5B00000000000000000A0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		5B00000000000000000A0002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		5B00000000000000000A0003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Rhea;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Harvey Li";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = "$(MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = Rhea;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		5B00000000000000000A0004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = App/Rhea.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Rhea;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Harvey Li";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = "$(MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = Rhea;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		5B00000000000000000B0003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = "$(MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "app.rhea.mac.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rhea.app/Contents/MacOS/Rhea";
+			};
+			name = Debug;
+		};
+		5B00000000000000000B0004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = "$(MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "app.rhea.mac.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rhea.app/Contents/MacOS/Rhea";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5A00000000000000000A0001 /* Build configuration list for PBXProject "Rhea" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5B00000000000000000A0001 /* Debug */,
+				5B00000000000000000A0002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A00000000000000000A0002 /* Build configuration list for PBXNativeTarget "Rhea" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5B00000000000000000A0003 /* Debug */,
+				5B00000000000000000A0004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A00000000000000000A0003 /* Build configuration list for PBXNativeTarget "RheaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5B00000000000000000B0003 /* Debug */,
+				5B00000000000000000B0004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1A00000000000000000A0001 /* Project object */;
+}
