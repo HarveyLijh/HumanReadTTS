@@ -174,7 +174,7 @@ The plan assumes **4–6 hours/week** (Jiahong has a dissertation and LEAI fello
 **Milestones:**
 - [ ] **M1.1** Xcode project set up. SwiftUI + AppKit shell. Menu bar, preferences window, single-document window. Developer ID signing configured.
 - [ ] **M1.2** PDFKit document viewer embedded. Open a PDF. Scroll. Text selection works.
-- [ ] **M1.3** Marker integrated as subprocess. PDF → structured Markdown with paragraph + heading boundaries. Python venv bundled or downloaded on first run.
+- [ ] **M1.3** PDFKit text extraction. Walk the loaded `PDFDocument` page by page, split on blank lines, produce a `[DocumentBlock]` model tagged with source page index. Zero dependencies, zero subprocesses — the day-one path per ADR-004. **Marker/MinerU integration (subprocess + first-PDF helper download) moves to M3.x** alongside the Chinese PDF cleanup work, where the download UI is needed anyway. Heading vs paragraph distinction is deferred to M4.1 (audiobook chapter markers) — M1.3 treats everything as a paragraph.
 - [ ] **M1.4** Sentence segmenter (Swift, using `NSLinguisticTagger` with `.tokenType = .sentence`). Sentence index maps to character ranges in both the Markdown and the PDF annotation coordinates.
 - [ ] **M1.5** AVSpeechSynthesizer playback. Play/pause/stop/seek-to-sentence.
 - [ ] **M1.6** Sentence highlight overlay on the PDF view. PDFKit's annotation layer with an ephemeral `PDFAnnotationHighlight`. Sync with synthesizer's `didSpeakRangeOfSpeechString` delegate callback.

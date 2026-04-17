@@ -38,3 +38,7 @@ Configs/Local.xcconfig
 
 # Trellis personal
 .trellis/.developer
+# local dev artifacts kept out of the repo
+/fake.pdf
+/*.pdf
+/text.txt
