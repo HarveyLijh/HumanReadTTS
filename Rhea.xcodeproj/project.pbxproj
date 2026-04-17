@@ -51,6 +51,8 @@
 		2B00000000000000000F0002 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0002 /* MLX */; };
 		2B00000000000000000F0003 /* MLXUtilsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0003 /* MLXUtilsLibrary */; };
 		2B00000000000000000F0004 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0004 /* ZIPFoundation */; };
+		2B00000000000000000F0005 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0005 /* WhisperKit */; };
+		2B00000000000000000F0006 /* TTSKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0006 /* TTSKit */; };
 		2B00000000000000000A00C1 /* EPUBLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00C1 /* EPUBLoader.swift */; };
 		2B00000000000000000A00C2 /* EPUBReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00C2 /* EPUBReaderView.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
@@ -147,6 +149,8 @@
 				2B00000000000000000F0002 /* MLX in Frameworks */,
 				2B00000000000000000F0003 /* MLXUtilsLibrary in Frameworks */,
 				2B00000000000000000F0004 /* ZIPFoundation in Frameworks */,
+				2B00000000000000000F0005 /* WhisperKit in Frameworks */,
+				2B00000000000000000F0006 /* TTSKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,6 +402,8 @@
 				7B00000000000000000A0002 /* MLX */,
 				7B00000000000000000A0003 /* MLXUtilsLibrary */,
 				7B00000000000000000A0004 /* ZIPFoundation */,
+				7B00000000000000000A0005 /* WhisperKit */,
+				7B00000000000000000A0006 /* TTSKit */,
 			);
 			productName = Rhea;
 			productReference = 2A00000000000000000FFFF1 /* Rhea.app */;
@@ -454,6 +460,7 @@
 				7A00000000000000000A0002 /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */,
 				7A00000000000000000A0004 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				7A00000000000000000A0005 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			productRefGroup = 1B00000000000000000A00FF /* Products */;
 			projectDirPath = "";
@@ -498,6 +505,14 @@
 				minimumVersion = 0.9.0;
 			};
 		};
+		7A00000000000000000A0005 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.18.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -520,6 +535,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A00000000000000000A0004 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
+		};
+		7B00000000000000000A0005 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0005 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+		7B00000000000000000A0006 /* TTSKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0005 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = TTSKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 
