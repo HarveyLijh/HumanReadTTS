@@ -25,6 +25,7 @@
 		2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackControlsView.swift */; };
 		2B00000000000000000A0043 /* KokoroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0043 /* KokoroEngine.swift */; };
 		2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0044 /* PCMAudioPlayer.swift */; };
+		2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0081 /* MenuBarCommand.swift */; };
 		2B00000000000000000A0051 /* LibraryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0051 /* LibraryEntry.swift */; };
 		2B00000000000000000A0052 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0052 /* Library.swift */; };
 		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
@@ -79,6 +80,7 @@
 		2A00000000000000000A0042 /* PlaybackControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0043 /* KokoroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroEngine.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0044 /* PCMAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMAudioPlayer.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0081 /* MenuBarCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCommand.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 				1B00000000000000000A000C /* Library */,
 				1B00000000000000000A000D /* Settings */,
 				1B00000000000000000A000E /* Models */,
+				1B00000000000000000A000F /* MenuBar */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -242,6 +245,14 @@
 				2A00000000000000000A0075 /* ModelManager.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A000F /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0081 /* MenuBarCommand.swift */,
+			);
+			path = MenuBar;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0005 /* Tests */ = {
@@ -456,6 +467,7 @@
 				2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */,
 				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
 				2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */,
+				2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */,
 				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
 				2B00000000000000000A0052 /* Library.swift in Sources */,
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
@@ -629,6 +641,9 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Harvey Li";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Rhea needs access to your Documents folder to open PDFs and Markdown files you've added to the library.";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Rhea needs access to your Downloads folder to open PDFs and Markdown files you've downloaded.";
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Rhea needs access to your Desktop to open PDFs and Markdown files stored there.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -655,6 +670,9 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Harvey Li";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Rhea needs access to your Documents folder to open PDFs and Markdown files you've added to the library.";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Rhea needs access to your Downloads folder to open PDFs and Markdown files you've downloaded.";
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Rhea needs access to your Desktop to open PDFs and Markdown files stored there.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

@@ -23,24 +23,29 @@ final class Library {
     }
 
     /// Record that the user opened `url`. Moves an existing entry
-    /// for the same resolved file to the top and updates its
+    /// for the same file path to the top and updates its
     /// timestamp; creates a new entry otherwise.
+    ///
+    /// Dedup compares stored `originalPath` strings — never resolves
+    /// existing bookmarks — so recording a drop doesn't trigger TCC
+    /// consent prompts for every other library entry that happens
+    /// to live in Documents / Downloads / Desktop.
     func record(url: URL) {
         do {
+            let canonicalPath = url.standardizedFileURL.path
             let bookmark = try url.bookmarkData(
                 options: Self.bookmarkCreationOptions,
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
             entries.removeAll { existing in
-                guard let resolved = resolve(existing) else { return false }
-                defer { existing.stopAccess(resolved: resolved) }
-                return resolved.resolvedURLs(with: url)
+                existing.originalPath == canonicalPath
             }
             let entry = LibraryEntry(
                 title: url.lastPathComponent,
                 lastOpened: Date(),
-                bookmarkData: bookmark
+                bookmarkData: bookmark,
+                originalPath: canonicalPath
             )
             entries.insert(entry, at: 0)
             save()
@@ -112,14 +117,5 @@ private extension LibraryEntry {
     /// Balances a `resolve` call without exposing the URL.
     func stopAccess(resolved: URL) {
         resolved.stopAccessingSecurityScopedResource()
-    }
-}
-
-private extension URL {
-    /// Loose equality: both URLs resolve to the same filesystem
-    /// path after removing percent-encoding. Avoids false negatives
-    /// from trailing slashes and `file://` prefix variations.
-    func resolvedURLs(with other: URL) -> Bool {
-        self.standardizedFileURL.path == other.standardizedFileURL.path
     }
 }
