@@ -47,7 +47,11 @@ struct MarkdownReaderView: View {
             } else {
                 switch viewMode {
                 case .preview:
-                    MarkdownTextView(attributed: rendered, activeSentence: activeSentence)
+                    MarkdownTextView(
+                        attributed: rendered,
+                        activeSentence: activeSentence,
+                        spokenSubRange: player.spokenSubRange
+                    )
                 case .source:
                     SourceTextView(text: rawSource)
                 }
@@ -309,6 +313,7 @@ enum MarkdownRenderer {
 private struct MarkdownTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
+    let spokenSubRange: NSRange?
 
     func makeNSView(context: Context) -> NSScrollView {
         makeReadOnlyTextScrollView()
@@ -322,7 +327,12 @@ private struct MarkdownTextView: NSViewRepresentable {
             storage.setAttributedString(attributed)
         }
 
-        applyHighlight(to: tv, storage: storage, sentence: activeSentence)
+        applyHighlight(
+            to: tv,
+            storage: storage,
+            sentence: activeSentence,
+            spokenSubRange: spokenSubRange
+        )
     }
 }
 
@@ -379,22 +389,37 @@ private func makeReadOnlyTextScrollView() -> NSScrollView {
 private func applyHighlight(
     to textView: NSTextView,
     storage: NSTextStorage,
-    sentence: Sentence?
+    sentence: Sentence?,
+    spokenSubRange: NSRange? = nil
 ) {
     let fullRange = NSRange(location: 0, length: storage.length)
     storage.beginEditing()
     storage.removeAttribute(.backgroundColor, range: fullRange)
 
     if let sentence {
-        let range = NSRange(
+        let sentenceRange = NSRange(
             location: sentence.offsetInBlock,
             length: sentence.lengthInBlock
         )
-        if NSMaxRange(range) <= storage.length {
-            let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
-            storage.addAttribute(.backgroundColor, value: amber, range: range)
+        if NSMaxRange(sentenceRange) <= storage.length {
+            // Soft sentence-wide wash.
+            let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+            storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
+
+            // Brighter sub-highlight for the word currently being
+            // spoken (system voice). Offset the sub-range by the
+            // sentence start.
+            if let sub = spokenSubRange {
+                let subOrigin = sentence.offsetInBlock + sub.location
+                let subRange = NSRange(location: subOrigin, length: sub.length)
+                if NSMaxRange(subRange) <= storage.length {
+                    let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+                    storage.addAttribute(.backgroundColor, value: bright, range: subRange)
+                }
+            }
+
             storage.endEditing()
-            textView.scrollRangeToVisible(range)
+            textView.scrollRangeToVisible(sentenceRange)
             return
         }
     }

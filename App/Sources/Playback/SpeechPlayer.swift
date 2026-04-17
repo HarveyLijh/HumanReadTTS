@@ -46,6 +46,12 @@ final class SpeechPlayer {
     /// playback starts.
     private(set) var sentences: [Sentence] = []
 
+    /// Sub-range within the currently-playing sentence that the
+    /// synthesizer is actively speaking. Driven by
+    /// `AVSpeechSynthesizerDelegate.willSpeakRangeOfSpeechString`
+    /// for system voices; nil during Kokoro playback.
+    private(set) var spokenSubRange: NSRange?
+
     private let synth = AVSpeechSynthesizer()
     private let delegate = Delegate()
     private let pcm = PCMAudioPlayer(sampleRate: KokoroEngine.sampleRate)
@@ -66,6 +72,7 @@ final class SpeechPlayer {
         self.sentences = sentences
         self.nextIndex = 0
         self.state = .idle
+        self.spokenSubRange = nil
     }
 
     func togglePlayPause() {
@@ -98,6 +105,7 @@ final class SpeechPlayer {
         pcm.stop()
         state = .idle
         nextIndex = 0
+        spokenSubRange = nil
     }
 
     private func speakCurrent() {
@@ -164,6 +172,7 @@ final class SpeechPlayer {
 
     fileprivate func didFinishCurrent() {
         recordSentenceForStats()
+        spokenSubRange = nil
         nextIndex += 1
         if nextIndex < sentences.count, state.isPlaying {
             speakCurrent()
@@ -188,6 +197,11 @@ final class SpeechPlayer {
     fileprivate func didCancel() {
         // Cancellation arrives as a consequence of stop() or load();
         // we've already updated state in those paths.
+        spokenSubRange = nil
+    }
+
+    fileprivate func updateSpokenSubRange(_ range: NSRange) {
+        spokenSubRange = range
     }
 
     // MARK: voice selection
@@ -236,6 +250,16 @@ final class SpeechPlayer {
             didCancel utterance: AVSpeechUtterance
         ) {
             Task { @MainActor [weak self] in self?.player?.didCancel() }
+        }
+
+        nonisolated func speechSynthesizer(
+            _ synthesizer: AVSpeechSynthesizer,
+            willSpeakRangeOfSpeechString characterRange: NSRange,
+            utterance: AVSpeechUtterance
+        ) {
+            Task { @MainActor [weak self] in
+                self?.player?.updateSpokenSubRange(characterRange)
+            }
         }
     }
 }

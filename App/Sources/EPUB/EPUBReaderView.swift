@@ -27,7 +27,11 @@ struct EPUBReaderView: View {
                     .tint(Color.rheaAccent)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                EPUBTextView(attributed: rendered, activeSentence: activeSentence)
+                EPUBTextView(
+                    attributed: rendered,
+                    activeSentence: activeSentence,
+                    spokenSubRange: player.spokenSubRange
+                )
             }
         }
         .task(id: url) {
@@ -88,6 +92,7 @@ struct EPUBReaderView: View {
 private struct EPUBTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
+    let spokenSubRange: NSRange?
 
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = NSScrollView()
@@ -130,15 +135,25 @@ private struct EPUBTextView: NSViewRepresentable {
         storage.removeAttribute(.backgroundColor, range: fullRange)
 
         if let sentence = activeSentence {
-            let range = NSRange(
+            let sentenceRange = NSRange(
                 location: sentence.offsetInBlock,
                 length: sentence.lengthInBlock
             )
-            if NSMaxRange(range) <= storage.length {
-                let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
-                storage.addAttribute(.backgroundColor, value: amber, range: range)
+            if NSMaxRange(sentenceRange) <= storage.length {
+                let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+                storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
+
+                if let sub = spokenSubRange {
+                    let subOrigin = sentence.offsetInBlock + sub.location
+                    let subRange = NSRange(location: subOrigin, length: sub.length)
+                    if NSMaxRange(subRange) <= storage.length {
+                        let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+                        storage.addAttribute(.backgroundColor, value: bright, range: subRange)
+                    }
+                }
+
                 storage.endEditing()
-                textView.scrollRangeToVisible(range)
+                textView.scrollRangeToVisible(sentenceRange)
                 return
             }
         }
