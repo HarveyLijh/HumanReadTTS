@@ -26,8 +26,12 @@ struct SettingsView: View {
             PronunciationSettingsView()
                 .tabItem { Label("Pronunciation", systemImage: "character.book.closed") }
                 .tag(2)
+
+            AnalyticsSettingsView()
+                .tabItem { Label("Analytics", systemImage: "chart.bar") }
+                .tag(3)
         }
-        .frame(width: 560, height: 460)
+        .frame(width: 580, height: 500)
     }
 
     private var playbackTab: some View {

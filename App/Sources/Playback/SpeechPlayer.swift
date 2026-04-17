@@ -51,6 +51,7 @@ final class SpeechPlayer {
     private let pcm = PCMAudioPlayer(sampleRate: KokoroEngine.sampleRate)
     private var nextIndex: Int = 0
     private var currentEngine: Engine = .system
+    private var currentSentenceStartedAt: Date?
 
     private static let log = Logger(subsystem: "app.rhea.mac", category: "playback")
 
@@ -106,6 +107,7 @@ final class SpeechPlayer {
         }
         let sentence = sentences[nextIndex]
         state = .playing(sentenceIndex: nextIndex)
+        currentSentenceStartedAt = Date()
 
         let settings = SpeechSettings.shared
         let voiceID = settings.voiceIdentifier ?? ""
@@ -161,12 +163,26 @@ final class SpeechPlayer {
     // MARK: delegate callbacks (dispatched from main by Delegate)
 
     fileprivate func didFinishCurrent() {
+        recordSentenceForStats()
         nextIndex += 1
         if nextIndex < sentences.count, state.isPlaying {
             speakCurrent()
         } else {
             state = .idle
         }
+    }
+
+    private func recordSentenceForStats() {
+        guard let startedAt = currentSentenceStartedAt,
+              let currentIndex = state.sentenceIndex,
+              currentIndex < sentences.count else { return }
+        let duration = Date().timeIntervalSince(startedAt)
+        let text = sentences[currentIndex].text
+        ReadingStats.shared.recordSentence(
+            wordCount: text.roughWordCount,
+            duration: duration
+        )
+        currentSentenceStartedAt = nil
     }
 
     fileprivate func didCancel() {
