@@ -23,6 +23,8 @@
 		2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0034 /* SentenceSegmenter.swift */; };
 		2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0041 /* SpeechPlayer.swift */; };
 		2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackControlsView.swift */; };
+		2B00000000000000000A0043 /* KokoroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0043 /* KokoroEngine.swift */; };
+		2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0044 /* PCMAudioPlayer.swift */; };
 		2B00000000000000000A0051 /* LibraryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0051 /* LibraryEntry.swift */; };
 		2B00000000000000000A0052 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0052 /* Library.swift */; };
 		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
@@ -34,6 +36,9 @@
 		2B00000000000000000A0073 /* ModelStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0073 /* ModelStorage.swift */; };
 		2B00000000000000000A0074 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0074 /* ModelDownloader.swift */; };
 		2B00000000000000000A0075 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0075 /* ModelManager.swift */; };
+		2B00000000000000000F0001 /* KokoroSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0001 /* KokoroSwift */; };
+		2B00000000000000000F0002 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0002 /* MLX */; };
+		2B00000000000000000F0003 /* MLXUtilsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0003 /* MLXUtilsLibrary */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
@@ -68,6 +73,8 @@
 		2A00000000000000000A0034 /* SentenceSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenter.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0041 /* SpeechPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0042 /* PlaybackControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0043 /* KokoroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroEngine.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0044 /* PCMAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMAudioPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
@@ -94,6 +101,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B00000000000000000F0001 /* KokoroSwift in Frameworks */,
+				2B00000000000000000F0002 /* MLX in Frameworks */,
+				2B00000000000000000F0003 /* MLXUtilsLibrary in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +198,8 @@
 			children = (
 				2A00000000000000000A0041 /* SpeechPlayer.swift */,
 				2A00000000000000000A0042 /* PlaybackControlsView.swift */,
+				2A00000000000000000A0043 /* KokoroEngine.swift */,
+				2A00000000000000000A0044 /* PCMAudioPlayer.swift */,
 			);
 			path = Playback;
 			sourceTree = "<group>";
@@ -277,6 +289,11 @@
 			dependencies = (
 			);
 			name = Rhea;
+			packageProductDependencies = (
+				7B00000000000000000A0001 /* KokoroSwift */,
+				7B00000000000000000A0002 /* MLX */,
+				7B00000000000000000A0003 /* MLXUtilsLibrary */,
+			);
 			productName = Rhea;
 			productReference = 2A00000000000000000FFFF1 /* Rhea.app */;
 			productType = "com.apple.product-type.application";
@@ -327,6 +344,11 @@
 				Base,
 			);
 			mainGroup = 1B00000000000000000A0001;
+			packageReferences = (
+				7A00000000000000000A0001 /* XCRemoteSwiftPackageReference "kokoro-ios" */,
+				7A00000000000000000A0002 /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */,
+			);
 			productRefGroup = 1B00000000000000000A00FF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -336,6 +358,51 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7A00000000000000000A0001 /* XCRemoteSwiftPackageReference "kokoro-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mlalma/kokoro-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		7A00000000000000000A0002 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.30.0;
+			};
+		};
+		7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mlalma/MLXUtilsLibrary.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7B00000000000000000A0001 /* KokoroSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0001 /* XCRemoteSwiftPackageReference "kokoro-ios" */;
+			productName = KokoroSwift;
+		};
+		7B00000000000000000A0002 /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0002 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		7B00000000000000000A0003 /* MLXUtilsLibrary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */;
+			productName = MLXUtilsLibrary;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin PBXResourcesBuildPhase section */
 		3A00000000000000000A0003 /* Resources */ = {
@@ -375,6 +442,8 @@
 				2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */,
 				2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */,
 				2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */,
+				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
+				2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */,
 				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
 				2B00000000000000000A0052 /* Library.swift in Sources */,
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,

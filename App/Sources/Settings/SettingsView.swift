@@ -31,8 +31,17 @@ struct SettingsView: View {
             Section {
                 Picker("Voice", selection: $settings.voiceIdentifier) {
                     Text("Auto (by language)").tag(Optional<String>.none)
+
+                    if !KokoroEngine.shared.voices.isEmpty {
+                        Section("Kokoro (on-device, English)") {
+                            ForEach(KokoroEngine.shared.voices) { voice in
+                                Text(voice.displayName).tag(Optional(voice.id))
+                            }
+                        }
+                    }
+
                     ForEach(voicesByLanguage, id: \.language) { group in
-                        Section(group.language) {
+                        Section("System · \(group.language)") {
                             ForEach(group.voices, id: \.identifier) { voice in
                                 Text(voice.name).tag(Optional(voice.identifier))
                             }
@@ -43,8 +52,13 @@ struct SettingsView: View {
             } header: {
                 Text("Voice")
             } footer: {
-                Text("Studio-quality bilingual voices (Kokoro for English, Qwen3-TTS for Chinese) arrive in a future update.")
-                    .foregroundStyle(.secondary)
+                if KokoroEngine.shared.voices.isEmpty {
+                    Text("Download Kokoro from the Models tab to unlock studio-quality on-device English voices.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Kokoro voices run entirely on-device. Chinese bilingual voices arrive with Qwen3-TTS in a future update.")
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section {

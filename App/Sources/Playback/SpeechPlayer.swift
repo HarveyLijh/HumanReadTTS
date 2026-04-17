@@ -2,15 +2,20 @@ import Foundation
 import AVFoundation
 import NaturalLanguage
 import Observation
+import os
 
-/// Owns an `AVSpeechSynthesizer` and walks through a queue of
-/// `Sentence`s one at a time. Picks a voice per sentence via
-/// `NLLanguageRecognizer` so a mixed EN/ZH document sounds
-/// reasonable even before the Qwen3-TTS bilingual orchestrator
-/// lands in Month 3.
+/// Owns playback state and walks through a queue of `Sentence`s
+/// one at a time. Routes each sentence to one of two engines:
+///
+/// - **AVSpeechSynthesizer** (default): system voices, EN+ZH out
+///   of the box, no model download required.
+/// - **KokoroEngine** + **PCMAudioPlayer**: studio-quality English
+///   voice via the on-device Kokoro MLX model. Active when the
+///   user picks a voice prefixed `kokoro:` in Settings AND the
+///   model is downloaded.
 ///
 /// The class is `@MainActor`-isolated so views can observe its
-/// state without extra bookkeeping. `AVSpeechSynthesizerDelegate`
+/// state without extra bookkeeping. AVSpeechSynthesizerDelegate
 /// callbacks come in on an unspecified thread; a private
 /// `Delegate` shim bounces them back to main.
 @Observable
@@ -43,7 +48,11 @@ final class SpeechPlayer {
 
     private let synth = AVSpeechSynthesizer()
     private let delegate = Delegate()
+    private let pcm = PCMAudioPlayer(sampleRate: KokoroEngine.sampleRate)
     private var nextIndex: Int = 0
+    private var currentEngine: Engine = .system
+
+    private static let log = Logger(subsystem: "app.rhea.mac", category: "playback")
 
     init() {
         delegate.player = self
@@ -52,6 +61,7 @@ final class SpeechPlayer {
 
     func load(_ sentences: [Sentence]) {
         synth.stopSpeaking(at: .immediate)
+        pcm.stop()
         self.sentences = sentences
         self.nextIndex = 0
         self.state = .idle
@@ -64,16 +74,27 @@ final class SpeechPlayer {
             nextIndex = 0
             speakCurrent()
         case .playing(let i):
-            synth.pauseSpeaking(at: .immediate)
+            switch currentEngine {
+            case .system: synth.pauseSpeaking(at: .immediate)
+            case .kokoro: pcm.stop()
+            }
             state = .paused(sentenceIndex: i)
         case .paused(let i):
-            synth.continueSpeaking()
-            state = .playing(sentenceIndex: i)
+            switch currentEngine {
+            case .system:
+                synth.continueSpeaking()
+                state = .playing(sentenceIndex: i)
+            case .kokoro:
+                // Kokoro can't resume mid-sentence; restart the current.
+                state = .playing(sentenceIndex: i)
+                speakCurrent()
+            }
         }
     }
 
     func stop() {
         synth.stopSpeaking(at: .immediate)
+        pcm.stop()
         state = .idle
         nextIndex = 0
     }
@@ -87,11 +108,50 @@ final class SpeechPlayer {
         state = .playing(sentenceIndex: nextIndex)
 
         let settings = SpeechSettings.shared
+        let voiceID = settings.voiceIdentifier ?? ""
+
+        if voiceID.hasPrefix("kokoro:") {
+            currentEngine = .kokoro
+            speakWithKokoro(sentence: sentence, voiceID: String(voiceID.dropFirst("kokoro:".count)), settings: settings)
+        } else {
+            currentEngine = .system
+            speakWithSystem(sentence: sentence, settings: settings)
+        }
+    }
+
+    private func speakWithSystem(sentence: Sentence, settings: SpeechSettings) {
         let utterance = AVSpeechUtterance(string: sentence.text)
-        utterance.voice = Self.voice(for: sentence.text, settings: settings)
+        utterance.voice = Self.systemVoice(for: sentence.text, settings: settings)
         utterance.rate = settings.avSpeechRate
         utterance.pitchMultiplier = Float(settings.pitchMultiplier)
         synth.speak(utterance)
+    }
+
+    private func speakWithKokoro(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
+        let speed = Float(settings.rate)
+        let myIndex = nextIndex
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            await KokoroEngine.shared.loadIfNeeded()
+            do {
+                let samples = try await KokoroEngine.shared.synthesize(
+                    text: sentence.text, voiceID: voiceID, speed: speed
+                )
+                // The user may have skipped or stopped while we were
+                // synthesising. Only play if we're still on the same
+                // sentence and still in playing state.
+                guard self.state.sentenceIndex == myIndex,
+                      case .playing = self.state else { return }
+                self.pcm.play(samples: samples) { [weak self] in
+                    self?.didFinishCurrent()
+                }
+            } catch {
+                Self.log.error("Kokoro synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
+                // Fall back so the user still gets audio.
+                self.currentEngine = .system
+                self.speakWithSystem(sentence: sentence, settings: settings)
+            }
+        }
     }
 
     // MARK: delegate callbacks (dispatched from main by Delegate)
@@ -112,11 +172,13 @@ final class SpeechPlayer {
 
     // MARK: voice selection
 
-    /// Voice resolution. If the user pinned a voice in Settings,
-    /// use it for everything; otherwise fall back to per-sentence
-    /// language detection (the bilingual default).
-    private static func voice(for text: String, settings: SpeechSettings) -> AVSpeechSynthesisVoice? {
+    /// Resolves a system `AVSpeechSynthesisVoice`. If the user
+    /// pinned a system voice in Settings, use it; otherwise fall
+    /// back to per-sentence language detection (the bilingual
+    /// default).
+    private static func systemVoice(for text: String, settings: SpeechSettings) -> AVSpeechSynthesisVoice? {
         if let id = settings.voiceIdentifier,
+           !id.hasPrefix("kokoro:"),
            let voice = AVSpeechSynthesisVoice(identifier: id) {
             return voice
         }
@@ -125,6 +187,13 @@ final class SpeechPlayer {
         let lang = recognizer.dominantLanguage?.rawValue
             ?? AVSpeechSynthesisVoice.currentLanguageCode()
         return AVSpeechSynthesisVoice(language: lang)
+    }
+
+    // MARK: types
+
+    private enum Engine {
+        case system
+        case kokoro
     }
 
     // MARK: delegate

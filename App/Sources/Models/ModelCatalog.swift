@@ -4,36 +4,35 @@ import Foundation
 /// new model is a code change — by design, so the user doesn't
 /// paste arbitrary URLs into Settings.
 ///
-/// The Kokoro file URLs below point at the public mlx-community
-/// MLX port on Hugging Face. They're best-effort guesses based on
-/// common HF layout conventions and will need verification once
-/// the engine wiring lands in a follow-up. If a URL 404s the
-/// download will fail loudly in the Models tab; replace it here
-/// and rebuild.
+/// The Kokoro file URLs below point at the canonical
+/// `mlalma/KokoroTestApp` repository (the integration project for
+/// the same author's `kokoro-ios` Swift package). Files are
+/// stored via Git LFS so the URLs use the `media.githubusercontent.com`
+/// LFS redirect host rather than the regular `raw` host.
 enum ModelCatalog {
-    static let all: [ModelEntry] = [
-        ModelEntry(
-            id: "kokoro-82m-mlx",
-            displayName: "Kokoro 82M (English)",
-            summary: "Studio-quality on-device English voice. Runs entirely locally via MLX.",
-            kind: .ttsEnglish,
-            approximateSizeMB: 165,
-            files: kokoroFiles,
-            engineIntegrated: false,
-            upstreamURL: URL(string: "https://github.com/mlalma/kokoro-ios")
-        )
-    ]
+    static let all: [ModelEntry] = [kokoro]
 
-    private static let kokoroBase = "https://huggingface.co/mlx-community/Kokoro-82M-bf16/resolve/main"
+    static let kokoro = ModelEntry(
+        id: "kokoro-v1_0",
+        displayName: "Kokoro v1.0 (English)",
+        summary: "Studio-quality on-device English voice with 28 voice styles. Runs entirely locally via MLX.",
+        kind: .ttsEnglish,
+        approximateSizeMB: 650,
+        files: kokoroFiles,
+        engineIntegrated: true,
+        upstreamURL: URL(string: "https://github.com/mlalma/kokoro-ios")
+    )
+
+    private static let kokoroBase = "https://media.githubusercontent.com/media/mlalma/KokoroTestApp/main/KokoroTestApp/Resources"
 
     private static let kokoroFiles: [ModelFile] = [
         ModelFile(
-            relativePath: "config.json",
-            downloadURL: URL(string: "\(kokoroBase)/config.json")!
+            relativePath: "kokoro-v1_0.safetensors",
+            downloadURL: URL(string: "\(kokoroBase)/kokoro-v1_0.safetensors")!
         ),
         ModelFile(
-            relativePath: "kokoro-v0_19.safetensors",
-            downloadURL: URL(string: "\(kokoroBase)/kokoro-v0_19.safetensors")!
+            relativePath: "voices.npz",
+            downloadURL: URL(string: "\(kokoroBase)/voices.npz")!
         )
     ]
 }
