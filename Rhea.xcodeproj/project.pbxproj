@@ -31,6 +31,8 @@
 		2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0092 /* PronunciationSettingsView.swift */; };
 		2B00000000000000000A00A1 /* ReadingStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00A1 /* ReadingStats.swift */; };
 		2B00000000000000000A00A2 /* AnalyticsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00A2 /* AnalyticsSettingsView.swift */; };
+		2B00000000000000000A00B1 /* AudioExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B1 /* AudioExporter.swift */; };
+		2B00000000000000000A00B2 /* ExportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B2 /* ExportCoordinator.swift */; };
 		2B00000000000000000A0051 /* LibraryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0051 /* LibraryEntry.swift */; };
 		2B00000000000000000A0052 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0052 /* Library.swift */; };
 		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
@@ -94,6 +96,8 @@
 		2A00000000000000000A0092 /* PronunciationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00A1 /* ReadingStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingStats.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00A2 /* AnalyticsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsSettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00B1 /* AudioExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExporter.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00B2 /* ExportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCoordinator.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
@@ -181,6 +185,7 @@
 				1B00000000000000000A000F /* MenuBar */,
 				1B00000000000000000A0010 /* Pronunciation */,
 				1B00000000000000000A0011 /* Analytics */,
+				1B00000000000000000A0012 /* Export */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -290,6 +295,15 @@
 				2A00000000000000000A00A1 /* ReadingStats.swift */,
 			);
 			path = Analytics;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0012 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A00B1 /* AudioExporter.swift */,
+				2A00000000000000000A00B2 /* ExportCoordinator.swift */,
+			);
+			path = Export;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0005 /* Tests */ = {
@@ -513,6 +527,8 @@
 				2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */,
 				2B00000000000000000A00A1 /* ReadingStats.swift in Sources */,
 				2B00000000000000000A00A2 /* AnalyticsSettingsView.swift in Sources */,
+				2B00000000000000000A00B1 /* AudioExporter.swift in Sources */,
+				2B00000000000000000A00B2 /* ExportCoordinator.swift in Sources */,
 				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
 				2B00000000000000000A0052 /* Library.swift in Sources */,
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
