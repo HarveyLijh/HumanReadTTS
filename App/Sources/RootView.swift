@@ -47,7 +47,7 @@ struct RootView: View {
 
     @ViewBuilder
     private var detail: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack {
             Color.rheaSurface.ignoresSafeArea()
 
             if let document {
@@ -55,7 +55,8 @@ struct RootView: View {
             } else {
                 DropTargetView()
             }
-
+        }
+        .overlay(alignment: .bottomTrailing) {
             if document != nil {
                 PlaybackControlsView(player: player)
                     .padding(16)

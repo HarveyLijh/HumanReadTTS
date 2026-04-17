@@ -2,42 +2,77 @@ import SwiftUI
 import AppKit
 import os
 
-/// The Markdown reader. Parses markdown via Foundation's
-/// `AttributedString(markdown:options:)` (no third-party dep), then
-/// walks the runs to translate `inlinePresentationIntent` /
-/// `presentationIntent` attributes into NSFont / NSColor visual
-/// styling that TextKit can render. The resulting NSAttributedString
-/// is fed to an `NSTextView` host so we keep TextKit's lazy layout
-/// for arbitrary-size markdown bodies.
+/// The Markdown reader. Two view modes:
+/// - **Preview** (default): Foundation parses the markdown into an
+///   `AttributedString`; we walk the runs to translate
+///   `inlinePresentationIntent` / `presentationIntent` into NSFont /
+///   NSColor visual styling and *insert explicit `\n\n` separators
+///   between distinct block identities*, because the Foundation
+///   parser does not include block-boundary newlines in the
+///   character stream.
+/// - **Source**: raw markdown text in monospace, useful for
+///   inspecting syntax. Highlight only renders in Preview because
+///   the player's sentence offsets are computed against the rendered
+///   plain text.
 ///
-/// Sentence segmentation happens on the *rendered* plain text so
-/// the offsets stored in each `Sentence` are valid indices into the
-/// `NSTextStorage` we display — no markdown-syntax characters get
-/// in the way of the highlight.
-///
-/// Renamed from MarkdownPlaceholderView in M2.7 to reflect that
-/// this is now the real reader, not a placeholder.
+/// Sentence segmentation always runs against the rendered plain
+/// text so the existing offset-based highlight path lights up the
+/// correct range in the displayed `NSTextStorage`.
 struct MarkdownReaderView: View {
     let url: URL
     let player: SpeechPlayer
 
-    @State private var attributed: NSAttributedString = .init()
+    @State private var rawSource: String = ""
+    @State private var rendered: NSAttributedString = .init()
     @State private var sentences: [Sentence] = []
     @State private var loadFailed = false
+    @State private var viewMode: ViewMode = .preview
+
+    enum ViewMode: String, CaseIterable, Identifiable {
+        case preview = "Preview"
+        case source = "Source"
+        var id: Self { self }
+    }
 
     private static let log = Logger(subsystem: "app.rhea.mac", category: "markdown")
 
     var body: some View {
-        Group {
+        VStack(spacing: 0) {
+            modeBar
+            Divider()
+
             if loadFailed {
                 errorState
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                MarkdownTextView(attributed: attributed, activeSentence: activeSentence)
+                switch viewMode {
+                case .preview:
+                    MarkdownTextView(attributed: rendered, activeSentence: activeSentence)
+                case .source:
+                    SourceTextView(text: rawSource)
+                }
             }
         }
         .task(id: url) {
             await load()
         }
+    }
+
+    private var modeBar: some View {
+        HStack {
+            Picker("", selection: $viewMode) {
+                ForEach(ViewMode.allCases) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(width: 180)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
     }
 
     private var activeSentence: Sentence? {
@@ -50,17 +85,18 @@ struct MarkdownReaderView: View {
         let started = ContinuousClock.now
         do {
             let raw = try String(contentsOf: url, encoding: .utf8)
+            rawSource = raw
             Self.log.info("read \(raw.count) chars")
 
             let parseStart = ContinuousClock.now
-            let rendered = MarkdownRenderer.render(raw)
+            let attributed = MarkdownRenderer.render(raw)
             Self.log.info("rendered markdown in \(ContinuousClock.now - parseStart, privacy: .public)")
 
-            attributed = rendered
+            rendered = attributed
             loadFailed = false
 
             let segmentStart = ContinuousClock.now
-            let plain = rendered.string
+            let plain = attributed.string
             let block = DocumentBlock(text: plain, pageIndex: 0, offsetInPage: 0)
             let parsed = await SentenceSegmenter.segment([block])
             Self.log.info("segmented \(parsed.count) sentences in \(ContinuousClock.now - segmentStart, privacy: .public)")
@@ -71,7 +107,8 @@ struct MarkdownReaderView: View {
             Self.log.info("TOTAL md load \(ContinuousClock.now - started, privacy: .public)")
         } catch {
             Self.log.error("failed to read \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            attributed = NSAttributedString()
+            rawSource = ""
+            rendered = NSAttributedString()
             sentences = []
             loadFailed = true
             player.load([])
@@ -96,20 +133,21 @@ struct MarkdownReaderView: View {
 
 // MARK: - Markdown rendering
 
-/// Parses GFM-flavored markdown into an `NSAttributedString` with
-/// sensible visual defaults for a reading view: New York body,
-/// SF Mono for code, larger weight-bold headings, italics for
-/// emphasis. No third-party dependency — Foundation's built-in
-/// markdown parser is enough for the reader and gives us a clean
-/// AttributedString we can decorate.
+/// Parses GFM-flavored markdown into an `NSAttributedString`. Walks
+/// the parsed `AttributedString` runs and rebuilds an output stream
+/// with:
+/// - block-boundary separators (`\n\n`) inserted between distinct
+///   `presentationIntent.identity` values, because the Foundation
+///   parser doesn't emit them in the character stream itself;
+/// - per-run font/color attributes derived from inline and block
+///   presentation intents (bold, italic, code, headers H1–H6).
 enum MarkdownRenderer {
     static func render(_ markdown: String) -> NSAttributedString {
-        let bodyFont = NSFont(name: "New York", size: 16) ?? NSFont.systemFont(ofSize: 16)
-        let monoFont = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+        let theme = Theme()
 
-        let attributedString: AttributedString
+        let attributed: AttributedString
         do {
-            attributedString = try AttributedString(
+            attributed = try AttributedString(
                 markdown: markdown,
                 options: .init(
                     interpretedSyntax: .full,
@@ -119,114 +157,161 @@ enum MarkdownRenderer {
         } catch {
             return NSAttributedString(
                 string: markdown,
-                attributes: [.font: bodyFont, .foregroundColor: NSColor.labelColor]
+                attributes: [.font: theme.body, .foregroundColor: NSColor.labelColor]
             )
         }
 
-        let mutable = NSMutableAttributedString(attributedString: NSAttributedString(attributedString))
-        let full = NSRange(location: 0, length: mutable.length)
+        let result = NSMutableAttributedString()
+        var lastBlockKey: [Int]? = nil
 
-        // Apply baseline body styling everywhere first.
-        mutable.addAttribute(.font, value: bodyFont, range: full)
-        mutable.addAttribute(.foregroundColor, value: NSColor.labelColor, range: full)
+        for run in attributed.runs {
+            let runRange = run.range
+            let runText = String(attributed[runRange].characters)
+            guard !runText.isEmpty else { continue }
 
-        let para = NSMutableParagraphStyle()
-        para.lineHeightMultiple = 1.25
-        para.paragraphSpacing = 8
-        mutable.addAttribute(.paragraphStyle, value: para, range: full)
-
-        // Walk per-run, look for presentation intents Foundation
-        // attached during parsing, translate to visual attributes.
-        for run in attributedString.runs {
-            let range = NSRange(run.range, in: attributedString)
-            guard range.length > 0, NSMaxRange(range) <= mutable.length else { continue }
-
-            if let inline = run.inlinePresentationIntent {
-                if inline.contains(.code) {
-                    mutable.addAttribute(.font, value: monoFont, range: range)
-                    mutable.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: range)
+            // Insert a block boundary if this run is in a different
+            // block from the previous one. PresentationIntent doesn't
+            // expose a single identity — it's a stack of components,
+            // each with its own — so we compare the full identity path.
+            if let intent = run.presentationIntent {
+                let key = intent.components.map(\.identity)
+                if let last = lastBlockKey, last != key {
+                    result.append(NSAttributedString(
+                        string: "\n\n",
+                        attributes: theme.bodyAttributes
+                    ))
                 }
-                if inline.contains(.stronglyEmphasized) {
-                    mutable.addAttribute(.font, value: bold(of: mutable, at: range, baseSize: 16), range: range)
-                }
-                if inline.contains(.emphasized) {
-                    mutable.addAttribute(.font, value: italic(of: mutable, at: range, baseSize: 16), range: range)
-                }
+                lastBlockKey = key
             }
 
-            if let block = run.presentationIntent {
+            let attrs = theme.attributes(
+                for: run.inlinePresentationIntent,
+                block: run.presentationIntent
+            )
+            result.append(NSAttributedString(string: runText, attributes: attrs))
+        }
+
+        return result
+    }
+
+    private struct Theme {
+        let body: NSFont
+        let bodyBold: NSFont
+        let bodyItalic: NSFont
+        let bodyBoldItalic: NSFont
+        let mono: NSFont
+        let monoBold: NSFont
+        let h1: NSFont
+        let h2: NSFont
+        let h3: NSFont
+        let h4: NSFont
+
+        let bodyAttributes: [NSAttributedString.Key: Any]
+
+        init() {
+            let bodyBase = NSFont(name: "New York", size: 16) ?? NSFont.systemFont(ofSize: 16)
+            let manager = NSFontManager.shared
+            self.body = bodyBase
+            self.bodyBold = manager.convert(bodyBase, toHaveTrait: .boldFontMask)
+            self.bodyItalic = manager.convert(bodyBase, toHaveTrait: .italicFontMask)
+            self.bodyBoldItalic = manager.convert(bodyBold, toHaveTrait: .italicFontMask)
+            self.mono = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+            self.monoBold = NSFont.monospacedSystemFont(ofSize: 13, weight: .bold)
+
+            let h1Base = NSFont(name: "New York", size: 28) ?? NSFont.systemFont(ofSize: 28)
+            let h2Base = NSFont(name: "New York", size: 22) ?? NSFont.systemFont(ofSize: 22)
+            let h3Base = NSFont(name: "New York", size: 18) ?? NSFont.systemFont(ofSize: 18)
+            let h4Base = NSFont(name: "New York", size: 16) ?? NSFont.systemFont(ofSize: 16)
+            self.h1 = manager.convert(h1Base, toHaveTrait: .boldFontMask)
+            self.h2 = manager.convert(h2Base, toHaveTrait: .boldFontMask)
+            self.h3 = manager.convert(h3Base, toHaveTrait: .boldFontMask)
+            self.h4 = manager.convert(h4Base, toHaveTrait: .boldFontMask)
+
+            let para = NSMutableParagraphStyle()
+            para.lineHeightMultiple = 1.25
+            para.paragraphSpacing = 6
+
+            self.bodyAttributes = [
+                .font: bodyBase,
+                .foregroundColor: NSColor.labelColor,
+                .paragraphStyle: para,
+            ]
+        }
+
+        func attributes(
+            for inline: InlinePresentationIntent?,
+            block: PresentationIntent?
+        ) -> [NSAttributedString.Key: Any] {
+            var attrs = bodyAttributes
+
+            // Block-level overrides come first so inline italics on a
+            // heading still apply on top of the heading font.
+            var blockKind: BlockKind = .paragraph
+            if let block {
                 for component in block.components {
                     switch component.kind {
                     case .header(let level):
-                        let size: CGFloat
-                        switch level {
-                        case 1: size = 28
-                        case 2: size = 22
-                        case 3: size = 18
-                        default: size = 16
-                        }
-                        let headingFont = NSFont(
-                            descriptor: bodyFont.fontDescriptor.withSymbolicTraits(.bold),
-                            size: size
-                        ) ?? NSFont.boldSystemFont(ofSize: size)
-                        mutable.addAttribute(.font, value: headingFont, range: range)
+                        blockKind = .header(level)
+                        attrs[.font] = headerFont(for: level)
                     case .codeBlock:
-                        mutable.addAttribute(.font, value: monoFont, range: range)
-                        mutable.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: range)
+                        blockKind = .codeBlock
+                        attrs[.font] = mono
+                        attrs[.foregroundColor] = NSColor.secondaryLabelColor
+                    case .blockQuote:
+                        blockKind = .blockQuote
+                        attrs[.foregroundColor] = NSColor.secondaryLabelColor
                     default:
                         break
                     }
                 }
             }
+
+            if let inline {
+                if inline.contains(.code), blockKind != .codeBlock {
+                    attrs[.font] = mono
+                    attrs[.foregroundColor] = NSColor.secondaryLabelColor
+                }
+                let isStrong = inline.contains(.stronglyEmphasized)
+                let isEm = inline.contains(.emphasized)
+                if isStrong || isEm, blockKind == .paragraph || blockKind == .blockQuote {
+                    switch (isStrong, isEm) {
+                    case (true, true):  attrs[.font] = bodyBoldItalic
+                    case (true, false): attrs[.font] = bodyBold
+                    case (false, true): attrs[.font] = bodyItalic
+                    default: break
+                    }
+                }
+            }
+
+            return attrs
         }
 
-        return mutable
-    }
+        private func headerFont(for level: Int) -> NSFont {
+            switch level {
+            case 1:  return h1
+            case 2:  return h2
+            case 3:  return h3
+            default: return h4
+            }
+        }
 
-    private static func bold(of storage: NSMutableAttributedString, at range: NSRange, baseSize: CGFloat) -> NSFont {
-        let current = (storage.attribute(.font, at: range.location, effectiveRange: nil) as? NSFont)
-            ?? NSFont.systemFont(ofSize: baseSize)
-        let descriptor = current.fontDescriptor.withSymbolicTraits(current.fontDescriptor.symbolicTraits.union(.bold))
-        return NSFont(descriptor: descriptor, size: current.pointSize) ?? NSFont.boldSystemFont(ofSize: baseSize)
-    }
-
-    private static func italic(of storage: NSMutableAttributedString, at range: NSRange, baseSize: CGFloat) -> NSFont {
-        let current = (storage.attribute(.font, at: range.location, effectiveRange: nil) as? NSFont)
-            ?? NSFont.systemFont(ofSize: baseSize)
-        let descriptor = current.fontDescriptor.withSymbolicTraits(current.fontDescriptor.symbolicTraits.union(.italic))
-        return NSFont(descriptor: descriptor, size: current.pointSize) ?? current
+        private enum BlockKind: Equatable {
+            case paragraph
+            case header(Int)
+            case codeBlock
+            case blockQuote
+        }
     }
 }
 
-// MARK: - NSTextView host
+// MARK: - NSTextView hosts
 
 private struct MarkdownTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scroll = NSScrollView()
-        scroll.hasVerticalScroller = true
-        scroll.hasHorizontalScroller = false
-        scroll.borderType = .noBorder
-        scroll.drawsBackground = true
-        scroll.backgroundColor = NSColor(Color.rheaSurface)
-
-        let textView = NSTextView()
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.isRichText = true
-        textView.backgroundColor = NSColor(Color.rheaSurface)
-        textView.drawsBackground = true
-        textView.textContainerInset = NSSize(width: 32, height: 24)
-        textView.autoresizingMask = [.width]
-        textView.textContainer?.widthTracksTextView = true
-        textView.textContainer?.containerSize = NSSize(
-            width: 0, height: CGFloat.greatestFiniteMagnitude
-        )
-
-        scroll.documentView = textView
-        return scroll
+        makeReadOnlyTextScrollView()
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
@@ -237,27 +322,81 @@ private struct MarkdownTextView: NSViewRepresentable {
             storage.setAttributedString(attributed)
         }
 
-        applyHighlight(to: tv, storage: storage)
+        applyHighlight(to: tv, storage: storage, sentence: activeSentence)
     }
+}
 
-    private func applyHighlight(to textView: NSTextView, storage: NSTextStorage) {
-        let fullRange = NSRange(location: 0, length: storage.length)
-        storage.beginEditing()
-        storage.removeAttribute(.backgroundColor, range: fullRange)
+private struct SourceTextView: NSViewRepresentable {
+    let text: String
 
-        if let sentence = activeSentence {
-            let range = NSRange(
-                location: sentence.offsetInBlock,
-                length: sentence.lengthInBlock
-            )
-            if NSMaxRange(range) <= storage.length {
-                let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
-                storage.addAttribute(.backgroundColor, value: amber, range: range)
-                storage.endEditing()
-                textView.scrollRangeToVisible(range)
-                return
-            }
+    func makeNSView(context: Context) -> NSScrollView {
+        let scroll = makeReadOnlyTextScrollView()
+        if let tv = scroll.documentView as? NSTextView {
+            tv.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+            tv.textColor = NSColor.labelColor
+            tv.string = text
         }
-        storage.endEditing()
+        return scroll
     }
+
+    func updateNSView(_ nsView: NSScrollView, context: Context) {
+        guard let tv = nsView.documentView as? NSTextView else { return }
+        if tv.string != text {
+            tv.string = text
+        }
+    }
+}
+
+// MARK: - Shared scrolling text view setup
+
+@MainActor
+private func makeReadOnlyTextScrollView() -> NSScrollView {
+    let scroll = NSScrollView()
+    scroll.hasVerticalScroller = true
+    scroll.hasHorizontalScroller = false
+    scroll.borderType = .noBorder
+    scroll.drawsBackground = true
+    scroll.backgroundColor = NSColor(Color.rheaSurface)
+
+    let textView = NSTextView()
+    textView.isEditable = false
+    textView.isSelectable = true
+    textView.isRichText = true
+    textView.backgroundColor = NSColor(Color.rheaSurface)
+    textView.drawsBackground = true
+    textView.textContainerInset = NSSize(width: 32, height: 24)
+    textView.autoresizingMask = [.width]
+    textView.textContainer?.widthTracksTextView = true
+    textView.textContainer?.containerSize = NSSize(
+        width: 0, height: CGFloat.greatestFiniteMagnitude
+    )
+
+    scroll.documentView = textView
+    return scroll
+}
+
+@MainActor
+private func applyHighlight(
+    to textView: NSTextView,
+    storage: NSTextStorage,
+    sentence: Sentence?
+) {
+    let fullRange = NSRange(location: 0, length: storage.length)
+    storage.beginEditing()
+    storage.removeAttribute(.backgroundColor, range: fullRange)
+
+    if let sentence {
+        let range = NSRange(
+            location: sentence.offsetInBlock,
+            length: sentence.lengthInBlock
+        )
+        if NSMaxRange(range) <= storage.length {
+            let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
+            storage.addAttribute(.backgroundColor, value: amber, range: range)
+            storage.endEditing()
+            textView.scrollRangeToVisible(range)
+            return
+        }
+    }
+    storage.endEditing()
 }
