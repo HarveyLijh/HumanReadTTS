@@ -8,21 +8,22 @@ final class PDFTextExtractorTests: XCTestCase {
 
     func test_splitOnBlankLines_singleParagraph() {
         let result = PDFTextExtractor.splitOnBlankLines("one sentence here")
-        XCTAssertEqual(result, ["one sentence here"])
+        XCTAssertEqual(result.map(\.text), ["one sentence here"])
+        XCTAssertEqual(result.map(\.offset), [0])
     }
 
-    func test_splitOnBlankLines_twoParagraphs() {
+    func test_splitOnBlankLines_twoParagraphs_carriesOffsets() {
         let input = "first paragraph text\n\nsecond paragraph text"
-        XCTAssertEqual(
-            PDFTextExtractor.splitOnBlankLines(input),
-            ["first paragraph text", "second paragraph text"]
-        )
+        let result = PDFTextExtractor.splitOnBlankLines(input)
+        XCTAssertEqual(result.map(\.text), ["first paragraph text", "second paragraph text"])
+        // First block at 0; second begins after "first paragraph text\n\n" = 22
+        XCTAssertEqual(result.map(\.offset), [0, 22])
     }
 
     func test_splitOnBlankLines_preservesSingleNewlinesInsideBlock() {
         let input = "line one\nline two\n\nnext paragraph"
         XCTAssertEqual(
-            PDFTextExtractor.splitOnBlankLines(input),
+            PDFTextExtractor.splitOnBlankLines(input).map(\.text),
             ["line one\nline two", "next paragraph"]
         )
     }
@@ -30,7 +31,7 @@ final class PDFTextExtractorTests: XCTestCase {
     func test_splitOnBlankLines_collapsesMultipleBlankLines() {
         let input = "first\n\n\n\nsecond"
         XCTAssertEqual(
-            PDFTextExtractor.splitOnBlankLines(input),
+            PDFTextExtractor.splitOnBlankLines(input).map(\.text),
             ["first", "second"]
         )
     }
@@ -38,14 +39,14 @@ final class PDFTextExtractorTests: XCTestCase {
     func test_splitOnBlankLines_dropsEmptyBlocks() {
         let input = "\n\n\nonly block\n\n   \n\n"
         XCTAssertEqual(
-            PDFTextExtractor.splitOnBlankLines(input),
+            PDFTextExtractor.splitOnBlankLines(input).map(\.text),
             ["only block"]
         )
     }
 
     func test_splitOnBlankLines_emptyInput() {
-        XCTAssertEqual(PDFTextExtractor.splitOnBlankLines(""), [])
-        XCTAssertEqual(PDFTextExtractor.splitOnBlankLines("   \n  \n  "), [])
+        XCTAssertTrue(PDFTextExtractor.splitOnBlankLines("").isEmpty)
+        XCTAssertTrue(PDFTextExtractor.splitOnBlankLines("   \n  \n  ").isEmpty)
     }
 
     // MARK: extractSync integration
@@ -65,13 +66,12 @@ final class PDFTextExtractorTests: XCTestCase {
         XCTAssertEqual(blocks.map(\.pageIndex), [0, 0, 1])
         XCTAssertEqual(blocks[0].text, "first page paragraph one")
         XCTAssertEqual(blocks[2].text, "second page sole paragraph")
+        XCTAssertEqual(blocks[0].offsetInPage, 0)
+        XCTAssertGreaterThan(blocks[1].offsetInPage, 0)
     }
 
     // MARK: helpers
 
-    /// Build a PDFDocument in-memory from an array of per-page text
-    /// strings. Each page is rendered as attributed text through
-    /// Core Graphics so the resulting PDF has real extractable text.
     private func makePDF(pages: [String]) throws -> PDFDocument {
         let pageRect = CGRect(x: 0, y: 0, width: 612, height: 792)
         let data = NSMutableData()

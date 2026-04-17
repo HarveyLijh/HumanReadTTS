@@ -2,16 +2,16 @@ import SwiftUI
 import PDFKit
 
 /// Renders a PDF, runs text extraction + sentence segmentation,
-/// hosts the per-document `SpeechPlayer`, and synchronises an
-/// amber `PDFAnnotationHighlight` with the currently-spoken
-/// sentence.
+/// pushes the segmented sentence queue into the shared
+/// `SpeechPlayer`, and synchronises an amber `PDFAnnotationHighlight`
+/// with the currently-spoken sentence.
 struct PDFViewerView: View {
     let url: URL
+    let player: SpeechPlayer
 
     @State private var loadResult: LoadResult = .loading
     @State private var blocks: [DocumentBlock] = []
     @State private var sentences: [Sentence] = []
-    @State private var player = SpeechPlayer()
 
     var body: some View {
         Group {
@@ -28,10 +28,6 @@ struct PDFViewerView: View {
                 )
                 .ignoresSafeArea()
                 .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
-                .overlay(alignment: .bottomTrailing) {
-                    PlaybackControlsView(player: player)
-                        .padding(16)
-                }
                 .task(id: url) {
                     let extracted = await PDFTextExtractor.extract(document)
                     blocks = extracted
@@ -47,14 +43,12 @@ struct PDFViewerView: View {
             loadResult = .loading
             blocks = []
             sentences = []
-            player.stop()
             if let document = await PDFDocumentLoader.load(url: url) {
                 loadResult = .loaded(document)
             } else {
                 loadResult = .failed
             }
         }
-        .onDisappear { player.stop() }
     }
 
     private var activeSentence: Sentence? {
@@ -136,7 +130,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         removeHighlight(coordinator: coordinator)
 
         guard let sentence = activeSentence,
-              let selection = findSelection(for: sentence) else { return }
+              let selection = selection(for: sentence) else { return }
 
         let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
         for lineSelection in selection.selectionsByLine() {
@@ -162,17 +156,18 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         coordinator.annotations = []
     }
 
-    /// Look up a `PDFSelection` for a sentence: prefer matches on
-    /// the sentence's source page, fall back to the first match
-    /// anywhere. Fragile against PDFs that hyphenate or normalize
-    /// whitespace differently from `page.string` — improving this
-    /// is a Month 3 polish item alongside Marker integration.
-    private func findSelection(for sentence: Sentence) -> PDFSelection? {
+    /// O(1) sentence → `PDFSelection` lookup. Uses
+    /// `PDFPage.selection(for: NSRange)` against page-relative UTF-16
+    /// offsets that the extractor recorded during `page.string`
+    /// extraction. Avoids the per-state-change `PDFDocument.findString`
+    /// scan that stalled large documents.
+    private func selection(for sentence: Sentence) -> PDFSelection? {
         guard sentence.blockIndex < blocks.count else { return nil }
         let block = blocks[sentence.blockIndex]
         guard let page = document.page(at: block.pageIndex) else { return nil }
-        let matches = document.findString(sentence.text, withOptions: [])
-        return matches.first { $0.pages.contains(page) } ?? matches.first
+        let pageOffset = block.offsetInPage + sentence.offsetInBlock
+        let range = NSRange(location: pageOffset, length: sentence.lengthInBlock)
+        return page.selection(for: range)
     }
 
     final class Coordinator {

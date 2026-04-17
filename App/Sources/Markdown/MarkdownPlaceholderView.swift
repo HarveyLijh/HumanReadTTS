@@ -1,10 +1,19 @@
 import SwiftUI
 
-/// Markdown rendering proper lands in M2.7. For M1.2 we just present
-/// the file's raw contents in a monospaced ScrollView so a dropped
-/// `.md` file shows *something* useful rather than a placeholder.
+/// Markdown rendering proper lands in M2.7. For M1.x we present the
+/// file's raw contents in a monospaced ScrollView so a dropped
+/// `.md` file shows *something* useful, and we segment the contents
+/// into sentences and feed them to the shared `SpeechPlayer` so
+/// playback works the same way it does for PDFs.
+///
+/// Per-sentence highlighting on this view is not implemented; the
+/// proper Markdown reader in M2.7 will support it (the styled
+/// AttributedString it builds is the natural place for it). Audio
+/// playback alone is enough to unblock the bilingual TTS path on
+/// markdown notes today.
 struct MarkdownPlaceholderView: View {
     let url: URL
+    let player: SpeechPlayer
 
     @State private var contents: String = ""
     @State private var loadFailed = false
@@ -25,11 +34,16 @@ struct MarkdownPlaceholderView: View {
         }
         .task(id: url) {
             do {
-                contents = try String(contentsOf: url, encoding: .utf8)
+                let raw = try String(contentsOf: url, encoding: .utf8)
+                contents = raw
                 loadFailed = false
+                let block = DocumentBlock(text: raw, pageIndex: 0, offsetInPage: 0)
+                let sentences = await SentenceSegmenter.segment([block])
+                player.load(sentences)
             } catch {
                 contents = ""
                 loadFailed = true
+                player.load([])
             }
         }
     }

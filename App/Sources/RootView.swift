@@ -3,11 +3,18 @@ import SwiftUI
 /// The window's content owner. Wraps a `Library` sidebar around the
 /// document detail view and keeps the drop edge live across both
 /// columns so a new file can replace the current one at any time.
+///
+/// `SpeechPlayer` lives here, not inside the per-format viewers, so
+/// PDFs and Markdown share one playback instance and the controls
+/// can sit at the window level rather than re-implemented per
+/// viewer. Changing documents stops the previous playback before
+/// the new viewer's `task` re-loads sentences.
 struct RootView: View {
     @State private var library = Library()
     @State private var document: DroppedDocument?
     @State private var selectedEntryID: LibraryEntry.ID?
     @State private var isTargeted = false
+    @State private var player = SpeechPlayer()
 
     var body: some View {
         NavigationSplitView {
@@ -31,6 +38,7 @@ struct RootView: View {
                   let entry = library.entries.first(where: { $0.id == newID }),
                   let url = library.resolve(entry),
                   let next = DroppedDocument(url: url) else { return }
+            player.stop()
             document = next
         }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
@@ -39,12 +47,18 @@ struct RootView: View {
 
     @ViewBuilder
     private var detail: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             Color.rheaSurface.ignoresSafeArea()
+
             if let document {
                 content(for: document)
             } else {
                 DropTargetView()
+            }
+
+            if document != nil {
+                PlaybackControlsView(player: player)
+                    .padding(16)
             }
         }
     }
@@ -53,9 +67,9 @@ struct RootView: View {
     private func content(for document: DroppedDocument) -> some View {
         switch document.kind {
         case .pdf:
-            PDFViewerView(url: document.url)
+            PDFViewerView(url: document.url, player: player)
         case .markdown:
-            MarkdownPlaceholderView(url: document.url)
+            MarkdownPlaceholderView(url: document.url, player: player)
         }
     }
 
@@ -67,9 +81,9 @@ struct RootView: View {
     }
 
     private func adopt(_ next: DroppedDocument) {
+        player.stop()
         document = next
         library.record(url: next.url)
-        // Sync sidebar selection to the just-recorded entry (top of list).
         selectedEntryID = library.entries.first?.id
     }
 }
