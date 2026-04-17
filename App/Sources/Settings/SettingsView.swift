@@ -48,6 +48,14 @@ struct SettingsView: View {
                         }
                     }
 
+                    if ModelManager.shared.isUsable(ModelCatalog.qwen3TTSSmall) {
+                        Section("Qwen3-TTS (on-device, bilingual)") {
+                            ForEach(QwenEngine.shared.voices) { voice in
+                                Text(voice.displayName).tag(Optional(voice.id))
+                            }
+                        }
+                    }
+
                     ForEach(voicesByLanguage, id: \.language) { group in
                         Section("System · \(group.language)") {
                             ForEach(group.voices, id: \.identifier) { voice in
@@ -60,11 +68,15 @@ struct SettingsView: View {
             } header: {
                 Text("Voice")
             } footer: {
-                if KokoroEngine.shared.voices.isEmpty {
-                    Text("Download Kokoro from the Models tab to unlock studio-quality on-device English voices.")
+                if KokoroEngine.shared.voices.isEmpty,
+                   !ModelManager.shared.isUsable(ModelCatalog.qwen3TTSSmall) {
+                    Text("Download Kokoro or Qwen3-TTS from the Models tab to unlock studio-quality on-device voices.")
+                        .foregroundStyle(.secondary)
+                } else if ModelManager.shared.isUsable(ModelCatalog.qwen3TTSSmall) {
+                    Text("Qwen3-TTS is bilingual (EN + ZH) and picks per-sentence automatically when 'Auto' is selected.")
                         .foregroundStyle(.secondary)
                 } else {
-                    Text("Kokoro voices run entirely on-device. Chinese bilingual voices arrive with Qwen3-TTS in a future update.")
+                    Text("Kokoro voices run entirely on-device. Download Qwen3-TTS to add bilingual English / Chinese support.")
                         .foregroundStyle(.secondary)
                 }
             }

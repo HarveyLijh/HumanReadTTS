@@ -59,11 +59,13 @@ final class SpeechPlayer {
     private var currentEngine: Engine = .system
     private var currentSentenceStartedAt: Date?
 
-    /// Kokoro synth runs per-sentence and each call costs real time,
-    /// so we prefetch the next sentence's PCM while the current one
-    /// is playing. On sentence advance, a cache hit lets playback
-    /// continue with zero gap. Cleared on stop / load / seek.
+    /// Neural-TTS prefetch cache. Kokoro and Qwen3-TTS both cost
+    /// real time per sentence, so while sentence N plays we
+    /// synthesise N+1 in the background and stash the PCM here.
+    /// On sentence advance, a cache hit means zero gap. Cleared on
+    /// stop / load / seek to avoid replaying a skipped sentence.
     private var prefetchedKokoro: [Int: [Float]] = [:]
+    private var prefetchedQwen: [Int: [Float]] = [:]
 
     private static let log = Logger(subsystem: "app.rhea.mac", category: "playback")
 
@@ -80,6 +82,7 @@ final class SpeechPlayer {
         self.state = .idle
         self.spokenSubRange = nil
         self.prefetchedKokoro.removeAll()
+        self.prefetchedQwen.removeAll()
     }
 
     func togglePlayPause() {
@@ -91,7 +94,7 @@ final class SpeechPlayer {
         case .playing(let i):
             switch currentEngine {
             case .system: synth.pauseSpeaking(at: .immediate)
-            case .kokoro: pcm.stop()
+            case .kokoro, .qwen: pcm.stop()
             }
             state = .paused(sentenceIndex: i)
         case .paused(let i):
@@ -99,8 +102,8 @@ final class SpeechPlayer {
             case .system:
                 synth.continueSpeaking()
                 state = .playing(sentenceIndex: i)
-            case .kokoro:
-                // Kokoro can't resume mid-sentence; restart the current.
+            case .kokoro, .qwen:
+                // Neural engines can't resume mid-sentence; restart current.
                 state = .playing(sentenceIndex: i)
                 speakCurrent()
             }
@@ -114,6 +117,7 @@ final class SpeechPlayer {
         nextIndex = 0
         spokenSubRange = nil
         prefetchedKokoro.removeAll()
+        prefetchedQwen.removeAll()
     }
 
     /// Jump to the next sentence. If we're playing, keep playing
@@ -138,6 +142,7 @@ final class SpeechPlayer {
         spokenSubRange = nil
         nextIndex = index
         prefetchedKokoro.removeAll()
+        prefetchedQwen.removeAll()
         if wasPlaying {
             speakCurrent()
         } else {
@@ -159,7 +164,18 @@ final class SpeechPlayer {
 
         if voiceID.hasPrefix("kokoro:") {
             currentEngine = .kokoro
-            speakWithKokoro(sentence: sentence, voiceID: String(voiceID.dropFirst("kokoro:".count)), settings: settings)
+            speakWithKokoro(
+                sentence: sentence,
+                voiceID: String(voiceID.dropFirst("kokoro:".count)),
+                settings: settings
+            )
+        } else if voiceID.hasPrefix("qwen:") {
+            currentEngine = .qwen
+            speakWithQwen(
+                sentence: sentence,
+                voiceID: String(voiceID.dropFirst("qwen:".count)),
+                settings: settings
+            )
         } else {
             currentEngine = .system
             speakWithSystem(sentence: sentence, settings: settings)
@@ -213,6 +229,63 @@ final class SpeechPlayer {
                 self.currentEngine = .system
                 self.speakWithSystem(sentence: sentence, settings: settings)
             }
+        }
+    }
+
+    private func speakWithQwen(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
+        let speed = Float(settings.rate)
+        let myIndex = nextIndex
+
+        if let samples = prefetchedQwen.removeValue(forKey: myIndex) {
+            pcm.play(samples: samples) { [weak self] in
+                self?.didFinishCurrent()
+            }
+            prefetchQwen(after: myIndex, voiceID: voiceID, settings: settings)
+            return
+        }
+
+        var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        let language = Self.languageCode(for: sentence.text)
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            await QwenEngine.shared.loadIfNeeded()
+            do {
+                let samples = try await QwenEngine.shared.synthesize(
+                    text: spokenText, voiceID: voiceID, language: language, speed: speed
+                )
+                guard self.state.sentenceIndex == myIndex,
+                      case .playing = self.state else { return }
+                self.pcm.play(samples: samples) { [weak self] in
+                    self?.didFinishCurrent()
+                }
+                self.prefetchQwen(after: myIndex, voiceID: voiceID, settings: settings)
+            } catch {
+                Self.log.error("Qwen synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
+                self.currentEngine = .system
+                self.speakWithSystem(sentence: sentence, settings: settings)
+            }
+        }
+    }
+
+    private func prefetchQwen(after playingIndex: Int, voiceID: String, settings: SpeechSettings) {
+        let nextIdx = playingIndex + 1
+        guard nextIdx < sentences.count,
+              prefetchedQwen[nextIdx] == nil else { return }
+        let sentence = sentences[nextIdx]
+        let speed = Float(settings.rate)
+        var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        let language = Self.languageCode(for: sentence.text)
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let samples = try await QwenEngine.shared.synthesize(
+                    text: spokenText, voiceID: voiceID, language: language, speed: speed
+                )
+                guard nextIdx == self.nextIndex + 1 else { return }
+                self.prefetchedQwen[nextIdx] = samples
+            } catch { /* silent; main path retries */ }
         }
     }
 
@@ -279,6 +352,17 @@ final class SpeechPlayer {
         spokenSubRange = range
     }
 
+    // MARK: language detection
+
+    /// Detects the dominant language of a sentence as an ISO-639
+    /// code (e.g. "en", "zh", "ja"). Used by the neural Qwen path
+    /// so a bilingual document flips voice character per sentence.
+    private static func languageCode(for text: String) -> String {
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(text)
+        return recognizer.dominantLanguage?.rawValue ?? "en"
+    }
+
     // MARK: voice selection
 
     /// Resolves a system `AVSpeechSynthesisVoice`. If the user
@@ -303,6 +387,7 @@ final class SpeechPlayer {
     private enum Engine {
         case system
         case kokoro
+        case qwen
     }
 
     // MARK: delegate

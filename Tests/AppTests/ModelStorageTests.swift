@@ -20,7 +20,8 @@ final class ModelStorageTests: XCTestCase {
             approximateSizeMB: 1,
             files: [],
             engineIntegrated: false,
-            upstreamURL: nil
+            upstreamURL: nil,
+            fetchStrategy: .manifest
         )
     }
 

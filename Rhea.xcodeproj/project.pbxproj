@@ -26,6 +26,8 @@
 		2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackControlsView.swift */; };
 		2B00000000000000000A0043 /* KokoroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0043 /* KokoroEngine.swift */; };
 		2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0044 /* PCMAudioPlayer.swift */; };
+		2B00000000000000000A0045 /* QwenEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0045 /* QwenEngine.swift */; };
+		2B00000000000000000A0046 /* WhisperAligner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0046 /* WhisperAligner.swift */; };
 		2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0081 /* MenuBarCommand.swift */; };
 		2B00000000000000000A0082 /* ServicesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0082 /* ServicesProvider.swift */; };
 		2B00000000000000000A0083 /* GlobalHotKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0083 /* GlobalHotKey.swift */; };
@@ -99,6 +101,8 @@
 		2A00000000000000000A0042 /* PlaybackControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0043 /* KokoroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroEngine.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0044 /* PCMAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMAudioPlayer.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0045 /* QwenEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QwenEngine.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0046 /* WhisperAligner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperAligner.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0081 /* MenuBarCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCommand.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0082 /* ServicesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesProvider.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0083 /* GlobalHotKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKey.swift; sourceTree = "<group>"; };
@@ -254,6 +258,8 @@
 				2A00000000000000000A0042 /* PlaybackControlsView.swift */,
 				2A00000000000000000A0043 /* KokoroEngine.swift */,
 				2A00000000000000000A0044 /* PCMAudioPlayer.swift */,
+				2A00000000000000000A0045 /* QwenEngine.swift */,
+				2A00000000000000000A0046 /* WhisperAligner.swift */,
 			);
 			path = Playback;
 			sourceTree = "<group>";
@@ -588,6 +594,8 @@
 				2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */,
 				2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */,
 				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
+				2B00000000000000000A0045 /* QwenEngine.swift in Sources */,
+				2B00000000000000000A0046 /* WhisperAligner.swift in Sources */,
 				2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */,
 				2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */,
 				2B00000000000000000A0082 /* ServicesProvider.swift in Sources */,

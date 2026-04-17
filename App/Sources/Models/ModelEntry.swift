@@ -44,6 +44,19 @@ struct ModelEntry: Identifiable, Hashable, Sendable {
     /// Source URL of the upstream project for the user to inspect
     /// licensing and provenance.
     let upstreamURL: URL?
+
+    /// Hint to the downloader about *how* to fetch this model.
+    /// `.manifest` (default) iterates through `files` and downloads
+    /// each via URLSession. `.ttsKit` / `.whisperKit` delegate to the
+    /// respective SDKs, which each have their own HuggingFace-aware
+    /// fetchers. For those cases `files` is typically empty.
+    let fetchStrategy: FetchStrategy
+
+    enum FetchStrategy: String, Codable, Sendable {
+        case manifest
+        case ttsKit
+        case whisperKit
+    }
 }
 
 struct ModelFile: Hashable, Sendable {
