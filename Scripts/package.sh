@@ -98,6 +98,32 @@ STAGE="$DIST_DIR/staging"
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
 cp -R "$SRC_APP" "$STAGE/"
+STAGED_APP="$STAGE/$APP_NAME.app"
+
+# Xcode's SwiftPM auto-embed misses some products (KokoroSwift and
+# related Swift packages fail to land in the bundle even though
+# they're linked). Walk the SPM build product tree and copy any
+# missing .framework into the staged app, then re-sign so the outer
+# codesign pass below covers them. Mirrors Scripts/build.sh's fix.
+PKG_FW_DIR="$BUILD_DIR/DerivedData/Build/Products/$CONFIG/PackageFrameworks"
+APP_FW_DIR="$STAGED_APP/Contents/Frameworks"
+if [[ -d "$PKG_FW_DIR" ]]; then
+    mkdir -p "$APP_FW_DIR"
+    for fw in "$PKG_FW_DIR"/*.framework; do
+        [[ -d "$fw" ]] || continue
+        name="$(basename "$fw")"
+        if [[ ! -d "$APP_FW_DIR/$name" ]]; then
+            note "Embedding missing framework: $name"
+            cp -R "$fw" "$APP_FW_DIR/"
+            codesign --force --sign - "$APP_FW_DIR/$name" >/dev/null 2>&1 || true
+        fi
+    done
+    # Ad-hoc re-sign the app so the new frameworks sit under a
+    # consistent outer signature. If the Developer-ID path below
+    # runs, it will overwrite this signature with the real one.
+    codesign --force --deep --sign - "$STAGED_APP" >/dev/null 2>&1 || true
+    ok "Frameworks embedded + ad-hoc signed"
+fi
 
 # ── Sign ─────────────────────────────────────────────────────────
 if [[ -n "${DEVELOPER_ID_APPLICATION:-}" ]]; then
