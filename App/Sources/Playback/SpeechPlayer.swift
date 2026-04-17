@@ -59,6 +59,12 @@ final class SpeechPlayer {
     private var currentEngine: Engine = .system
     private var currentSentenceStartedAt: Date?
 
+    /// Kokoro synth runs per-sentence and each call costs real time,
+    /// so we prefetch the next sentence's PCM while the current one
+    /// is playing. On sentence advance, a cache hit lets playback
+    /// continue with zero gap. Cleared on stop / load / seek.
+    private var prefetchedKokoro: [Int: [Float]] = [:]
+
     private static let log = Logger(subsystem: "app.rhea.mac", category: "playback")
 
     init() {
@@ -73,6 +79,7 @@ final class SpeechPlayer {
         self.nextIndex = 0
         self.state = .idle
         self.spokenSubRange = nil
+        self.prefetchedKokoro.removeAll()
     }
 
     func togglePlayPause() {
@@ -106,6 +113,7 @@ final class SpeechPlayer {
         state = .idle
         nextIndex = 0
         spokenSubRange = nil
+        prefetchedKokoro.removeAll()
     }
 
     /// Jump to the next sentence. If we're playing, keep playing
@@ -129,6 +137,7 @@ final class SpeechPlayer {
         pcm.stop()
         spokenSubRange = nil
         nextIndex = index
+        prefetchedKokoro.removeAll()
         if wasPlaying {
             speakCurrent()
         } else {
@@ -170,6 +179,16 @@ final class SpeechPlayer {
     private func speakWithKokoro(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
         let speed = Float(settings.rate)
         let myIndex = nextIndex
+
+        // Cache hit: pre-buffered during the previous sentence.
+        if let samples = prefetchedKokoro.removeValue(forKey: myIndex) {
+            pcm.play(samples: samples) { [weak self] in
+                self?.didFinishCurrent()
+            }
+            prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
+            return
+        }
+
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
         spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
         Task { @MainActor [weak self] in
@@ -187,11 +206,39 @@ final class SpeechPlayer {
                 self.pcm.play(samples: samples) { [weak self] in
                     self?.didFinishCurrent()
                 }
+                self.prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
             } catch {
                 Self.log.error("Kokoro synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
                 // Fall back so the user still gets audio.
                 self.currentEngine = .system
                 self.speakWithSystem(sentence: sentence, settings: settings)
+            }
+        }
+    }
+
+    /// Fire-and-forget: synthesise the sentence after `playingIndex`
+    /// while the user listens to `playingIndex`, then stash the PCM
+    /// so the next `speakWithKokoro` hits the cache. Silent on error
+    /// — the main path will retry when it reaches that sentence.
+    private func prefetchKokoro(after playingIndex: Int, voiceID: String, settings: SpeechSettings) {
+        let nextIdx = playingIndex + 1
+        guard nextIdx < sentences.count,
+              prefetchedKokoro[nextIdx] == nil else { return }
+        let sentence = sentences[nextIdx]
+        let speed = Float(settings.rate)
+        var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let samples = try await KokoroEngine.shared.synthesize(
+                    text: spokenText, voiceID: voiceID, speed: speed
+                )
+                // Drop prefetch if the user skipped/stopped during synth.
+                guard nextIdx == self.nextIndex + 1 else { return }
+                self.prefetchedKokoro[nextIdx] = samples
+            } catch {
+                // Silent; main-path synth will surface the error.
             }
         }
     }
