@@ -29,7 +29,10 @@ struct PDFViewerView: View {
                 .ignoresSafeArea()
                 .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
                 .task(id: url) {
-                    let extracted = await PDFTextExtractor.extract(document)
+                    let extracted = await PDFTextExtractor.extract(
+                        document,
+                        skipFigureCaptions: SpeechSettings.shared.skipFigureCaptions
+                    )
                     blocks = extracted
                     let parsed = await SentenceSegmenter.segment(extracted)
                     sentences = parsed

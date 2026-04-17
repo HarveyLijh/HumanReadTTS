@@ -21,6 +21,7 @@
 		2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0032 /* PDFTextExtractor.swift */; };
 		2B00000000000000000A0033 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0033 /* Sentence.swift */; };
 		2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0034 /* SentenceSegmenter.swift */; };
+		2B00000000000000000A0035 /* ResearchCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0035 /* ResearchCleanup.swift */; };
 		2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0041 /* SpeechPlayer.swift */; };
 		2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackControlsView.swift */; };
 		2B00000000000000000A0043 /* KokoroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0043 /* KokoroEngine.swift */; };
@@ -51,6 +52,7 @@
 		2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */; };
 		2B00000000000000000B0008 /* LibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0008 /* LibraryTests.swift */; };
 		2B00000000000000000B0009 /* PronunciationDictionaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */; };
+		2B00000000000000000B000A /* ResearchCleanupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000A /* ResearchCleanupTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +81,7 @@
 		2A00000000000000000A0032 /* PDFTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractor.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0033 /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0034 /* SentenceSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenter.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0035 /* ResearchCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchCleanup.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0041 /* SpeechPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0042 /* PlaybackControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0043 /* KokoroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroEngine.swift; sourceTree = "<group>"; };
@@ -106,6 +109,7 @@
 		2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalogReachabilityTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0008 /* LibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionaryTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B000A /* ResearchCleanupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchCleanupTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -207,6 +211,7 @@
 				2A00000000000000000A0032 /* PDFTextExtractor.swift */,
 				2A00000000000000000A0033 /* Sentence.swift */,
 				2A00000000000000000A0034 /* SentenceSegmenter.swift */,
+				2A00000000000000000A0035 /* ResearchCleanup.swift */,
 			);
 			path = Document;
 			sourceTree = "<group>";
@@ -291,6 +296,7 @@
 				2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */,
 				2A00000000000000000B0008 /* LibraryTests.swift */,
 				2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */,
+				2A00000000000000000B000A /* ResearchCleanupTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -480,6 +486,7 @@
 				2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */,
 				2B00000000000000000A0033 /* Sentence.swift in Sources */,
 				2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */,
+				2B00000000000000000A0035 /* ResearchCleanup.swift in Sources */,
 				2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */,
 				2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */,
 				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
@@ -514,6 +521,7 @@
 				2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */,
 				2B00000000000000000B0008 /* LibraryTests.swift in Sources */,
 				2B00000000000000000B0009 /* PronunciationDictionaryTests.swift in Sources */,
+				2B00000000000000000B000A /* ResearchCleanupTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

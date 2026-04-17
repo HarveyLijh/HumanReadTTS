@@ -13,13 +13,19 @@ import PDFKit
 /// (and optionally MinerU for Chinese-heavy PDFs) lands in Month 3
 /// as an opt-in enhancer for documents PDFKit handles poorly.
 enum PDFTextExtractor {
-    static func extract(_ document: PDFDocument) async -> [DocumentBlock] {
+    static func extract(
+        _ document: PDFDocument,
+        skipFigureCaptions: Bool = false
+    ) async -> [DocumentBlock] {
         await Task.detached(priority: .userInitiated) {
-            extractSync(document)
+            extractSync(document, skipFigureCaptions: skipFigureCaptions)
         }.value
     }
 
-    static func extractSync(_ document: PDFDocument) -> [DocumentBlock] {
+    static func extractSync(
+        _ document: PDFDocument,
+        skipFigureCaptions: Bool = false
+    ) -> [DocumentBlock] {
         var blocks: [DocumentBlock] = []
         for pageIndex in 0..<document.pageCount {
             guard let page = document.page(at: pageIndex),
@@ -27,6 +33,9 @@ enum PDFTextExtractor {
                 continue
             }
             for (offset, text) in splitOnBlankLines(raw) {
+                if skipFigureCaptions, ResearchCleanup.isFigureOrTableBlock(text) {
+                    continue
+                }
                 blocks.append(DocumentBlock(
                     text: text,
                     pageIndex: pageIndex,

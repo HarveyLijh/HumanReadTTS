@@ -45,10 +45,30 @@ final class SpeechSettings {
         }
     }
 
+    /// When true, `ResearchCleanup.clean` strips inline citations
+    /// (`[12]`, `(Smith et al., 2019)`, etc.) from sentence text
+    /// before it reaches the synthesizer. Visible document is
+    /// unchanged. Default off — changes what the user hears, so
+    /// opt-in is safer than opt-out.
+    var stripCitations: Bool = false {
+        didSet { defaults.set(stripCitations, forKey: stripCitationsKey) }
+    }
+
+    /// When true, whole document blocks whose first line looks
+    /// like `Figure N:` / `Table N:` are skipped entirely when
+    /// loading a PDF. Applied by `PDFTextExtractor` at extract
+    /// time (so highlighting and sentence counts match what's
+    /// actually playable). Default off.
+    var skipFigureCaptions: Bool = false {
+        didSet { defaults.set(skipFigureCaptions, forKey: skipFigureCaptionsKey) }
+    }
+
     private let defaults: UserDefaults
     private let rateKey = "app.rhea.mac.speech.rate.v1"
     private let pitchKey = "app.rhea.mac.speech.pitch.v1"
     private let voiceKey = "app.rhea.mac.speech.voice.v1"
+    private let stripCitationsKey = "app.rhea.mac.speech.stripCitations.v1"
+    private let skipFigureCaptionsKey = "app.rhea.mac.speech.skipFigureCaptions.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -59,12 +79,16 @@ final class SpeechSettings {
             pitchMultiplier = defaults.double(forKey: pitchKey)
         }
         voiceIdentifier = defaults.string(forKey: voiceKey)
+        stripCitations = defaults.bool(forKey: stripCitationsKey)
+        skipFigureCaptions = defaults.bool(forKey: skipFigureCaptionsKey)
     }
 
     func reset() {
         rate = 1.0
         pitchMultiplier = 1.0
         voiceIdentifier = nil
+        stripCitations = false
+        skipFigureCaptions = false
     }
 
     /// Maps user-facing speed to `AVSpeechUtterance.rate`, clamped

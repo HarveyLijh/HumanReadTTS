@@ -120,7 +120,8 @@ final class SpeechPlayer {
     }
 
     private func speakWithSystem(sentence: Sentence, settings: SpeechSettings) {
-        let spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
         let utterance = AVSpeechUtterance(string: spokenText)
         utterance.voice = Self.systemVoice(for: sentence.text, settings: settings)
         utterance.rate = settings.avSpeechRate
@@ -131,7 +132,8 @@ final class SpeechPlayer {
     private func speakWithKokoro(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
         let speed = Float(settings.rate)
         let myIndex = nextIndex
-        let spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
         Task { @MainActor [weak self] in
             guard let self else { return }
             await KokoroEngine.shared.loadIfNeeded()

@@ -97,6 +97,16 @@ struct SettingsView: View {
             }
 
             Section {
+                Toggle("Skip inline citations when reading", isOn: $settings.stripCitations)
+                Toggle("Skip figure and table captions", isOn: $settings.skipFigureCaptions)
+            } header: {
+                Text("Research PDFs")
+            } footer: {
+                Text("Removes inline `[12]` or `(Smith et al., 2019)` from spoken text; hides `Figure N:` / `Table N:` blocks when loading a PDF. The visible document is unchanged.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
                 Button("Reset to defaults", role: .destructive) {
                     settings.reset()
                 }
