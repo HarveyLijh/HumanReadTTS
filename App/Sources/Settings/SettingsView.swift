@@ -22,8 +22,12 @@ struct SettingsView: View {
             ModelsSettingsView()
                 .tabItem { Label("Models", systemImage: "cube.box") }
                 .tag(1)
+
+            PronunciationSettingsView()
+                .tabItem { Label("Pronunciation", systemImage: "character.book.closed") }
+                .tag(2)
         }
-        .frame(width: 520, height: 420)
+        .frame(width: 560, height: 460)
     }
 
     private var playbackTab: some View {

@@ -120,7 +120,8 @@ final class SpeechPlayer {
     }
 
     private func speakWithSystem(sentence: Sentence, settings: SpeechSettings) {
-        let utterance = AVSpeechUtterance(string: sentence.text)
+        let spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
+        let utterance = AVSpeechUtterance(string: spokenText)
         utterance.voice = Self.systemVoice(for: sentence.text, settings: settings)
         utterance.rate = settings.avSpeechRate
         utterance.pitchMultiplier = Float(settings.pitchMultiplier)
@@ -130,12 +131,13 @@ final class SpeechPlayer {
     private func speakWithKokoro(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
         let speed = Float(settings.rate)
         let myIndex = nextIndex
+        let spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
         Task { @MainActor [weak self] in
             guard let self else { return }
             await KokoroEngine.shared.loadIfNeeded()
             do {
                 let samples = try await KokoroEngine.shared.synthesize(
-                    text: sentence.text, voiceID: voiceID, speed: speed
+                    text: spokenText, voiceID: voiceID, speed: speed
                 )
                 // The user may have skipped or stopped while we were
                 // synthesising. Only play if we're still on the same

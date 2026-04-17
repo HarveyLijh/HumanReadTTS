@@ -26,6 +26,8 @@
 		2B00000000000000000A0043 /* KokoroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0043 /* KokoroEngine.swift */; };
 		2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0044 /* PCMAudioPlayer.swift */; };
 		2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0081 /* MenuBarCommand.swift */; };
+		2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0091 /* PronunciationDictionary.swift */; };
+		2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0092 /* PronunciationSettingsView.swift */; };
 		2B00000000000000000A0051 /* LibraryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0051 /* LibraryEntry.swift */; };
 		2B00000000000000000A0052 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0052 /* Library.swift */; };
 		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
@@ -48,6 +50,7 @@
 		2B00000000000000000B0006 /* ModelStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0006 /* ModelStorageTests.swift */; };
 		2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */; };
 		2B00000000000000000B0008 /* LibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0008 /* LibraryTests.swift */; };
+		2B00000000000000000B0009 /* PronunciationDictionaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +84,8 @@
 		2A00000000000000000A0043 /* KokoroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroEngine.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0044 /* PCMAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMAudioPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0081 /* MenuBarCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCommand.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0091 /* PronunciationDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionary.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0092 /* PronunciationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
@@ -100,6 +105,7 @@
 		2A00000000000000000B0006 /* ModelStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStorageTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalogReachabilityTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0008 /* LibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionaryTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -163,6 +169,7 @@
 				1B00000000000000000A000D /* Settings */,
 				1B00000000000000000A000E /* Models */,
 				1B00000000000000000A000F /* MenuBar */,
+				1B00000000000000000A0010 /* Pronunciation */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -231,6 +238,7 @@
 				2A00000000000000000A0061 /* SpeechSettings.swift */,
 				2A00000000000000000A0062 /* SettingsView.swift */,
 				2A00000000000000000A0063 /* ModelsSettingsView.swift */,
+				2A00000000000000000A0092 /* PronunciationSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -255,6 +263,14 @@
 			path = MenuBar;
 			sourceTree = "<group>";
 		};
+		1B00000000000000000A0010 /* Pronunciation */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0091 /* PronunciationDictionary.swift */,
+			);
+			path = Pronunciation;
+			sourceTree = "<group>";
+		};
 		1B00000000000000000A0005 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -274,6 +290,7 @@
 				2A00000000000000000B0006 /* ModelStorageTests.swift */,
 				2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */,
 				2A00000000000000000B0008 /* LibraryTests.swift */,
+				2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -468,6 +485,8 @@
 				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
 				2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */,
 				2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */,
+				2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */,
+				2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */,
 				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
 				2B00000000000000000A0052 /* Library.swift in Sources */,
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
@@ -494,6 +513,7 @@
 				2B00000000000000000B0006 /* ModelStorageTests.swift in Sources */,
 				2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */,
 				2B00000000000000000B0008 /* LibraryTests.swift in Sources */,
+				2B00000000000000000B0009 /* PronunciationDictionaryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
