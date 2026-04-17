@@ -16,7 +16,7 @@
 		2B00000000000000000A0007 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0007 /* RootView.swift */; };
 		2B00000000000000000A0011 /* PDFViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0011 /* PDFViewerView.swift */; };
 		2B00000000000000000A0012 /* PDFDocumentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0012 /* PDFDocumentLoader.swift */; };
-		2B00000000000000000A0021 /* MarkdownPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */; };
+		2B00000000000000000A0021 /* MarkdownReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0021 /* MarkdownReaderView.swift */; };
 		2B00000000000000000A0031 /* DocumentBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0031 /* DocumentBlock.swift */; };
 		2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0032 /* PDFTextExtractor.swift */; };
 		2B00000000000000000A0033 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0033 /* Sentence.swift */; };
@@ -26,6 +26,8 @@
 		2B00000000000000000A0051 /* LibraryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0051 /* LibraryEntry.swift */; };
 		2B00000000000000000A0052 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0052 /* Library.swift */; };
 		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
+		2B00000000000000000A0061 /* SpeechSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0061 /* SpeechSettings.swift */; };
+		2B00000000000000000A0062 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0062 /* SettingsView.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
@@ -53,7 +55,7 @@
 		2A00000000000000000A0010 /* Rhea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rhea.entitlements; sourceTree = "<group>"; };
 		2A00000000000000000A0011 /* PDFViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFViewerView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0012 /* PDFDocumentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoader.swift; sourceTree = "<group>"; };
-		2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPlaceholderView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0021 /* MarkdownReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownReaderView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0031 /* DocumentBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBlock.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0032 /* PDFTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractor.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0033 /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
@@ -63,6 +65,8 @@
 		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0061 /* SpeechSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSettings.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0062 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0001 /* DropTargetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0003 /* PDFTextExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractorTests.swift; sourceTree = "<group>"; };
@@ -124,6 +128,7 @@
 				1B00000000000000000A000A /* Document */,
 				1B00000000000000000A000B /* Playback */,
 				1B00000000000000000A000C /* Library */,
+				1B00000000000000000A000D /* Settings */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -149,7 +154,7 @@
 		1B00000000000000000A0009 /* Markdown */ = {
 			isa = PBXGroup;
 			children = (
-				2A00000000000000000A0021 /* MarkdownPlaceholderView.swift */,
+				2A00000000000000000A0021 /* MarkdownReaderView.swift */,
 			);
 			path = Markdown;
 			sourceTree = "<group>";
@@ -182,6 +187,15 @@
 				2A00000000000000000A0053 /* LibrarySidebarView.swift */,
 			);
 			path = Library;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A000D /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0061 /* SpeechSettings.swift */,
+				2A00000000000000000A0062 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0005 /* Tests */ = {
@@ -328,7 +342,7 @@
 				2B00000000000000000A0006 /* DroppedDocument.swift in Sources */,
 				2B00000000000000000A0011 /* PDFViewerView.swift in Sources */,
 				2B00000000000000000A0012 /* PDFDocumentLoader.swift in Sources */,
-				2B00000000000000000A0021 /* MarkdownPlaceholderView.swift in Sources */,
+				2B00000000000000000A0021 /* MarkdownReaderView.swift in Sources */,
 				2B00000000000000000A0031 /* DocumentBlock.swift in Sources */,
 				2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */,
 				2B00000000000000000A0033 /* Sentence.swift in Sources */,
@@ -338,6 +352,8 @@
 				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
 				2B00000000000000000A0052 /* Library.swift in Sources */,
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
+				2B00000000000000000A0061 /* SpeechSettings.swift in Sources */,
+				2B00000000000000000A0062 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

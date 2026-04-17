@@ -86,8 +86,11 @@ final class SpeechPlayer {
         let sentence = sentences[nextIndex]
         state = .playing(sentenceIndex: nextIndex)
 
+        let settings = SpeechSettings.shared
         let utterance = AVSpeechUtterance(string: sentence.text)
-        utterance.voice = Self.voice(for: sentence.text)
+        utterance.voice = Self.voice(for: sentence.text, settings: settings)
+        utterance.rate = settings.avSpeechRate
+        utterance.pitchMultiplier = Float(settings.pitchMultiplier)
         synth.speak(utterance)
     }
 
@@ -109,7 +112,14 @@ final class SpeechPlayer {
 
     // MARK: voice selection
 
-    private static func voice(for text: String) -> AVSpeechSynthesisVoice? {
+    /// Voice resolution. If the user pinned a voice in Settings,
+    /// use it for everything; otherwise fall back to per-sentence
+    /// language detection (the bilingual default).
+    private static func voice(for text: String, settings: SpeechSettings) -> AVSpeechSynthesisVoice? {
+        if let id = settings.voiceIdentifier,
+           let voice = AVSpeechSynthesisVoice(identifier: id) {
+            return voice
+        }
         let recognizer = NLLanguageRecognizer()
         recognizer.processString(text)
         let lang = recognizer.dominantLanguage?.rawValue

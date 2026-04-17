@@ -4,5 +4,9 @@ import SwiftUI
 struct RheaApp: App {
     var body: some Scene {
         AppScene()
+
+        Settings {
+            SettingsView()
+        }
     }
 }

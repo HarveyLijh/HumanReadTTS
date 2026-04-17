@@ -69,7 +69,7 @@ struct RootView: View {
         case .pdf:
             PDFViewerView(url: document.url, player: player)
         case .markdown:
-            MarkdownPlaceholderView(url: document.url, player: player)
+            MarkdownReaderView(url: document.url, player: player)
         }
     }
 

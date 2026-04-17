@@ -195,9 +195,9 @@ The plan assumes **4–6 hours/week** (Jiahong has a dissertation and LEAI fello
 - [ ] **M2.2** Streaming synthesis: generate audio paragraph-by-paragraph, pre-buffer the next one. AVAudioEngine scheduling.
 - [ ] **M2.3** WhisperKit forced alignment on the generated audio → word-level timestamps. (Reuse Hearba's WhisperKit integration.)
 - [ ] **M2.4** Word-level highlight tracker. 0.15s linear interpolation between words. PDFKit annotation replaced each word.
-- [ ] **M2.5** Playback controls polish: speed (0.5×–3×), pitch (±20%), per-voice memory.
+- [ ] **M2.5** Playback controls polish: speed (0.5×–2.5×) and pitch (0.5×–2.0×) sliders in a Settings scene (⌘,), plus a system-voice picker. Settings persist via UserDefaults; SpeechPlayer reads them at each utterance creation so changes apply at the next sentence boundary. Per-voice memory of speed/pitch is deferred until M2.1 / M3.1 voices land — the current single-global-pace model is the simpler default.
 - [ ] **M2.6** System-wide "Read Selection" via Services menu + global hotkey (`⌘⇧S`). Floating reader window.
-- [ ] **M2.7** Markdown renderer + reader (not just PDF). `.md` files open in a prose view with the same interactions.
+- [ ] **M2.7** Markdown renderer + reader (not just PDF). `.md` files parse via Foundation's `AttributedString(markdown:options:)` (no third-party dep — `swift-markdown` only buys us nicer block-level layout we don't yet need), then render through an `NSTextView` host with New York body, SF Mono code, larger weight-bold headings, and italics for emphasis. Sentence segmentation runs against the rendered plain text so the existing per-sentence highlight path works against a single `NSTextStorage`.
 
 **De-risks:** Kokoro quality on academic text (test with real papers), forced-alignment accuracy, AVAudioEngine scheduling without pops at paragraph boundaries.
 
