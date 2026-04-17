@@ -67,6 +67,13 @@ final class SpeechPlayer {
     private var prefetchedKokoro: [Int: [Float]] = [:]
     private var prefetchedQwen: [Int: [Float]] = [:]
 
+    /// Word-level highlight alignment task for the current neural
+    /// sentence. Cancelled on stop / load / seek; the task itself
+    /// also bails out if `state.sentenceIndex` changes during its
+    /// run, so a fast skip can't trigger a stale word update on
+    /// the next sentence.
+    private var alignmentTask: Task<Void, Never>?
+
     private static let log = Logger(subsystem: "app.rhea.mac", category: "playback")
 
     init() {
@@ -83,6 +90,8 @@ final class SpeechPlayer {
         self.spokenSubRange = nil
         self.prefetchedKokoro.removeAll()
         self.prefetchedQwen.removeAll()
+        self.alignmentTask?.cancel()
+        self.alignmentTask = nil
     }
 
     func togglePlayPause() {
@@ -118,6 +127,8 @@ final class SpeechPlayer {
         spokenSubRange = nil
         prefetchedKokoro.removeAll()
         prefetchedQwen.removeAll()
+        alignmentTask?.cancel()
+        alignmentTask = nil
     }
 
     /// Jump to the next sentence. If we're playing, keep playing
@@ -143,6 +154,8 @@ final class SpeechPlayer {
         nextIndex = index
         prefetchedKokoro.removeAll()
         prefetchedQwen.removeAll()
+        alignmentTask?.cancel()
+        alignmentTask = nil
         if wasPlaying {
             speakCurrent()
         } else {
@@ -198,9 +211,16 @@ final class SpeechPlayer {
 
         // Cache hit: pre-buffered during the previous sentence.
         if let samples = prefetchedKokoro.removeValue(forKey: myIndex) {
+            let start = ContinuousClock.now
             pcm.play(samples: samples) { [weak self] in
                 self?.didFinishCurrent()
             }
+            startWordAlignment(
+                samples: samples, text: sentence.text,
+                sentenceIndex: myIndex,
+                sampleRate: KokoroEngine.sampleRate,
+                playbackStart: start
+            )
             prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
             return
         }
@@ -219,9 +239,16 @@ final class SpeechPlayer {
                 // sentence and still in playing state.
                 guard self.state.sentenceIndex == myIndex,
                       case .playing = self.state else { return }
+                let start = ContinuousClock.now
                 self.pcm.play(samples: samples) { [weak self] in
                     self?.didFinishCurrent()
                 }
+                self.startWordAlignment(
+                    samples: samples, text: sentence.text,
+                    sentenceIndex: myIndex,
+                    sampleRate: KokoroEngine.sampleRate,
+                    playbackStart: start
+                )
                 self.prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
             } catch {
                 Self.log.error("Kokoro synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
@@ -237,9 +264,16 @@ final class SpeechPlayer {
         let myIndex = nextIndex
 
         if let samples = prefetchedQwen.removeValue(forKey: myIndex) {
+            let start = ContinuousClock.now
             pcm.play(samples: samples) { [weak self] in
                 self?.didFinishCurrent()
             }
+            startWordAlignment(
+                samples: samples, text: sentence.text,
+                sentenceIndex: myIndex,
+                sampleRate: QwenEngine.sampleRate,
+                playbackStart: start
+            )
             prefetchQwen(after: myIndex, voiceID: voiceID, settings: settings)
             return
         }
@@ -256,14 +290,54 @@ final class SpeechPlayer {
                 )
                 guard self.state.sentenceIndex == myIndex,
                       case .playing = self.state else { return }
+                let start = ContinuousClock.now
                 self.pcm.play(samples: samples) { [weak self] in
                     self?.didFinishCurrent()
                 }
+                self.startWordAlignment(
+                    samples: samples, text: sentence.text,
+                    sentenceIndex: myIndex,
+                    sampleRate: QwenEngine.sampleRate,
+                    playbackStart: start
+                )
                 self.prefetchQwen(after: myIndex, voiceID: voiceID, settings: settings)
             } catch {
                 Self.log.error("Qwen synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
                 self.currentEngine = .system
                 self.speakWithSystem(sentence: sentence, settings: settings)
+            }
+        }
+    }
+
+    /// Kick off a background Whisper alignment pass and advance
+    /// `spokenSubRange` on each returned word's scheduled start.
+    /// No-op when Whisper isn't installed — the caller shouldn't
+    /// need to check first. Cancels any previous alignment task.
+    private func startWordAlignment(
+        samples: [Float],
+        text: String,
+        sentenceIndex: Int,
+        sampleRate: Double,
+        playbackStart: ContinuousClock.Instant
+    ) {
+        alignmentTask?.cancel()
+        alignmentTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard let words = await WhisperAligner.shared.align(
+                samples: samples, text: text, sampleRate: sampleRate
+            ) else { return }
+            guard !Task.isCancelled,
+                  self.state.sentenceIndex == sentenceIndex else { return }
+            for word in words {
+                let target = playbackStart.advanced(
+                    by: .milliseconds(Int((word.startSeconds * 1000).rounded()))
+                )
+                if ContinuousClock.now < target {
+                    try? await Task.sleep(until: target, clock: .continuous)
+                }
+                guard !Task.isCancelled,
+                      self.state.sentenceIndex == sentenceIndex else { return }
+                self.spokenSubRange = word.characterRange
             }
         }
     }
