@@ -10,6 +10,7 @@ struct DroppedDocument: Equatable, Hashable {
     enum Kind: String, Equatable, Hashable {
         case pdf
         case markdown
+        case epub
     }
 
     let url: URL
@@ -21,6 +22,8 @@ struct DroppedDocument: Equatable, Hashable {
             self.kind = .pdf
         case "md", "markdown":
             self.kind = .markdown
+        case "epub":
+            self.kind = .epub
         default:
             return nil
         }

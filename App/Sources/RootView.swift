@@ -91,6 +91,8 @@ struct RootView: View {
             PDFViewerView(url: document.url, player: player)
         case .markdown:
             MarkdownReaderView(url: document.url, player: player)
+        case .epub:
+            EPUBReaderView(url: document.url, player: player)
         }
     }
 

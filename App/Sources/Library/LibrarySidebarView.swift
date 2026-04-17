@@ -25,7 +25,7 @@ struct LibrarySidebarView: View {
             Text("No documents yet")
                 .font(RheaFont.ui(13))
                 .foregroundStyle(.secondary)
-            Text("Drop a PDF or Markdown file anywhere in the window.")
+            Text("Drop a PDF, Markdown, or EPUB file anywhere in the window.")
                 .font(RheaFont.ui(11))
                 .foregroundStyle(.tertiary)
         }

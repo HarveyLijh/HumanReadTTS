@@ -9,7 +9,7 @@ struct DropTargetView: View {
             Image(systemName: "doc.text")
                 .font(.system(size: 48, weight: .light))
                 .foregroundStyle(Color.rheaAccent)
-            Text("Drop a PDF or Markdown file")
+            Text("Drop a PDF, Markdown, or EPUB file")
                 .font(RheaFont.serif(22))
                 .foregroundStyle(.primary)
             Text("We'll read it aloud.")

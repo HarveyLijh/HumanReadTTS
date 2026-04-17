@@ -47,6 +47,9 @@
 		2B00000000000000000F0001 /* KokoroSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0001 /* KokoroSwift */; };
 		2B00000000000000000F0002 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0002 /* MLX */; };
 		2B00000000000000000F0003 /* MLXUtilsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0003 /* MLXUtilsLibrary */; };
+		2B00000000000000000F0004 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0004 /* ZIPFoundation */; };
+		2B00000000000000000A00C1 /* EPUBLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00C1 /* EPUBLoader.swift */; };
+		2B00000000000000000A00C2 /* EPUBReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00C2 /* EPUBReaderView.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
@@ -97,6 +100,8 @@
 		2A00000000000000000A00A1 /* ReadingStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingStats.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00A2 /* AnalyticsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B1 /* AudioExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExporter.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00C1 /* EPUBLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EPUBLoader.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00C2 /* EPUBReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EPUBReaderView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B2 /* ExportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCoordinator.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
@@ -134,6 +139,7 @@
 				2B00000000000000000F0001 /* KokoroSwift in Frameworks */,
 				2B00000000000000000F0002 /* MLX in Frameworks */,
 				2B00000000000000000F0003 /* MLXUtilsLibrary in Frameworks */,
+				2B00000000000000000F0004 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,6 +192,7 @@
 				1B00000000000000000A0010 /* Pronunciation */,
 				1B00000000000000000A0011 /* Analytics */,
 				1B00000000000000000A0012 /* Export */,
+				1B00000000000000000A0013 /* EPUB */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -306,6 +313,15 @@
 			path = Export;
 			sourceTree = "<group>";
 		};
+		1B00000000000000000A0013 /* EPUB */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A00C1 /* EPUBLoader.swift */,
+				2A00000000000000000A00C2 /* EPUBReaderView.swift */,
+			);
+			path = EPUB;
+			sourceTree = "<group>";
+		};
 		1B00000000000000000A0005 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -370,6 +386,7 @@
 				7B00000000000000000A0001 /* KokoroSwift */,
 				7B00000000000000000A0002 /* MLX */,
 				7B00000000000000000A0003 /* MLXUtilsLibrary */,
+				7B00000000000000000A0004 /* ZIPFoundation */,
 			);
 			productName = Rhea;
 			productReference = 2A00000000000000000FFFF1 /* Rhea.app */;
@@ -425,6 +442,7 @@
 				7A00000000000000000A0001 /* XCRemoteSwiftPackageReference "kokoro-ios" */,
 				7A00000000000000000A0002 /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */,
+				7A00000000000000000A0004 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = 1B00000000000000000A00FF /* Products */;
 			projectDirPath = "";
@@ -461,6 +479,14 @@
 				minimumVersion = 0.0.6;
 			};
 		};
+		7A00000000000000000A0004 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -478,6 +504,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */;
 			productName = MLXUtilsLibrary;
+		};
+		7B00000000000000000A0004 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0004 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
 		};
 /* End XCSwiftPackageProductDependency section */
 
@@ -529,6 +560,8 @@
 				2B00000000000000000A00A2 /* AnalyticsSettingsView.swift in Sources */,
 				2B00000000000000000A00B1 /* AudioExporter.swift in Sources */,
 				2B00000000000000000A00B2 /* ExportCoordinator.swift in Sources */,
+				2B00000000000000000A00C1 /* EPUBLoader.swift in Sources */,
+				2B00000000000000000A00C2 /* EPUBReaderView.swift in Sources */,
 				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
 				2B00000000000000000A0052 /* Library.swift in Sources */,
 				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
