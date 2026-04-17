@@ -68,6 +68,11 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         // scrollbars and page-shadow defaults untouched. Apple territory.
         view.backgroundColor = NSColor(Color.rheaSurface)
         view.document = document
+        // PDFView registers itself as an NSDraggingDestination at init
+        // and silently eats drag events for files it can't open (e.g.
+        // a .md dropped on top of a loaded PDF). Unregister so the
+        // SwiftUI .dropDestination on RootView gets every drag.
+        view.unregisterDraggedTypes()
         return view
     }
 
