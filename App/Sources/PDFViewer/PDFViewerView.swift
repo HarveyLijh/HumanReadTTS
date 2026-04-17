@@ -1,17 +1,17 @@
 import SwiftUI
 import PDFKit
 
-/// Renders a PDF using PDFKit's native `PDFView`. Async-loads the
-/// document via `PDFDocumentLoader`, runs `PDFTextExtractor` against
-/// the loaded document, shows a quiet progress indicator while it
-/// parses, and falls back to a warm error state for files PDFKit
-/// can't decode (corrupt, encrypted, mislabeled).
+/// Renders a PDF, runs text extraction + sentence segmentation,
+/// hosts the per-document `SpeechPlayer`, and synchronises an
+/// amber `PDFAnnotationHighlight` with the currently-spoken
+/// sentence.
 struct PDFViewerView: View {
     let url: URL
 
     @State private var loadResult: LoadResult = .loading
     @State private var blocks: [DocumentBlock] = []
     @State private var sentences: [Sentence] = []
+    @State private var player = SpeechPlayer()
 
     var body: some View {
         Group {
@@ -21,16 +21,24 @@ struct PDFViewerView: View {
                     .controlSize(.small)
                     .tint(Color.rheaAccent)
             case .loaded(let document):
-                PDFViewRepresentable(document: document)
-                    .ignoresSafeArea()
-                    .overlay(alignment: .bottomLeading) {
-                        statusFooter(pageCount: document.pageCount)
-                    }
-                    .task(id: url) {
-                        let extracted = await PDFTextExtractor.extract(document)
-                        blocks = extracted
-                        sentences = await SentenceSegmenter.segment(extracted)
-                    }
+                PDFViewRepresentable(
+                    document: document,
+                    blocks: blocks,
+                    activeSentence: activeSentence
+                )
+                .ignoresSafeArea()
+                .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
+                .overlay(alignment: .bottomTrailing) {
+                    PlaybackControlsView(player: player)
+                        .padding(16)
+                }
+                .task(id: url) {
+                    let extracted = await PDFTextExtractor.extract(document)
+                    blocks = extracted
+                    let parsed = await SentenceSegmenter.segment(extracted)
+                    sentences = parsed
+                    player.load(parsed)
+                }
             case .failed:
                 errorState
             }
@@ -39,12 +47,20 @@ struct PDFViewerView: View {
             loadResult = .loading
             blocks = []
             sentences = []
+            player.stop()
             if let document = await PDFDocumentLoader.load(url: url) {
                 loadResult = .loaded(document)
             } else {
                 loadResult = .failed
             }
         }
+        .onDisappear { player.stop() }
+    }
+
+    private var activeSentence: Sentence? {
+        guard let index = player.state.sentenceIndex,
+              index >= 0, index < sentences.count else { return nil }
+        return sentences[index]
     }
 
     private func statusFooter(pageCount: Int) -> some View {
@@ -88,29 +104,78 @@ struct PDFViewerView: View {
     }
 }
 
+// MARK: - PDFView host with highlight coordination
+
 private struct PDFViewRepresentable: NSViewRepresentable {
     let document: PDFDocument
+    let blocks: [DocumentBlock]
+    let activeSentence: Sentence?
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> PDFView {
         let view = PDFView()
         view.autoScales = true
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
-        // Theme just the background to Color.rheaSurface; leave PDFKit's
-        // scrollbars and page-shadow defaults untouched. Apple territory.
         view.backgroundColor = NSColor(Color.rheaSurface)
         view.document = document
-        // PDFView registers itself as an NSDraggingDestination at init
-        // and silently eats drag events for files it can't open (e.g.
-        // a .md dropped on top of a loaded PDF). Unregister so the
-        // SwiftUI .dropDestination on RootView gets every drag.
         view.unregisterDraggedTypes()
         return view
     }
 
     func updateNSView(_ nsView: PDFView, context: Context) {
         if nsView.document !== document {
+            removeHighlight(coordinator: context.coordinator)
             nsView.document = document
         }
+        applyHighlight(view: nsView, coordinator: context.coordinator)
+    }
+
+    private func applyHighlight(view: PDFView, coordinator: Coordinator) {
+        removeHighlight(coordinator: coordinator)
+
+        guard let sentence = activeSentence,
+              let selection = findSelection(for: sentence) else { return }
+
+        let amber = NSColor(Color.rheaAccent).withAlphaComponent(0.4)
+        for lineSelection in selection.selectionsByLine() {
+            for page in lineSelection.pages {
+                let bounds = lineSelection.bounds(for: page)
+                let annotation = PDFAnnotation(
+                    bounds: bounds,
+                    forType: .highlight,
+                    withProperties: nil
+                )
+                annotation.color = amber
+                page.addAnnotation(annotation)
+                coordinator.annotations.append((annotation, page))
+            }
+        }
+        view.go(to: selection)
+    }
+
+    private func removeHighlight(coordinator: Coordinator) {
+        for (annotation, page) in coordinator.annotations {
+            page.removeAnnotation(annotation)
+        }
+        coordinator.annotations = []
+    }
+
+    /// Look up a `PDFSelection` for a sentence: prefer matches on
+    /// the sentence's source page, fall back to the first match
+    /// anywhere. Fragile against PDFs that hyphenate or normalize
+    /// whitespace differently from `page.string` — improving this
+    /// is a Month 3 polish item alongside Marker integration.
+    private func findSelection(for sentence: Sentence) -> PDFSelection? {
+        guard sentence.blockIndex < blocks.count else { return nil }
+        let block = blocks[sentence.blockIndex]
+        guard let page = document.page(at: block.pageIndex) else { return nil }
+        let matches = document.findString(sentence.text, withOptions: [])
+        return matches.first { $0.pages.contains(page) } ?? matches.first
+    }
+
+    final class Coordinator {
+        var annotations: [(PDFAnnotation, PDFPage)] = []
     }
 }

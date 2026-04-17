@@ -21,6 +21,11 @@
 		2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0032 /* PDFTextExtractor.swift */; };
 		2B00000000000000000A0033 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0033 /* Sentence.swift */; };
 		2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0034 /* SentenceSegmenter.swift */; };
+		2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0041 /* SpeechPlayer.swift */; };
+		2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackControlsView.swift */; };
+		2B00000000000000000A0051 /* LibraryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0051 /* LibraryEntry.swift */; };
+		2B00000000000000000A0052 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0052 /* Library.swift */; };
+		2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0053 /* LibrarySidebarView.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
@@ -53,6 +58,11 @@
 		2A00000000000000000A0032 /* PDFTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractor.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0033 /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0034 /* SentenceSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenter.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0041 /* SpeechPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayer.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0042 /* PlaybackControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0051 /* LibraryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryEntry.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0052 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0053 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0001 /* DropTargetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0003 /* PDFTextExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractorTests.swift; sourceTree = "<group>"; };
@@ -112,6 +122,8 @@
 				1B00000000000000000A0008 /* PDFViewer */,
 				1B00000000000000000A0009 /* Markdown */,
 				1B00000000000000000A000A /* Document */,
+				1B00000000000000000A000B /* Playback */,
+				1B00000000000000000A000C /* Library */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -151,6 +163,25 @@
 				2A00000000000000000A0034 /* SentenceSegmenter.swift */,
 			);
 			path = Document;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A000B /* Playback */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0041 /* SpeechPlayer.swift */,
+				2A00000000000000000A0042 /* PlaybackControlsView.swift */,
+			);
+			path = Playback;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A000C /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0051 /* LibraryEntry.swift */,
+				2A00000000000000000A0052 /* Library.swift */,
+				2A00000000000000000A0053 /* LibrarySidebarView.swift */,
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0005 /* Tests */ = {
@@ -302,6 +333,11 @@
 				2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */,
 				2B00000000000000000A0033 /* Sentence.swift in Sources */,
 				2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */,
+				2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */,
+				2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */,
+				2B00000000000000000A0051 /* LibraryEntry.swift in Sources */,
+				2B00000000000000000A0052 /* Library.swift in Sources */,
+				2B00000000000000000A0053 /* LibrarySidebarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
