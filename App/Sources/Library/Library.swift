@@ -28,7 +28,7 @@ final class Library {
     func record(url: URL) {
         do {
             let bookmark = try url.bookmarkData(
-                options: [.withSecurityScope],
+                options: Self.bookmarkCreationOptions,
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
@@ -50,23 +50,43 @@ final class Library {
         }
     }
 
-    /// Resolve a bookmark back to a URL. The returned URL has had
-    /// `startAccessingSecurityScopedResource()` called on it; the
-    /// caller is responsible for the matching `stop` when done.
+    /// Resolve a bookmark back to a URL. Tries both plain and
+    /// security-scoped resolution so a user whose library was
+    /// recorded by an older build (which always used
+    /// `.withSecurityScope`) still works after the fix.
     func resolve(_ entry: LibraryEntry) -> URL? {
-        var isStale = false
-        do {
-            let url = try URL(
+        let modes: [URL.BookmarkResolutionOptions] = Self.isSandboxed
+            ? [[.withSecurityScope], []]
+            : [[], [.withSecurityScope]]
+
+        for mode in modes {
+            var isStale = false
+            if let url = try? URL(
                 resolvingBookmarkData: entry.bookmarkData,
-                options: [.withSecurityScope],
+                options: mode,
                 relativeTo: nil,
                 bookmarkDataIsStale: &isStale
-            )
-            _ = url.startAccessingSecurityScopedResource()
-            return url
-        } catch {
-            return nil
+            ) {
+                if mode.contains(.withSecurityScope) {
+                    _ = url.startAccessingSecurityScopedResource()
+                }
+                return url
+            }
         }
+        return nil
+    }
+
+    /// Non-sandboxed Developer-ID builds don't need (and actively
+    /// can't use) security-scoped bookmarks — plain bookmarks are
+    /// what survive restarts. Detect at runtime so the same code
+    /// does the right thing in both Debug (sandbox off) and Release
+    /// (sandbox on, per ADR-003).
+    private static var isSandboxed: Bool {
+        ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil
+    }
+
+    private static var bookmarkCreationOptions: URL.BookmarkCreationOptions {
+        isSandboxed ? [.withSecurityScope] : []
     }
 
     private func load() {

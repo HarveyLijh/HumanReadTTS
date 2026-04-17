@@ -41,6 +41,13 @@ struct RootView: View {
             player.stop()
             document = next
         }
+        .onOpenURL { url in
+            // Covers Finder "Open With", `open -a Rhea file.pdf`,
+            // and any other LaunchServices dispatch. Reuses the
+            // same drop/adopt path as drag-drop.
+            guard let next = DroppedDocument(url: url) else { return }
+            adopt(next)
+        }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
         .animation(.easeOut(duration: 0.18), value: document)
     }
