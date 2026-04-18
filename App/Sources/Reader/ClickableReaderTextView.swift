@@ -23,6 +23,13 @@ final class ClickableReaderTextView: NSTextView {
     /// triggering playback.
     var onReadFromOffset: ((Int) -> Void)?
 
+    /// Called by the "Read from here to end" menu item. Same
+    /// offset semantics as `onReadFromOffset`; the host decides
+    /// whether to truncate the sentence queue or just hand the
+    /// start to the player — today they're equivalent because
+    /// playback naturally stops at the end of the queue.
+    var onReadFromOffsetToEnd: ((Int) -> Void)?
+
     /// Offset captured at the last right-click, used by the
     /// menu validation + action so the selector sees the same
     /// click point the menu opened at.
@@ -42,17 +49,26 @@ final class ClickableReaderTextView: NSTextView {
         guard offset >= 0 else { return menu }
         pendingMenuOffset = offset
 
-        let item = NSMenuItem(
+        let readHere = NSMenuItem(
             title: "Read from here",
             action: #selector(readFromHere(_:)),
             keyEquivalent: ""
         )
-        item.target = self
+        readHere.target = self
+        let readToEnd = NSMenuItem(
+            title: "Read from here to end",
+            action: #selector(readFromHereToEnd(_:)),
+            keyEquivalent: ""
+        )
+        readToEnd.target = self
+
         if menu.items.isEmpty {
-            menu.addItem(item)
+            menu.addItem(readHere)
+            menu.addItem(readToEnd)
         } else {
             menu.insertItem(.separator(), at: 0)
-            menu.insertItem(item, at: 0)
+            menu.insertItem(readToEnd, at: 0)
+            menu.insertItem(readHere, at: 0)
         }
         return menu
     }
@@ -61,6 +77,12 @@ final class ClickableReaderTextView: NSTextView {
         guard let offset = pendingMenuOffset else { return }
         pendingMenuOffset = nil
         onReadFromOffset?(offset)
+    }
+
+    @objc private func readFromHereToEnd(_ sender: Any?) {
+        guard let offset = pendingMenuOffset else { return }
+        pendingMenuOffset = nil
+        (onReadFromOffsetToEnd ?? onReadFromOffset)?(offset)
     }
 
     /// Translates a window-space `NSEvent` to the UTF-16 offset

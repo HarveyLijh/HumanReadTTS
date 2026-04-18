@@ -265,17 +265,32 @@ private final class ClickablePDFView: PDFView {
         guard let location = pdfLocation(for: event) else { return menu }
         pendingMenuLocation = location
 
-        let item = NSMenuItem(
+        let readHere = NSMenuItem(
             title: "Read from here",
             action: #selector(readFromHere(_:)),
             keyEquivalent: ""
         )
-        item.target = self
+        readHere.target = self
+        let readToEnd = NSMenuItem(
+            title: "Read from here to end",
+            action: #selector(readFromHere(_:)),
+            keyEquivalent: ""
+        )
+        readToEnd.target = self
+        // The two items resolve to the same action today — playback
+        // naturally ends at the sentence queue's tail — but we still
+        // expose them as two menu items so users who expect the
+        // Speechify-style "to end" affordance find it where they
+        // look. If we ever add auto-stop bookmarks, the two paths
+        // will diverge at that point.
+
         if menu.items.isEmpty {
-            menu.addItem(item)
+            menu.addItem(readHere)
+            menu.addItem(readToEnd)
         } else {
             menu.insertItem(.separator(), at: 0)
-            menu.insertItem(item, at: 0)
+            menu.insertItem(readToEnd, at: 0)
+            menu.insertItem(readHere, at: 0)
         }
         return menu
     }
