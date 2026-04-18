@@ -83,6 +83,25 @@ struct ScratchpadView: View {
             .controlSize(.small)
             .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .help("Export the scratchpad to a .md file.")
+
+            Button {
+                Task { @MainActor in
+                    // Force-segment the latest text into the shared
+                    // player before posting — the typing-debounce in
+                    // `.task(id: text)` may not have fired if the user
+                    // typed and clicked Export within 400 ms.
+                    await loadIntoPlayerSynchronously()
+                    NotificationCenter.default.post(
+                        name: AppScene.exportNotification, object: nil
+                    )
+                }
+            } label: {
+                Label("Export audio…", systemImage: "waveform.badge.plus")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .help("Render this scratchpad to an audio file (queues a background job).")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -98,11 +117,26 @@ struct ScratchpadView: View {
                 .padding(.vertical, 20)
                 .background(Color.rheaSurface)
         case .preview:
-            ScratchpadPreview(markdown: text)
+            ScratchpadPreview(
+                markdown: text,
+                activeSentence: activeSentence,
+                spokenSubRange: player.spokenSubRange
+            )
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
                 .background(Color.rheaSurface)
         }
+    }
+
+    /// The sentence currently being spoken — looked up against the
+    /// player's queue, which `ensureLoaded()` segmented from the
+    /// rendered Markdown plain text. Offsets line up with what the
+    /// Preview text view renders, so the same highlight code the
+    /// MarkdownReaderView uses works unchanged here.
+    private var activeSentence: Sentence? {
+        guard let index = player.state.sentenceIndex,
+              index >= 0, index < player.sentences.count else { return nil }
+        return player.sentences[index]
     }
 
     private var characterSummary: String {
@@ -118,6 +152,24 @@ struct ScratchpadView: View {
     /// syntax (`##`, `**`, `[link](url)`, etc.) never reaches the
     /// synthesizer — the spoken output matches the rendered Preview,
     /// not the raw typing. No-op when nothing has changed.
+    /// Awaitable variant for callers that need the player's sentence
+    /// queue to reflect the current scratchpad text *now* — the
+    /// Export button uses this so a queued job sees the latest text
+    /// rather than the last debounced snapshot.
+    private func loadIntoPlayerSynchronously() async {
+        let snapshot = text
+        guard !snapshot.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+        let rendered = MarkdownRenderer.render(snapshot)
+        let block = DocumentBlock(
+            text: rendered.string, pageIndex: 0, offsetInPage: 0
+        )
+        let parsed = await SentenceSegmenter.segment([block])
+        lastSegmentedText = snapshot
+        player.load(parsed)
+    }
+
     private func ensureLoaded() {
         let snapshot = text
         guard snapshot != lastSegmentedText else { return }
@@ -223,9 +275,14 @@ private struct ScratchpadEditor: NSViewRepresentable {
 @MainActor
 private struct ScratchpadPreview: NSViewRepresentable {
     let markdown: String
+    let activeSentence: Sentence?
+    let spokenSubRange: NSRange?
 
     final class Coordinator {
         var lastRenderedSource: String?
+        var lastSentenceRange: NSRange?
+        var lastSubRange: NSRange?
+        var lastScrolledSentenceIndex: Int?
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -263,6 +320,85 @@ private struct ScratchpadPreview: NSViewRepresentable {
             let rendered = MarkdownRenderer.render(markdown)
             storage.setAttributedString(rendered)
             context.coordinator.lastRenderedSource = markdown
+            context.coordinator.lastSentenceRange = nil
+            context.coordinator.lastSubRange = nil
+            context.coordinator.lastScrolledSentenceIndex = nil
         }
+
+        applyScratchpadHighlight(
+            to: textView,
+            storage: storage,
+            coordinator: context.coordinator,
+            sentence: activeSentence,
+            spokenSubRange: spokenSubRange
+        )
+    }
+}
+
+/// Same incremental-highlight strategy the Markdown / EPUB readers
+/// use: bounded clears (only repaint the range we previously
+/// touched) and scroll-only-on-sentence-change so word ticks from
+/// the Whisper aligner don't yank the viewport on every update.
+@MainActor
+private func applyScratchpadHighlight(
+    to textView: NSTextView,
+    storage: NSTextStorage,
+    coordinator: ScratchpadPreview.Coordinator,
+    sentence: Sentence?,
+    spokenSubRange: NSRange?
+) {
+    storage.beginEditing()
+
+    if let last = coordinator.lastSubRange,
+       NSMaxRange(last) <= storage.length {
+        storage.removeAttribute(.backgroundColor, range: last)
+    }
+    if let last = coordinator.lastSentenceRange,
+       NSMaxRange(last) <= storage.length {
+        storage.removeAttribute(.backgroundColor, range: last)
+    }
+
+    guard let sentence else {
+        coordinator.lastSentenceRange = nil
+        coordinator.lastSubRange = nil
+        storage.endEditing()
+        return
+    }
+
+    let sentenceRange = NSRange(
+        location: sentence.offsetInBlock,
+        length: sentence.lengthInBlock
+    )
+    guard NSMaxRange(sentenceRange) <= storage.length else {
+        coordinator.lastSentenceRange = nil
+        coordinator.lastSubRange = nil
+        storage.endEditing()
+        return
+    }
+
+    let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+    storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
+    coordinator.lastSentenceRange = sentenceRange
+
+    if let sub = spokenSubRange {
+        let subOrigin = sentence.offsetInBlock + sub.location
+        let subRange = NSRange(location: subOrigin, length: sub.length)
+        if NSMaxRange(subRange) <= storage.length {
+            let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+            storage.addAttribute(.backgroundColor, value: bright, range: subRange)
+            coordinator.lastSubRange = subRange
+        } else {
+            coordinator.lastSubRange = nil
+        }
+    } else {
+        coordinator.lastSubRange = nil
+    }
+
+    storage.endEditing()
+
+    let currentIndex = sentence.offsetInBlock
+    if coordinator.lastScrolledSentenceIndex != currentIndex {
+        coordinator.lastScrolledSentenceIndex = currentIndex
+        textView.scrollRangeToVisible(sentenceRange)
     }
 }
