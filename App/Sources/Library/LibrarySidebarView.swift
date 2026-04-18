@@ -38,10 +38,49 @@ struct LibrarySidebarView: View {
                 .font(RheaFont.ui(13))
                 .lineLimit(1)
                 .truncationMode(.middle)
-            Text(entry.lastOpened, style: .relative)
+            Text(Self.formatted(entry.lastOpened))
                 .font(RheaFont.ui(11))
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
     }
+
+    /// Finder-style stable timestamp. `Text(_, style: .relative)`
+    /// re-renders every second ("2 min, 32 sec ago" ticking up),
+    /// which is visually noisy for a library that's open for hours.
+    /// We swap to a snapshot at render time: "Today 3:42 PM",
+    /// "Yesterday", or "Apr 11" for anything older.
+    static func formatted(_ date: Date, relativeTo now: Date = Date()) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) {
+            return "Today \(timeFormatter.string(from: date))"
+        }
+        if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        }
+        if let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: now)?.start,
+           date >= startOfWeek {
+            return weekdayFormatter.string(from: date)
+        }
+        return monthDayFormatter.string(from: date)
+    }
+
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.timeStyle = .short
+        f.dateStyle = .none
+        return f
+    }()
+
+    private static let weekdayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE"
+        return f
+    }()
+
+    private static let monthDayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.setLocalizedDateFormatFromTemplate("MMM d")
+        return f
+    }()
 }
