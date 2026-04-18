@@ -241,6 +241,18 @@ final class SpeechPlayer {
         lastSwitchEvent = nil
     }
 
+    /// Drop the prefetched PCM for the next neural sentence so a
+    /// mid-playback settings change (skip rules toggled, pronunciation
+    /// dictionary edited) takes effect at the next sentence. Without
+    /// this the prefetched next-sentence sample, synthesized against
+    /// the previous text, would play verbatim and hide the user's
+    /// change until they skip or restart. Safe to call any time —
+    /// it's a cache drop, not a state transition.
+    func invalidateNeuralPrefetch() {
+        prefetchedKokoro.removeAll()
+        prefetchedQwen.removeAll()
+    }
+
     /// Neural engines (Kokoro/Qwen) call this after a successful
     /// synthesis so a previously-stuck "System (fallback)" chip
     /// heals as soon as the user's chosen voice works again

@@ -24,6 +24,7 @@ struct PlaybackTransportView: View {
     @State private var scrubIndex: Double?
     @State private var showingSpeedPopover = false
     @State private var showingVoicePopover = false
+    @State private var showingSkipPopover = false
     @State private var kokoroReady = false
     @State private var qwenReady = false
 
@@ -52,6 +53,15 @@ struct PlaybackTransportView: View {
             kokoroReady = true
             qwenReady = true
         }
+        .onChange(of: settings.skipRules) { _, _ in
+            // Any toggle / edit of skip rules must invalidate the
+            // prefetched next sentence; otherwise the next sentence
+            // was synthesized against the previous rule set and the
+            // change wouldn't land until the user skipped or
+            // restarted. The current sentence already being spoken
+            // stays as-is (spec: "applies at next sentence").
+            player.invalidateNeuralPrefetch()
+        }
     }
 
     private var fullLayout: some View {
@@ -61,6 +71,7 @@ struct PlaybackTransportView: View {
             skipForward
             scrubber
             timeReadout
+            skipChip
             speedChip
             voiceChip(style: .full)
             settingsButton
@@ -73,6 +84,7 @@ struct PlaybackTransportView: View {
             playPause
             skipForward
             scrubber
+            skipChip
             speedChip
             voiceChip(style: .short)
             settingsButton
@@ -171,6 +183,7 @@ struct PlaybackTransportView: View {
         let progress = player.progress
         let total = max(Double(progress.total - 1), 0)
         let bindingValue = scrubIndex ?? Double(progress.currentIndex)
+        let isDragging = scrubIndex != nil
         return Slider(
             value: Binding(
                 get: { bindingValue },
@@ -193,6 +206,58 @@ struct PlaybackTransportView: View {
         .frame(minWidth: minWidth, maxWidth: 280)
         .disabled(isDisabled || progress.total < 2)
         .help(scrubberTooltip(at: bindingValue))
+        .overlay(alignment: .top) {
+            if isDragging, progress.total > 1 {
+                // Floating preview capsule that tracks the thumb's
+                // rough position. The thumb is hidden under the user's
+                // cursor during drag; this bubble above the track is
+                // where the user's eye actually goes.
+                scrubberPreviewBubble(at: bindingValue, total: total)
+                    .offset(y: -32)
+            }
+        }
+    }
+
+    /// Bubble rendered above the scrubber during drag. We lay it out
+    /// inside a GeometryReader so its horizontal offset tracks the
+    /// slider's thumb instead of always sitting centred — otherwise
+    /// a drag to either edge makes the preview drift away from the
+    /// thumb by half a bubble width, which is visually confusing.
+    private func scrubberPreviewBubble(
+        at value: Double, total: Double
+    ) -> some View {
+        let idx = Int(value.rounded())
+        let clamped = max(0, min(idx, player.sentences.count - 1))
+        let sentence = player.sentences.indices.contains(clamped)
+            ? player.sentences[clamped] : nil
+        let preview = sentence.map { String($0.text.prefix(80)) } ?? ""
+        return GeometryReader { geo in
+            let fraction = total > 0 ? value / total : 0
+            let thumbX = geo.size.width * fraction
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Sentence \(clamped + 1) of \(player.sentences.count)")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                Text(preview)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .frame(maxWidth: 300, alignment: .leading)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.black.opacity(0.12), lineWidth: 0.5)
+            )
+            .fixedSize(horizontal: false, vertical: true)
+            .offset(x: max(0, min(thumbX - 150, geo.size.width - 160)))
+        }
+        .frame(height: 44)
+        .allowsHitTesting(false)
+        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .bottom)))
     }
 
     private func scrubberTooltip(at value: Double) -> String {
@@ -220,6 +285,41 @@ struct PlaybackTransportView: View {
         let m = total / 60
         let s = total % 60
         return String(format: "%d:%02d", m, s)
+    }
+
+    // MARK: skip-rules chip
+
+    /// Small chip that surfaces the count of active skip rules and
+    /// opens a per-rule toggle popover. Keeps the important
+    /// transparency signal ("text is being stripped before speech")
+    /// at a glance without having to open Settings.
+    private var skipChip: some View {
+        let enabled = settings.skipRules.filter(\.isEnabled).count
+        return Button {
+            showingSkipPopover.toggle()
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "scissors")
+                    .font(.system(size: 10, weight: .semibold))
+                Text("\(enabled)")
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            }
+            .foregroundStyle(enabled == 0 ? .secondary : .primary)
+            .frame(minHeight: 26)
+            .padding(.horizontal, 8)
+            .background(Color.primary.opacity(0.08), in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .help(skipChipTooltip(enabled: enabled))
+        .popover(isPresented: $showingSkipPopover, arrowEdge: .bottom) {
+            SkipRulesPopover(settings: settings)
+        }
+    }
+
+    private func skipChipTooltip(enabled: Int) -> String {
+        if enabled == 0 { return "No skip rules active." }
+        if enabled == 1 { return "1 skip rule active — click to toggle." }
+        return "\(enabled) skip rules active — click to toggle."
     }
 
     // MARK: speed chip
@@ -657,5 +757,64 @@ private struct VoicePopover: View {
     private struct SystemVoiceGroup {
         let language: String
         let voices: [AVSpeechSynthesisVoice]
+    }
+}
+
+// MARK: - Skip rules popover
+
+@MainActor
+private struct SkipRulesPopover: View {
+    @Bindable var settings: SpeechSettings
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Skip rules")
+                    .font(.headline)
+                Spacer()
+                Text("\(settings.skipRules.filter(\.isEnabled).count) active")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+
+            Text("Text patterns stripped from speech. Visible document unchanged.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Divider()
+
+            if settings.skipRules.isEmpty {
+                Text("No rules configured. Add one in Settings → Skip Rules.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 4)
+            } else {
+                ForEach($settings.skipRules) { $rule in
+                    Toggle(isOn: $rule.isEnabled) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(rule.name)
+                                .font(.system(size: 12))
+                                .lineLimit(1)
+                            Text(rule.pattern)
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
+                    }
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+                }
+            }
+
+            Divider()
+
+            Text("Changes apply at the next sentence.")
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(12)
+        .frame(width: 320)
     }
 }
