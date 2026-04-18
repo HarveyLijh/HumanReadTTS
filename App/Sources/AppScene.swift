@@ -10,15 +10,28 @@ struct AppScene: Scene {
     static let nextSentenceNotification = Notification.Name("app.rhea.mac.nextSentence")
     static let prevSentenceNotification = Notification.Name("app.rhea.mac.prevSentence")
     static let openFileNotification = Notification.Name("app.rhea.mac.openFile")
+    static let speedFasterNotification = Notification.Name("app.rhea.mac.speedFaster")
+    static let speedSlowerNotification = Notification.Name("app.rhea.mac.speedSlower")
 
     var body: some Scene {
         WindowGroup("Rhea") {
             RootView()
                 .frame(minWidth: 600, minHeight: 400)
+                .handlesExternalEvents(
+                    preferring: ["rhea-main"], allowing: ["rhea-main"]
+                )
         }
         .windowResizability(.contentMinSize)
         .defaultSize(width: 800, height: 600)
+        .handlesExternalEvents(matching: ["rhea-main"])
         .commands {
+            // Kill the default ⌘N "New Window" — one reader window
+            // per process is the whole mental model. URL opens route
+            // through `AppDelegateShim.application(_:open:)` which
+            // reuses the front window rather than spawning a new
+            // scene.
+            CommandGroup(replacing: .newItem) { }
+
             CommandGroup(after: .newItem) {
                 Button("Open File…") {
                     NotificationCenter.default.post(
@@ -60,6 +73,22 @@ struct AppScene: Scene {
                     )
                 }
                 .keyboardShortcut(.rightArrow, modifiers: [])
+
+                Divider()
+
+                Button("Speed Up") {
+                    NotificationCenter.default.post(
+                        name: AppScene.speedFasterNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("]", modifiers: [.command])
+
+                Button("Slow Down") {
+                    NotificationCenter.default.post(
+                        name: AppScene.speedSlowerNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("[", modifiers: [.command])
             }
         }
     }
