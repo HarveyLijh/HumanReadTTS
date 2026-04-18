@@ -18,6 +18,9 @@ struct RootView: View {
     @State private var isTargeted = false
     @State private var player = SpeechPlayer()
     @State private var exporter = ExportCoordinator()
+    @State private var fallbackBannerVisible = false
+    @State private var fallbackBannerText: String = ""
+    @State private var fallbackDismissTask: Task<Void, Never>?
 
     var body: some View {
         NavigationSplitView {
@@ -32,7 +35,12 @@ struct RootView: View {
                 exportProgressBanner(fraction: fraction)
             } else if case .failed(let message) = exporter.state {
                 exportErrorBanner(message: message)
+            } else if fallbackBannerVisible {
+                fallbackBanner
             }
+        }
+        .onChange(of: player.lastSwitchEvent) { _, event in
+            handleSwitchEvent(event)
         }
         .dropDestination(for: URL.self) { urls, _ in
             guard let url = urls.first, let next = DroppedDocument(url: url) else {
@@ -51,11 +59,15 @@ struct RootView: View {
             player.stop()
             document = next
         }
-        .onOpenURL { url in
-            // Covers Finder "Open With", `open -a Rhea file.pdf`,
-            // and any other LaunchServices dispatch. Reuses the
-            // same drop/adopt path as drag-drop.
-            guard let next = DroppedDocument(url: url) else { return }
+        .onReceive(
+            NotificationCenter.default.publisher(for: .rheaOpenURL)
+        ) { note in
+            // Routed via `AppDelegateShim.application(_:open:)` so
+            // `open -a Rhea file.pdf` and Finder double-clicks swap
+            // the document in the existing window rather than
+            // triggering `WindowGroup` to spawn a new scene.
+            guard let url = note.userInfo?["url"] as? URL,
+                  let next = DroppedDocument(url: url) else { return }
             adopt(next)
         }
         .onReceive(
@@ -83,6 +95,18 @@ struct RootView: View {
         ) { _ in
             promptForOpenFile()
         }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.speedFasterNotification)
+        ) { _ in
+            let current = SpeechSettings.shared.rate
+            player.setRate(min(4.0, (current + 0.1).roundedToStep(0.05)))
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.speedSlowerNotification)
+        ) { _ in
+            let current = SpeechSettings.shared.rate
+            player.setRate(max(0.5, (current - 0.1).roundedToStep(0.05)))
+        }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
         .animation(.easeOut(duration: 0.18), value: document)
     }
@@ -98,10 +122,16 @@ struct RootView: View {
                 DropTargetView()
             }
         }
-        .overlay(alignment: .bottomTrailing) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            // safeAreaInset reserves layout space for the HUD so
+            // the document never scrolls underneath it. An overlay
+            // would visually cover the last line of text, which is
+            // exactly what we hit when the window got wider.
             if document != nil {
-                PlaybackControlsView(player: player)
-                    .padding(16)
+                PlaybackTransportView(player: player)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
             }
         }
     }
@@ -150,6 +180,52 @@ struct RootView: View {
         .padding(.top, 12)
     }
 
+    /// Toast-style warning for engine fallbacks. Auto-dismisses
+    /// after ~2s so the user knows WHY their chosen neural voice
+    /// is being served by the system voice instead — without
+    /// clogging the transport with a permanent banner.
+    private var fallbackBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "waveform.slash")
+                .foregroundStyle(.orange)
+            Text(fallbackBannerText)
+                .font(RheaFont.ui(12))
+                .foregroundStyle(.primary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color.orange.opacity(0.5), lineWidth: 0.5))
+        .padding(.top, 12)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func handleSwitchEvent(_ event: SpeechPlayer.SwitchEvent?) {
+        guard let event else { return }
+        switch event.kind {
+        case .engineFallback(let requested, _):
+            fallbackBannerText = "\(requested) unavailable — using system voice."
+            withAnimation(.easeOut(duration: 0.2)) {
+                fallbackBannerVisible = true
+            }
+            fallbackDismissTask?.cancel()
+            fallbackDismissTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.3)) {
+                    fallbackBannerVisible = false
+                }
+                // Also clear the sticky event — the chip returns to
+                // the user's chosen voice. If the next sentence still
+                // falls back, a fresh event + banner re-appear.
+                player.dismissSwitchEvent()
+            }
+        case .voiceChanged:
+            // Handled by transport (chip label + icon update); no banner.
+            break
+        }
+    }
+
     private func exportErrorBanner(message: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle")
@@ -196,5 +272,11 @@ struct RootView: View {
 
     private func currentSentences() -> [Sentence] {
         player.sentences
+    }
+}
+
+private extension Double {
+    func roundedToStep(_ step: Double) -> Double {
+        (self / step).rounded() * step
     }
 }

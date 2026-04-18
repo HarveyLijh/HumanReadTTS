@@ -1,0 +1,44 @@
+{
+  "id": "playback-hud",
+  "name": "playback-hud",
+  "title": "Speechify-class playback transport + live voice/model switching",
+  "description": "Replace minimal play button with production transport HUD; add live voice/model switching; click-to-start-from-word; fix sidebar timestamp auto-tick",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "priority": "P1",
+  "creator": "Harvey",
+  "assignee": "Harvey",
+  "createdAt": "2026-04-17",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

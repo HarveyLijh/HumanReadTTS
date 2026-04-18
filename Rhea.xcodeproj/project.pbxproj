@@ -23,7 +23,7 @@
 		2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0034 /* SentenceSegmenter.swift */; };
 		2B00000000000000000A0035 /* ResearchCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0035 /* ResearchCleanup.swift */; };
 		2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0041 /* SpeechPlayer.swift */; };
-		2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackControlsView.swift */; };
+		2B00000000000000000A0042 /* PlaybackTransportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackTransportView.swift */; };
 		2B00000000000000000A0043 /* KokoroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0043 /* KokoroEngine.swift */; };
 		2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0044 /* PCMAudioPlayer.swift */; };
 		2B00000000000000000A0045 /* QwenEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0045 /* QwenEngine.swift */; };
@@ -68,6 +68,8 @@
 		2B00000000000000000B0009 /* PronunciationDictionaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */; };
 		2B00000000000000000B000A /* ResearchCleanupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000A /* ResearchCleanupTests.swift */; };
 		2B00000000000000000B000B /* ReadingStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000B /* ReadingStatsTests.swift */; };
+		2B00000000000000000B000C /* SpeechPlayerProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000C /* SpeechPlayerProgressTests.swift */; };
+		2B00000000000000000B000D /* LibrarySidebarFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000D /* LibrarySidebarFormatterTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,7 +100,7 @@
 		2A00000000000000000A0034 /* SentenceSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenter.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0035 /* ResearchCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchCleanup.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0041 /* SpeechPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayer.swift; sourceTree = "<group>"; };
-		2A00000000000000000A0042 /* PlaybackControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0042 /* PlaybackTransportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTransportView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0043 /* KokoroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroEngine.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0044 /* PCMAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMAudioPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0045 /* QwenEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QwenEngine.swift; sourceTree = "<group>"; };
@@ -138,6 +140,8 @@
 		2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionaryTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B000A /* ResearchCleanupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchCleanupTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B000B /* ReadingStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingStatsTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B000C /* SpeechPlayerProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayerProgressTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B000D /* LibrarySidebarFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarFormatterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -255,7 +259,7 @@
 			isa = PBXGroup;
 			children = (
 				2A00000000000000000A0041 /* SpeechPlayer.swift */,
-				2A00000000000000000A0042 /* PlaybackControlsView.swift */,
+				2A00000000000000000A0042 /* PlaybackTransportView.swift */,
 				2A00000000000000000A0043 /* KokoroEngine.swift */,
 				2A00000000000000000A0044 /* PCMAudioPlayer.swift */,
 				2A00000000000000000A0045 /* QwenEngine.swift */,
@@ -365,6 +369,8 @@
 				2A00000000000000000B0009 /* PronunciationDictionaryTests.swift */,
 				2A00000000000000000B000A /* ResearchCleanupTests.swift */,
 				2A00000000000000000B000B /* ReadingStatsTests.swift */,
+				2A00000000000000000B000C /* SpeechPlayerProgressTests.swift */,
+				2A00000000000000000B000D /* LibrarySidebarFormatterTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -592,7 +598,7 @@
 				2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */,
 				2B00000000000000000A0035 /* ResearchCleanup.swift in Sources */,
 				2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */,
-				2B00000000000000000A0042 /* PlaybackControlsView.swift in Sources */,
+				2B00000000000000000A0042 /* PlaybackTransportView.swift in Sources */,
 				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
 				2B00000000000000000A0045 /* QwenEngine.swift in Sources */,
 				2B00000000000000000A0046 /* WhisperAligner.swift in Sources */,
@@ -638,6 +644,8 @@
 				2B00000000000000000B0009 /* PronunciationDictionaryTests.swift in Sources */,
 				2B00000000000000000B000A /* ResearchCleanupTests.swift in Sources */,
 				2B00000000000000000B000B /* ReadingStatsTests.swift in Sources */,
+				2B00000000000000000B000C /* SpeechPlayerProgressTests.swift in Sources */,
+				2B00000000000000000B000D /* LibrarySidebarFormatterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

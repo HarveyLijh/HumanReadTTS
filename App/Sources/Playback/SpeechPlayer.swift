@@ -39,7 +39,27 @@ final class SpeechPlayer {
         }
     }
 
+    /// One-shot record of the last mid-playback switch. UI reads this
+    /// to show an undo toast. Cleared when the user dismisses the
+    /// toast or a new switch event arrives. Observers see the
+    /// transition via `@Observable`.
+    struct SwitchEvent: Equatable {
+        enum Kind: Equatable {
+            case voiceChanged(previous: String?, current: String?)
+            /// Neural engine selected by the user couldn't synthesize
+            /// (model file missing / corrupt / still downloading) and
+            /// we silently fell back to a system voice. The banner
+            /// the UI shows from this event is the user's first sign
+            /// that the voice they picked is unusable.
+            case engineFallback(requested: String, reason: String)
+        }
+        let kind: Kind
+        let sentenceIndex: Int
+        let timestamp: Date
+    }
+
     private(set) var state: PlaybackState = .idle
+    private(set) var lastSwitchEvent: SwitchEvent?
 
     /// The current sentence queue. Set by `load(_:)` before the
     /// first play so UI can show enabled controls even before
@@ -92,6 +112,7 @@ final class SpeechPlayer {
         self.prefetchedQwen.removeAll()
         self.alignmentTask?.cancel()
         self.alignmentTask = nil
+        self.lastSwitchEvent = nil
     }
 
     func togglePlayPause() {
@@ -129,6 +150,138 @@ final class SpeechPlayer {
         prefetchedQwen.removeAll()
         alignmentTask?.cancel()
         alignmentTask = nil
+    }
+
+    /// Public seek-and-play. If the player is idle, transitions to
+    /// playing at `index`. If paused, starts playing at `index`. If
+    /// already playing, moves to `index` and keeps playing. Used by
+    /// the transport scrubber (on release) and the
+    /// click-to-start-from-word handlers.
+    func playFromSentence(_ index: Int) {
+        guard !sentences.isEmpty else { return }
+        let clamped = max(0, min(index, sentences.count - 1))
+        synth.stopSpeaking(at: .immediate)
+        pcm.stop()
+        spokenSubRange = nil
+        prefetchedKokoro.removeAll()
+        prefetchedQwen.removeAll()
+        alignmentTask?.cancel()
+        alignmentTask = nil
+        nextIndex = clamped
+        speakCurrent()
+    }
+
+    /// Live voice switch. Persists the new identifier to settings
+    /// and, if we're mid-playback, stops the current engine, clears
+    /// prefetch caches (which hold the *previous* voice's PCM and
+    /// would otherwise replay with the old voice), and restarts the
+    /// current sentence on the new engine. Emits a `SwitchEvent` so
+    /// the UI can surface an undo toast. No-op when the identifier
+    /// is unchanged.
+    func setVoice(_ identifier: String?) {
+        let settings = SpeechSettings.shared
+        let previous = settings.voiceIdentifier
+        guard previous != identifier else { return }
+        settings.voiceIdentifier = identifier
+
+        guard let index = state.sentenceIndex else {
+            // Idle — no sentence to restart; persisted value will be
+            // picked up on next play.
+            lastSwitchEvent = SwitchEvent(
+                kind: .voiceChanged(previous: previous, current: identifier),
+                sentenceIndex: -1,
+                timestamp: Date()
+            )
+            return
+        }
+
+        let wasPlaying = state.isPlaying
+        synth.stopSpeaking(at: .immediate)
+        pcm.stop()
+        spokenSubRange = nil
+        prefetchedKokoro.removeAll()
+        prefetchedQwen.removeAll()
+        alignmentTask?.cancel()
+        alignmentTask = nil
+        nextIndex = index
+        lastSwitchEvent = SwitchEvent(
+            kind: .voiceChanged(previous: previous, current: identifier),
+            sentenceIndex: index,
+            timestamp: Date()
+        )
+        if wasPlaying {
+            speakCurrent()
+        } else {
+            state = .paused(sentenceIndex: index)
+        }
+    }
+
+    /// Dismiss the one-shot switch event. Called by the toast when
+    /// the user taps the × or the 3-second auto-timer fires.
+    func dismissSwitchEvent() {
+        lastSwitchEvent = nil
+    }
+
+    /// Neural engines (Kokoro/Qwen) call this after a successful
+    /// synthesis so a previously-stuck "System (fallback)" chip
+    /// heals as soon as the user's chosen voice works again
+    /// — e.g. they re-downloaded the model. Only clears when the
+    /// live event is a stale `.engineFallback`; voice-change events
+    /// still auto-dismiss via the banner timer.
+    fileprivate func clearFallbackEventIfStale() {
+        guard let event = lastSwitchEvent,
+              case .engineFallback = event.kind else { return }
+        lastSwitchEvent = nil
+    }
+
+    /// Live speed change. Persists to settings; takes effect at the
+    /// next sentence boundary for all engines (AVSpeechUtterance is
+    /// immutable mid-utterance, and neural engines synthesise per
+    /// sentence). The current sentence finishes at the old rate.
+    func setRate(_ rate: Double) {
+        SpeechSettings.shared.rate = rate
+    }
+
+    // MARK: progress readout
+
+    struct Progress: Equatable {
+        let currentIndex: Int
+        let total: Int
+        let fraction: Double
+        let estimatedElapsed: TimeInterval
+        let estimatedRemaining: TimeInterval
+    }
+
+    /// Estimated progress over the current sentence queue. Uses
+    /// `ReadingStats.wordsPerMinute` when available (enabled and
+    /// populated); falls back to 165 wpm × current rate. Treats
+    /// the reading position as "N sentences completed" so idle and
+    /// paused both return the cursor's index.
+    var progress: Progress {
+        let total = sentences.count
+        guard total > 0 else {
+            return Progress(
+                currentIndex: 0, total: 0, fraction: 0,
+                estimatedElapsed: 0, estimatedRemaining: 0
+            )
+        }
+        let index = max(0, min(state.sentenceIndex ?? 0, total - 1))
+        let rate = SpeechSettings.shared.rate
+        let statsWpm = ReadingStats.shared.wordsPerMinute
+        let baseWpm = statsWpm > 0 ? statsWpm : 165.0
+        let wpm = baseWpm * rate
+        let secondsPerWord = 60.0 / max(wpm, 1)
+        let elapsedWords = sentences[..<index]
+            .reduce(0) { $0 + $1.text.roughWordCount }
+        let remainingWords = sentences[index...]
+            .reduce(0) { $0 + $1.text.roughWordCount }
+        let elapsed = Double(elapsedWords) * secondsPerWord
+        let remaining = Double(remainingWords) * secondsPerWord
+        let fraction = total <= 1 ? 0 : Double(index) / Double(total - 1)
+        return Progress(
+            currentIndex: index, total: total, fraction: fraction,
+            estimatedElapsed: elapsed, estimatedRemaining: remaining
+        )
     }
 
     /// Jump to the next sentence. If we're playing, keep playing
@@ -249,9 +402,18 @@ final class SpeechPlayer {
                     sampleRate: KokoroEngine.sampleRate,
                     playbackStart: start
                 )
+                self.clearFallbackEventIfStale()
                 self.prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
             } catch {
                 Self.log.error("Kokoro synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
+                self.lastSwitchEvent = SwitchEvent(
+                    kind: .engineFallback(
+                        requested: "Kokoro",
+                        reason: error.localizedDescription
+                    ),
+                    sentenceIndex: self.state.sentenceIndex ?? -1,
+                    timestamp: Date()
+                )
                 // Fall back so the user still gets audio.
                 self.currentEngine = .system
                 self.speakWithSystem(sentence: sentence, settings: settings)
@@ -300,9 +462,18 @@ final class SpeechPlayer {
                     sampleRate: QwenEngine.sampleRate,
                     playbackStart: start
                 )
+                self.clearFallbackEventIfStale()
                 self.prefetchQwen(after: myIndex, voiceID: voiceID, settings: settings)
             } catch {
                 Self.log.error("Qwen synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
+                self.lastSwitchEvent = SwitchEvent(
+                    kind: .engineFallback(
+                        requested: "Qwen3-TTS",
+                        reason: error.localizedDescription
+                    ),
+                    sentenceIndex: self.state.sentenceIndex ?? -1,
+                    timestamp: Date()
+                )
                 self.currentEngine = .system
                 self.speakWithSystem(sentence: sentence, settings: settings)
             }

@@ -73,7 +73,14 @@ final class QwenEngine {
         }
 
         state = .loading
-        let modelFolder = ModelStorage.directory(for: entry)
+        let baseDir = ModelStorage.directory(for: entry)
+        // TTSKit.download lands the HuggingFace tree at
+        // `<base>/models/argmaxinc/ttskit-coreml/qwen3_tts/`, not at
+        // `<base>/` directly. TTSKit(modelFolder:) expects the
+        // flattened root containing `text_projector/`,
+        // `speech_decoder/`, etc. Resolve whichever layout the
+        // downloader produced.
+        let modelFolder = Self.resolveModelFolder(inside: baseDir)
         Self.log.info("loading Qwen3-TTS from \(modelFolder.path, privacy: .public)")
         let started = ContinuousClock.now
 
@@ -122,6 +129,28 @@ final class QwenEngine {
             case .notReady: return "Qwen3-TTS is not loaded yet."
             }
         }
+    }
+
+    /// Returns the directory TTSKit expects as `modelFolder`. TTSKit
+    /// internally appends `qwen3_tts/<component>/<versionDir>/<variant>`
+    /// to this path, so we need to point one level above `qwen3_tts/`.
+    /// First checks `base/` itself (old flat layout); otherwise uses
+    /// the nested HuggingFace path that TTSKit's downloader produces
+    /// at `base/models/argmaxinc/ttskit-coreml/`.
+    private static func resolveModelFolder(inside base: URL) -> URL {
+        let fm = FileManager.default
+        let marker = "qwen3_tts/text_projector"
+        if fm.fileExists(atPath: base.appending(path: marker).path) {
+            return base
+        }
+        let nested = base
+            .appending(path: "models")
+            .appending(path: "argmaxinc")
+            .appending(path: "ttskit-coreml")
+        if fm.fileExists(atPath: nested.appending(path: marker).path) {
+            return nested
+        }
+        return base
     }
 
     // MARK: voice catalogue
