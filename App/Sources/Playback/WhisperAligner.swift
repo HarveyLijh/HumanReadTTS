@@ -61,7 +61,19 @@ final class WhisperAligner {
         }
 
         state = .loading
-        let modelFolder = ModelStorage.directory(for: entry)
+        // `WhisperKit.download` writes the model into a nested path
+        // (`models/<repo>/openai_whisper-<variant>/`) inside our
+        // storage dir; the folder containing the `.mlmodelc` bundles
+        // is what WhisperKit expects in `modelFolder`. Locate it by
+        // scanning rather than hard-coding the upstream layout, so a
+        // future WhisperKit version that nests differently still
+        // resolves.
+        let storageDir = ModelStorage.directory(for: entry)
+        guard let modelFolder = Self.locateModelFolder(under: storageDir) else {
+            state = .failed(message: "Whisper model files not found.")
+            Self.log.error("Whisper load failed: no MelSpectrogram.mlmodelc under \(storageDir.path, privacy: .public)")
+            return
+        }
         Self.log.info("loading Whisper base from \(modelFolder.path, privacy: .public)")
 
         do {
@@ -115,6 +127,32 @@ final class WhisperAligner {
     }
 
     // MARK: helpers
+
+    /// Walk the storage directory looking for the folder that
+    /// actually contains WhisperKit's compiled model bundles. We
+    /// anchor on `MelSpectrogram.mlmodelc` because that's the file
+    /// WhisperKit fails on first when the path is wrong, and every
+    /// Whisper variant ships it. Returns the storage dir itself if
+    /// the bundles live at the top level (forward-compat for a
+    /// flatter layout).
+    private static func locateModelFolder(under root: URL) -> URL? {
+        let fm = FileManager.default
+        let anchor = "MelSpectrogram.mlmodelc"
+        if fm.fileExists(atPath: root.appending(path: anchor).path) {
+            return root
+        }
+        guard let enumerator = fm.enumerator(
+            at: root,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else { return nil }
+        for case let url as URL in enumerator {
+            if url.lastPathComponent == anchor {
+                return url.deletingLastPathComponent()
+            }
+        }
+        return nil
+    }
 
     private static func resampleTo16k(_ samples: [Float], from rate: Double) -> [Float] {
         let target: Double = 16_000
