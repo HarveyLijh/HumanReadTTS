@@ -66,6 +66,14 @@ final class SpeechPlayer {
     /// playback starts.
     private(set) var sentences: [Sentence] = []
 
+    /// Prefix-sum of word counts so `progress` can answer elapsed /
+    /// remaining in O(1). Without this the scrubber recomputes two
+    /// `reduce` walks of up to several thousand sentences on every
+    /// drag tick, which pegs the main thread during a seek.
+    /// `prefixWordCounts[i]` is the total words in `sentences[0..<i]`;
+    /// length is `sentences.count + 1`.
+    private var prefixWordCounts: [Int] = [0]
+
     /// Sub-range within the currently-playing sentence that the
     /// synthesizer is actively speaking. Driven by
     /// `AVSpeechSynthesizerDelegate.willSpeakRangeOfSpeechString`
@@ -105,6 +113,7 @@ final class SpeechPlayer {
         synth.stopSpeaking(at: .immediate)
         pcm.stop()
         self.sentences = sentences
+        self.prefixWordCounts = Self.buildPrefixWordCounts(for: sentences)
         self.nextIndex = 0
         self.state = .idle
         self.spokenSubRange = nil
@@ -113,6 +122,16 @@ final class SpeechPlayer {
         self.alignmentTask?.cancel()
         self.alignmentTask = nil
         self.lastSwitchEvent = nil
+    }
+
+    private static func buildPrefixWordCounts(for sentences: [Sentence]) -> [Int] {
+        var prefix = [Int](repeating: 0, count: sentences.count + 1)
+        var running = 0
+        for (i, s) in sentences.enumerated() {
+            running += s.text.roughWordCount
+            prefix[i + 1] = running
+        }
+        return prefix
     }
 
     func togglePlayPause() {
@@ -271,10 +290,14 @@ final class SpeechPlayer {
         let baseWpm = statsWpm > 0 ? statsWpm : 165.0
         let wpm = baseWpm * rate
         let secondsPerWord = 60.0 / max(wpm, 1)
-        let elapsedWords = sentences[..<index]
-            .reduce(0) { $0 + $1.text.roughWordCount }
-        let remainingWords = sentences[index...]
-            .reduce(0) { $0 + $1.text.roughWordCount }
+        // O(1) lookups using the cached prefix sum. Previously this
+        // did two `reduce` walks of up to several thousand sentences
+        // on every call — a scrubber drag fired it every frame, which
+        // was the cause of the reported lag.
+        let totalWords = prefixWordCounts.last ?? 0
+        let elapsedWords = prefixWordCounts.indices.contains(index)
+            ? prefixWordCounts[index] : 0
+        let remainingWords = max(totalWords - elapsedWords, 0)
         let elapsed = Double(elapsedWords) * secondsPerWord
         let remaining = Double(remainingWords) * secondsPerWord
         let fraction = total <= 1 ? 0 : Double(index) / Double(total - 1)
