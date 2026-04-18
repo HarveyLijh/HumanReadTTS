@@ -11,6 +11,7 @@ struct AppScene: Scene {
     static let nextSentenceNotification = Notification.Name("app.rhea.mac.nextSentence")
     static let prevSentenceNotification = Notification.Name("app.rhea.mac.prevSentence")
     static let openFileNotification = Notification.Name("app.rhea.mac.openFile")
+    static let newScratchpadNotification = Notification.Name("app.rhea.mac.newScratchpad")
     static let speedFasterNotification = Notification.Name("app.rhea.mac.speedFaster")
     static let speedSlowerNotification = Notification.Name("app.rhea.mac.speedSlower")
 
@@ -26,12 +27,21 @@ struct AppScene: Scene {
         .defaultSize(width: 800, height: 600)
         .handlesExternalEvents(matching: ["rhea-main"])
         .commands {
-            // Kill the default ⌘N "New Window" — one reader window
-            // per process is the whole mental model. URL opens route
-            // through `AppDelegateShim.application(_:open:)` which
-            // reuses the front window rather than spawning a new
-            // scene.
-            CommandGroup(replacing: .newItem) { }
+            // Replace the default ⌘N "New Window" (one reader window
+            // per process is the mental model) with ⌘N "New
+            // Scratchpad" — an in-app text area the user can type
+            // into and have read aloud without opening a file first.
+            // URL opens still route through
+            // `AppDelegateShim.application(_:open:)` which reuses the
+            // front window rather than spawning a new scene.
+            CommandGroup(replacing: .newItem) {
+                Button("New Scratchpad") {
+                    NotificationCenter.default.post(
+                        name: AppScene.newScratchpadNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("N", modifiers: [.command])
+            }
 
             CommandGroup(after: .newItem) {
                 Button("Open File…") {

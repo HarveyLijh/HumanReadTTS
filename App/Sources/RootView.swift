@@ -33,6 +33,11 @@ struct RootView: View {
     /// the viewer has applied it so a re-render won't snap playback
     /// back. See `content(for:)` and `seekPaused` on the player.
     @State private var pendingResumeIndex: Int?
+    /// Active scratchpad text. Non-nil means the user picked File →
+    /// New; the detail pane swaps the viewer for an in-app editor.
+    /// Dropping a real document or picking a library entry resets
+    /// this to nil so the reader takes back over.
+    @State private var scratchpadText: String?
 
     var body: some View {
         NavigationSplitView {
@@ -83,6 +88,8 @@ struct RootView: View {
                   let url = library.resolve(entry),
                   let next = DroppedDocument(url: url) else { return }
             player.stop()
+            scratchpadText = nil
+            pendingResumeIndex = library.savedPosition(for: url)
             document = next
         }
         .onReceive(
@@ -127,6 +134,11 @@ struct RootView: View {
             promptForOpenFile()
         }
         .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.newScratchpadNotification)
+        ) { _ in
+            openScratchpad()
+        }
+        .onReceive(
             NotificationCenter.default.publisher(for: AppScene.speedFasterNotification)
         ) { _ in
             let current = SpeechSettings.shared.rate
@@ -147,7 +159,15 @@ struct RootView: View {
         ZStack {
             Color.rheaSurface.ignoresSafeArea()
 
-            if let document {
+            if scratchpadText != nil {
+                ScratchpadView(
+                    player: player,
+                    text: Binding(
+                        get: { scratchpadText ?? "" },
+                        set: { scratchpadText = $0 }
+                    )
+                )
+            } else if let document {
                 content(for: document)
             } else {
                 DropTargetView()
@@ -158,7 +178,7 @@ struct RootView: View {
             // the document never scrolls underneath it. An overlay
             // would visually cover the last line of text, which is
             // exactly what we hit when the window got wider.
-            if document != nil {
+            if document != nil || scratchpadText != nil {
                 PlaybackTransportView(player: player)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
@@ -188,6 +208,7 @@ struct RootView: View {
 
     private func adopt(_ next: DroppedDocument) {
         player.stop()
+        scratchpadText = nil
         // Look up resume position BEFORE `library.record(url:)` moves
         // the entry to the top — the record call preserves the
         // existing `lastSentenceIndex`, so both orderings work, but
@@ -196,6 +217,18 @@ struct RootView: View {
         document = next
         library.record(url: next.url)
         selectedEntryID = library.entries.first?.id
+    }
+
+    private func openScratchpad() {
+        player.stop()
+        document = nil
+        selectedEntryID = nil
+        // Preserve existing scratchpad text if the user hits ⌘N a
+        // second time — "New" shouldn't nuke in-progress work. A
+        // blank scratchpad is reachable by selecting all + delete.
+        if scratchpadText == nil {
+            scratchpadText = ""
+        }
     }
 
     /// Observe sentence-index changes and persist them to the
