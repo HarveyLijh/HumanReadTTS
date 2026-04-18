@@ -78,6 +78,7 @@
 		2B00000000000000000B000F /* SkipRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000F /* SkipRuleTests.swift */; };
 		2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B3 /* AudioExportFormat.swift */; };
 		2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B4 /* ExportQueueView.swift */; };
+		2B00000000000000000A00F1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00F1 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -158,6 +159,7 @@
 		2A00000000000000000B000F /* SkipRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRuleTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B3 /* AudioExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExportFormat.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B4 /* ExportQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportQueueView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00F1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -202,10 +204,19 @@
 			isa = PBXGroup;
 			children = (
 				1B00000000000000000A0003 /* Sources */,
+				1B00000000000000000A0015 /* Resources */,
 				2A00000000000000000A0010 /* Rhea.entitlements */,
 				2A00000000000000000A0085 /* Info.plist */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0015 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A00F1 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0003 /* Sources */ = {
@@ -597,6 +608,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B00000000000000000A00F1 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
