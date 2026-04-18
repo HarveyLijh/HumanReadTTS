@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import AVFoundation
 import UniformTypeIdentifiers
 
 /// The window's content owner. Wraps a `Library` sidebar around the
@@ -21,6 +22,10 @@ struct RootView: View {
     @State private var fallbackBannerVisible = false
     @State private var fallbackBannerText: String = ""
     @State private var fallbackDismissTask: Task<Void, Never>?
+    @State private var undoBannerVisible = false
+    @State private var undoBannerText: String = ""
+    @State private var undoPrevious: String?
+    @State private var undoDismissTask: Task<Void, Never>?
 
     var body: some View {
         NavigationSplitView {
@@ -37,6 +42,8 @@ struct RootView: View {
                 exportErrorBanner(message: message)
             } else if fallbackBannerVisible {
                 fallbackBanner
+            } else if undoBannerVisible {
+                undoBanner
             }
         }
         .onChange(of: player.lastSwitchEvent) { _, event in
@@ -220,10 +227,70 @@ struct RootView: View {
                 // falls back, a fresh event + banner re-appear.
                 player.dismissSwitchEvent()
             }
-        case .voiceChanged:
-            // Handled by transport (chip label + icon update); no banner.
-            break
+        case .voiceChanged(let previous, let current):
+            // Undo toast: the chip already shows the new voice; the
+            // banner is a non-modal "Switched to …" confirmation with
+            // an Undo action that reverts to the previous selection.
+            // Auto-dismiss at 4s — a bit longer than the fallback
+            // warning so the Undo button is actually reachable.
+            undoPrevious = previous
+            undoBannerText = "Switched to \(displayName(for: current))"
+            withAnimation(.easeOut(duration: 0.2)) {
+                undoBannerVisible = true
+            }
+            undoDismissTask?.cancel()
+            undoDismissTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(4))
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.3)) {
+                    undoBannerVisible = false
+                }
+                player.dismissSwitchEvent()
+            }
         }
+    }
+
+    private var undoBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .foregroundStyle(Color.rheaAccent)
+            Text(undoBannerText)
+                .font(RheaFont.ui(12))
+                .foregroundStyle(.primary)
+            Button("Undo") {
+                undoDismissTask?.cancel()
+                withAnimation(.easeOut(duration: 0.2)) {
+                    undoBannerVisible = false
+                }
+                player.setVoice(undoPrevious)
+                undoPrevious = nil
+            }
+            .buttonStyle(.plain)
+            .font(RheaFont.ui(12).weight(.semibold))
+            .foregroundStyle(Color.rheaAccent)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color.primary.opacity(0.1), lineWidth: 0.5))
+        .padding(.top, 12)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    /// Resolves a voice identifier to a human-readable label for the
+    /// undo toast. Matches the transport chip's label logic so the
+    /// two always agree on what to call the voice.
+    private func displayName(for identifier: String?) -> String {
+        guard let id = identifier else { return "Auto" }
+        if id.hasPrefix("kokoro:") {
+            return KokoroEngine.shared.voices
+                .first(where: { $0.id == id })?.displayName ?? "Kokoro"
+        }
+        if id.hasPrefix("qwen:") {
+            return QwenEngine.shared.voices
+                .first(where: { $0.id == id })?.displayName ?? "Qwen"
+        }
+        return AVSpeechSynthesisVoice(identifier: id)?.name ?? "System"
     }
 
     private func exportErrorBanner(message: String) -> some View {

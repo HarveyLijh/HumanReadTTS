@@ -370,9 +370,12 @@ struct PlaybackTransportView: View {
             return "≈15s"
         }
         let words = player.sentences[target].text.roughWordCount
-        let wpm = max(player.progress.estimatedElapsed == 0 ? 165.0 : 165.0, 1)
-        _ = wpm // reserved for future stats-backed estimate
-        let baseWpm = 165.0 * settings.rate
+        // Prefer the user's measured reading wpm (settles at ~130 to
+        // ~180 depending on voice) when available — falls back to the
+        // 165 wpm baseline for fresh installs where ReadingStats
+        // hasn't built up a sample yet.
+        let statsWpm = ReadingStats.shared.wordsPerMinute
+        let baseWpm = (statsWpm > 0 ? statsWpm : 165.0) * settings.rate
         let seconds = Double(words) / max(baseWpm, 1) * 60.0
         return "≈\(Int(seconds.rounded()))s"
     }
