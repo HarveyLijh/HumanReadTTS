@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct AppScene: Scene {
     /// Menu commands need a reference to the current RootView to
@@ -22,7 +23,17 @@ struct AppScene: Scene {
                 .handlesExternalEvents(
                     preferring: ["rhea-main"], allowing: ["rhea-main"]
                 )
+                .background(WindowAccessor { window in
+                    // Let vibrancy and the content flow up under the
+                    // traffic lights the way Notes / Finder do.
+                    window.titlebarAppearsTransparent = true
+                    window.titleVisibility = NSWindow.TitleVisibility.hidden
+                    window.isMovableByWindowBackground = true
+                    window.styleMask.insert(NSWindow.StyleMask.fullSizeContentView)
+                    window.backgroundColor = NSColor.clear
+                })
         }
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 800, height: 600)
         .handlesExternalEvents(matching: ["rhea-main"])

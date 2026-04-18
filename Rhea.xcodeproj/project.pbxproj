@@ -10,6 +10,7 @@
 		2B00000000000000000A0001 /* RheaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0001 /* RheaApp.swift */; };
 		2B00000000000000000A0002 /* AppScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0002 /* AppScene.swift */; };
 		2B00000000000000000A0003 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0003 /* Colors.swift */; };
+		2B00000000000000000A0A00 /* VisualEffectBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0A00 /* VisualEffectBackground.swift */; };
 		2B00000000000000000A0004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0004 /* Typography.swift */; };
 		2B00000000000000000A0005 /* DropTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0005 /* DropTargetView.swift */; };
 		2B00000000000000000A0006 /* DroppedDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0006 /* DroppedDocument.swift */; };
@@ -97,6 +98,7 @@
 		2A00000000000000000A0001 /* RheaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RheaApp.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0002 /* AppScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppScene.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0003 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0A00 /* VisualEffectBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBackground.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0005 /* DropTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0006 /* DroppedDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroppedDocument.swift; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 				2A00000000000000000A0007 /* RootView.swift */,
 				2A00000000000000000A0003 /* Colors.swift */,
 				2A00000000000000000A0004 /* Typography.swift */,
+				2A00000000000000000A0A00 /* VisualEffectBackground.swift */,
 				1B00000000000000000A0004 /* DropTarget */,
 				1B00000000000000000A0008 /* PDFViewer */,
 				1B00000000000000000A0009 /* Markdown */,
@@ -646,6 +649,7 @@
 				2B00000000000000000A0007 /* RootView.swift in Sources */,
 				2B00000000000000000A0003 /* Colors.swift in Sources */,
 				2B00000000000000000A0004 /* Typography.swift in Sources */,
+				2B00000000000000000A0A00 /* VisualEffectBackground.swift in Sources */,
 				2B00000000000000000A0005 /* DropTargetView.swift in Sources */,
 				2B00000000000000000A0006 /* DroppedDocument.swift in Sources */,
 				2B00000000000000000A0011 /* PDFViewerView.swift in Sources */,

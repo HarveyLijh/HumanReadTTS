@@ -157,6 +157,8 @@ struct RootView: View {
     @ViewBuilder
     private var detail: some View {
         ZStack {
+            VisualEffectBackground(material: .underPageBackground)
+                .ignoresSafeArea()
             Color.rheaSurface.ignoresSafeArea()
 
             if scratchpadText != nil {
