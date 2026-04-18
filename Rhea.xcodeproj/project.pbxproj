@@ -76,6 +76,8 @@
 		2B00000000000000000A0036 /* SkipRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0036 /* SkipRule.swift */; };
 		2B00000000000000000A0064 /* SkipRulesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0064 /* SkipRulesSettingsView.swift */; };
 		2B00000000000000000B000F /* SkipRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000F /* SkipRuleTests.swift */; };
+		2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B3 /* AudioExportFormat.swift */; };
+		2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B4 /* ExportQueueView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -154,6 +156,8 @@
 		2A00000000000000000A0036 /* SkipRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRule.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0064 /* SkipRulesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRulesSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000B000F /* SkipRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRuleTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00B3 /* AudioExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExportFormat.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00B4 /* ExportQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportQueueView.swift; sourceTree = "<group>"; };
 		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
 		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -349,6 +353,8 @@
 			children = (
 				2A00000000000000000A00B1 /* AudioExporter.swift */,
 				2A00000000000000000A00B2 /* ExportCoordinator.swift */,
+				2A00000000000000000A00B3 /* AudioExportFormat.swift */,
+				2A00000000000000000A00B4 /* ExportQueueView.swift */,
 			);
 			path = Export;
 			sourceTree = "<group>";
@@ -656,6 +662,8 @@
 				2B00000000000000000A00E2 /* ClickableReaderTextView.swift in Sources */,
 				2B00000000000000000A0036 /* SkipRule.swift in Sources */,
 				2B00000000000000000A0064 /* SkipRulesSettingsView.swift in Sources */,
+				2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */,
+				2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,6 +6,7 @@ struct AppScene: Scene {
     /// plumbing decoupled so the command can originate from any
     /// window without threading bindings through the hierarchy.
     static let exportNotification = Notification.Name("app.rhea.mac.export")
+    static let showExportsNotification = Notification.Name("app.rhea.mac.showExports")
     static let playPauseNotification = Notification.Name("app.rhea.mac.playPause")
     static let nextSentenceNotification = Notification.Name("app.rhea.mac.nextSentence")
     static let prevSentenceNotification = Notification.Name("app.rhea.mac.prevSentence")
@@ -48,6 +49,13 @@ struct AppScene: Scene {
                     )
                 }
                 .keyboardShortcut("E", modifiers: [.command, .shift])
+
+                Button("Show Exports") {
+                    NotificationCenter.default.post(
+                        name: AppScene.showExportsNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("J", modifiers: [.command, .shift])
             }
 
             CommandMenu("Playback") {

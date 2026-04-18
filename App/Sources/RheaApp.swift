@@ -8,6 +8,11 @@ struct RheaApp: App {
     var body: some Scene {
         AppScene()
 
+        Window("Exports", id: "exports") {
+            ExportQueueView(coordinator: ExportCoordinator.shared)
+        }
+        .defaultSize(width: 620, height: 420)
+
         Settings {
             SettingsView()
         }

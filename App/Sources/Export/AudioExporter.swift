@@ -42,12 +42,13 @@ enum AudioExporter {
 
     private static let log = Logger(subsystem: "app.rhea.mac", category: "export")
 
-    /// Export `sentences` to `destination` as an AAC-encoded
-    /// `.m4a` file. `progress` is called on the main actor with
-    /// fraction of sentences completed.
+    /// Export `sentences` to `destination` in `format`. `progress`
+    /// is called on the main actor with fraction of sentences
+    /// completed.
     static func export(
         sentences: [Sentence],
         to destination: URL,
+        format: AudioExportFormat = .m4a,
         progress: @escaping @MainActor (Double) -> Void = { _ in }
     ) async throws {
         guard !sentences.isEmpty else { throw ExportError.emptyQueue }
@@ -59,18 +60,12 @@ enum AudioExporter {
         let kokoroVoice = useKokoro ? String(voiceID.dropFirst("kokoro:".count)) : nil
         let qwenVoice = useQwen ? String(voiceID.dropFirst("qwen:".count)) : nil
 
-        // File format: AAC at 24 kHz for the neural paths (both
-        // Kokoro and Qwen3-TTS output at 24k), 22.05 kHz for the
-        // system path (AVSpeechSynthesizer's native output rate on
-        // most voices). One rate per export so the AVAudioFile can
-        // stay simple.
+        // Sample rate: 24 kHz for the neural paths (both Kokoro and
+        // Qwen3-TTS output at 24k), 22.05 kHz for the system path
+        // (AVSpeechSynthesizer's native output rate on most voices).
+        // One rate per export so the AVAudioFile can stay simple.
         let sampleRate: Double = (useKokoro || useQwen) ? 24_000 : 22_050
-        let fileSettings: [String: Any] = [
-            AVFormatIDKey: kAudioFormatMPEG4AAC,
-            AVSampleRateKey: sampleRate,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderBitRateKey: 64_000,
-        ]
+        let fileSettings = format.avSettings(sampleRate: sampleRate)
 
         let pcmFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,

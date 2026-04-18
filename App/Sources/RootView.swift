@@ -13,12 +13,14 @@ import UniformTypeIdentifiers
 /// viewer. Changing documents stops the previous playback before
 /// the new viewer's `task` re-loads sentences.
 struct RootView: View {
+    @Environment(\.openWindow) private var openWindow
+
     @State private var library = Library()
     @State private var document: DroppedDocument?
     @State private var selectedEntryID: LibraryEntry.ID?
     @State private var isTargeted = false
     @State private var player = SpeechPlayer()
-    @State private var exporter = ExportCoordinator()
+    @State private var exporter = ExportCoordinator.shared
     @State private var fallbackBannerVisible = false
     @State private var fallbackBannerText: String = ""
     @State private var fallbackDismissTask: Task<Void, Never>?
@@ -81,6 +83,11 @@ struct RootView: View {
             NotificationCenter.default.publisher(for: AppScene.exportNotification)
         ) { _ in
             startExport()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.showExportsNotification)
+        ) { _ in
+            openWindow(id: "exports")
         }
         .onReceive(
             NotificationCenter.default.publisher(for: AppScene.playPauseNotification)
