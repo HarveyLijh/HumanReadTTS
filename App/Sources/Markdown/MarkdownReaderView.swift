@@ -50,7 +50,8 @@ struct MarkdownReaderView: View {
                     MarkdownTextView(
                         attributed: rendered,
                         activeSentence: activeSentence,
-                        spokenSubRange: player.spokenSubRange
+                        spokenSubRange: player.spokenSubRange,
+                        onReadFromOffset: handleReadFromOffset
                     )
                 case .source:
                     SourceTextView(text: rawSource)
@@ -83,6 +84,13 @@ struct MarkdownReaderView: View {
         guard let index = player.state.sentenceIndex,
               index >= 0, index < sentences.count else { return nil }
         return sentences[index]
+    }
+
+    private func handleReadFromOffset(_ offset: Int) {
+        guard let idx = ReaderHitTester.sentenceIndex(
+            forOffset: offset, in: sentences
+        ) else { return }
+        player.playFromSentence(idx)
     }
 
     private func load() async {
@@ -314,14 +322,19 @@ private struct MarkdownTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let onReadFromOffset: (Int) -> Void
 
     func makeNSView(context: Context) -> NSScrollView {
-        makeReadOnlyTextScrollView()
+        makeReadOnlyTextScrollView(onReadFromOffset: onReadFromOffset)
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let tv = nsView.documentView as? NSTextView,
+        guard let tv = nsView.documentView as? ClickableReaderTextView,
               let storage = tv.textStorage else { return }
+
+        // Keep the closure fresh so it captures the latest sentence
+        // array (the host reads `sentences` every time it fires).
+        tv.onReadFromOffset = onReadFromOffset
 
         if storage.length != attributed.length || storage.string != attributed.string {
             storage.setAttributedString(attributed)
@@ -340,7 +353,10 @@ private struct SourceTextView: NSViewRepresentable {
     let text: String
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scroll = makeReadOnlyTextScrollView()
+        // Source view: plain NSTextView, no click-to-start — the
+        // raw markdown source offsets don't line up with rendered
+        // sentence offsets, so a click there wouldn't map cleanly.
+        let scroll = makeReadOnlyTextScrollView(onReadFromOffset: nil)
         if let tv = scroll.documentView as? NSTextView {
             tv.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
             tv.textColor = NSColor.labelColor
@@ -360,7 +376,9 @@ private struct SourceTextView: NSViewRepresentable {
 // MARK: - Shared scrolling text view setup
 
 @MainActor
-private func makeReadOnlyTextScrollView() -> NSScrollView {
+private func makeReadOnlyTextScrollView(
+    onReadFromOffset: ((Int) -> Void)?
+) -> NSScrollView {
     let scroll = NSScrollView()
     scroll.hasVerticalScroller = true
     scroll.hasHorizontalScroller = false
@@ -368,7 +386,14 @@ private func makeReadOnlyTextScrollView() -> NSScrollView {
     scroll.drawsBackground = true
     scroll.backgroundColor = NSColor(Color.rheaSurface)
 
-    let textView = NSTextView()
+    let textView: NSTextView
+    if let onReadFromOffset {
+        let clickable = ClickableReaderTextView()
+        clickable.onReadFromOffset = onReadFromOffset
+        textView = clickable
+    } else {
+        textView = NSTextView()
+    }
     textView.isEditable = false
     textView.isSelectable = true
     textView.isRichText = true

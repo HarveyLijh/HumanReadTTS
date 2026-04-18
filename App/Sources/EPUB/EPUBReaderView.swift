@@ -30,7 +30,8 @@ struct EPUBReaderView: View {
                 EPUBTextView(
                     attributed: rendered,
                     activeSentence: activeSentence,
-                    spokenSubRange: player.spokenSubRange
+                    spokenSubRange: player.spokenSubRange,
+                    onReadFromOffset: handleReadFromOffset
                 )
             }
         }
@@ -43,6 +44,13 @@ struct EPUBReaderView: View {
         guard let index = player.state.sentenceIndex,
               index >= 0, index < sentences.count else { return nil }
         return sentences[index]
+    }
+
+    private func handleReadFromOffset(_ offset: Int) {
+        guard let idx = ReaderHitTester.sentenceIndex(
+            forOffset: offset, in: sentences
+        ) else { return }
+        player.playFromSentence(idx)
     }
 
     private func load() async {
@@ -93,6 +101,7 @@ private struct EPUBTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let onReadFromOffset: (Int) -> Void
 
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = NSScrollView()
@@ -102,7 +111,8 @@ private struct EPUBTextView: NSViewRepresentable {
         scroll.drawsBackground = true
         scroll.backgroundColor = NSColor(Color.rheaSurface)
 
-        let textView = NSTextView()
+        let textView = ClickableReaderTextView()
+        textView.onReadFromOffset = onReadFromOffset
         textView.isEditable = false
         textView.isSelectable = true
         textView.isRichText = true
@@ -120,8 +130,10 @@ private struct EPUBTextView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let tv = nsView.documentView as? NSTextView,
+        guard let tv = nsView.documentView as? ClickableReaderTextView,
               let storage = tv.textStorage else { return }
+
+        tv.onReadFromOffset = onReadFromOffset
 
         if storage.length != attributed.length || storage.string != attributed.string {
             storage.setAttributedString(attributed)

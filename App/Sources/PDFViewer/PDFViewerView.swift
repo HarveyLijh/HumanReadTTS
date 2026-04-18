@@ -25,7 +25,8 @@ struct PDFViewerView: View {
                     document: document,
                     blocks: blocks,
                     activeSentence: activeSentence,
-                    spokenSubRange: player.spokenSubRange
+                    spokenSubRange: player.spokenSubRange,
+                    onReadFromLocation: handleReadFromLocation
                 )
                 .ignoresSafeArea()
                 .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
@@ -59,6 +60,19 @@ struct PDFViewerView: View {
         guard let index = player.state.sentenceIndex,
               index >= 0, index < sentences.count else { return nil }
         return sentences[index]
+    }
+
+    /// The PDFView host reports (pageIndex, pageOffset) for the
+    /// character under the mouse. Look up the enclosing sentence
+    /// and seek playback there.
+    private func handleReadFromLocation(_ location: PDFClickLocation) {
+        guard let idx = ReaderHitTester.sentenceIndex(
+            forPageOffset: location.pageOffset,
+            pageIndex: location.pageIndex,
+            sentences: sentences,
+            blocks: blocks
+        ) else { return }
+        player.playFromSentence(idx)
     }
 
     private func statusFooter(pageCount: Int) -> some View {
@@ -104,16 +118,24 @@ struct PDFViewerView: View {
 
 // MARK: - PDFView host with highlight coordination
 
+struct PDFClickLocation: Equatable {
+    let pageIndex: Int
+    /// UTF-16 offset into the page's extracted `page.string`.
+    let pageOffset: Int
+}
+
 private struct PDFViewRepresentable: NSViewRepresentable {
     let document: PDFDocument
     let blocks: [DocumentBlock]
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let onReadFromLocation: (PDFClickLocation) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> PDFView {
-        let view = PDFView()
+        let view = ClickablePDFView()
+        view.onReadFromLocation = onReadFromLocation
         view.autoScales = true
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
@@ -124,6 +146,9 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: PDFView, context: Context) {
+        if let clickable = nsView as? ClickablePDFView {
+            clickable.onReadFromLocation = onReadFromLocation
+        }
         if nsView.document !== document {
             removeHighlight(coordinator: context.coordinator)
             nsView.document = document
@@ -211,5 +236,64 @@ private struct PDFViewRepresentable: NSViewRepresentable {
 
     final class Coordinator {
         var annotations: [(PDFAnnotation, PDFPage)] = []
+    }
+}
+
+// MARK: - Click-to-start for PDF
+
+/// `PDFView` subclass that turns a double-click or right-click's
+/// "Read from here" into a (page, page-offset) callback. Character
+/// offsets are recovered via `PDFPage.characterIndex(at:)`, which
+/// speaks *page-space* coordinates and UTF-16 offsets into
+/// `page.string` — the same coordinate system the extractor's
+/// `DocumentBlock.offsetInPage` and `Sentence.offsetInBlock` live in,
+/// so the host can look up the sentence without any translation.
+private final class ClickablePDFView: PDFView {
+    var onReadFromLocation: ((PDFClickLocation) -> Void)?
+
+    private var pendingMenuLocation: PDFClickLocation?
+
+    override func mouseDown(with event: NSEvent) {
+        super.mouseDown(with: event)
+        guard event.clickCount == 2 else { return }
+        guard let location = pdfLocation(for: event) else { return }
+        onReadFromLocation?(location)
+    }
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let menu = super.menu(for: event) ?? NSMenu()
+        guard let location = pdfLocation(for: event) else { return menu }
+        pendingMenuLocation = location
+
+        let item = NSMenuItem(
+            title: "Read from here",
+            action: #selector(readFromHere(_:)),
+            keyEquivalent: ""
+        )
+        item.target = self
+        if menu.items.isEmpty {
+            menu.addItem(item)
+        } else {
+            menu.insertItem(.separator(), at: 0)
+            menu.insertItem(item, at: 0)
+        }
+        return menu
+    }
+
+    @objc private func readFromHere(_ sender: Any?) {
+        guard let location = pendingMenuLocation else { return }
+        pendingMenuLocation = nil
+        onReadFromLocation?(location)
+    }
+
+    private func pdfLocation(for event: NSEvent) -> PDFClickLocation? {
+        let viewPoint = convert(event.locationInWindow, from: nil)
+        guard let page = self.page(for: viewPoint, nearest: true),
+              let document = document else { return nil }
+        let pagePoint = convert(viewPoint, to: page)
+        let charIdx = page.characterIndex(at: pagePoint)
+        guard charIdx >= 0 else { return nil }
+        let pageIndex = document.index(for: page)
+        return PDFClickLocation(pageIndex: pageIndex, pageOffset: charIdx)
     }
 }
