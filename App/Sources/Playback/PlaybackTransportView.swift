@@ -18,6 +18,7 @@ import AppKit
 struct PlaybackTransportView: View {
     @Bindable var player: SpeechPlayer
     @Bindable var settings = SpeechSettings.shared
+    @Bindable var exporter = ExportCoordinator.shared
 
     @Environment(\.openSettings) private var openSettings
 
@@ -72,6 +73,8 @@ struct PlaybackTransportView: View {
             skipChip
             speedChip
             voiceChip(style: .full)
+            exportButton
+            queueChip
             settingsButton
         }
     }
@@ -85,6 +88,8 @@ struct PlaybackTransportView: View {
             skipChip
             speedChip
             voiceChip(style: .short)
+            exportButton
+            queueChip
             settingsButton
         }
     }
@@ -97,6 +102,8 @@ struct PlaybackTransportView: View {
             timeReadout
             speedChip
             voiceChip(style: .iconOnly)
+            exportButton
+            queueChip
             settingsButton
         }
     }
@@ -112,6 +119,7 @@ struct PlaybackTransportView: View {
             skipForward
             timeReadout
             voiceChip(style: .iconOnly)
+            queueChip
             settingsButton
         }
     }
@@ -355,6 +363,109 @@ struct PlaybackTransportView: View {
         guard let event = player.lastSwitchEvent else { return false }
         if case .engineFallback = event.kind { return true }
         return false
+    }
+
+    // MARK: export to audiobook
+
+    /// Surfaces the existing File → Export Audiobook flow as a HUD
+    /// affordance so users don't have to discover the menu shortcut.
+    /// Disabled when the player has no sentences (no document open
+    /// and no scratchpad text segmented yet) — the existing menu
+    /// command silently no-ops in that case; the disabled style
+    /// makes the same precondition visible.
+    private var exportButton: some View {
+        Button {
+            NotificationCenter.default.post(
+                name: AppScene.exportNotification, object: nil
+            )
+        } label: {
+            Image(systemName: "waveform.badge.plus")
+                .font(.system(size: 12))
+                .frame(width: 26, height: 26)
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
+        .opacity(isDisabled ? 0.4 : 1)
+        .help("Export this document as an audiobook (⌘⇧E)")
+    }
+
+    // MARK: queue status chip
+
+    /// Always-visible queue indicator. Reflects ExportCoordinator
+    /// state at a glance: tray when empty, waveform + "running·queued"
+    /// while jobs are in flight, orange triangle when the most recent
+    /// run failed. Click opens the dedicated Exports window so the
+    /// user never has to remember ⌘⇧J.
+    private var queueChip: some View {
+        Button {
+            NotificationCenter.default.post(
+                name: AppScene.showExportsNotification, object: nil
+            )
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: queueIconName)
+                    .font(.system(size: 10, weight: .semibold))
+                if let label = queueCountLabel {
+                    Text(label)
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                }
+            }
+            .foregroundStyle(queueTint)
+            .frame(minHeight: 26)
+            .padding(.horizontal, 8)
+            .background(Color.primary.opacity(0.08), in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .help(queueChipTooltip)
+    }
+
+    private var queueRunning: Int {
+        exporter.jobs.filter {
+            if case .running = $0.state { return true }
+            return false
+        }.count
+    }
+
+    private var queueQueued: Int {
+        exporter.jobs.filter {
+            if case .queued = $0.state { return true }
+            return false
+        }.count
+    }
+
+    private var queueFailedRecent: Bool {
+        if case .failed = exporter.state { return true }
+        return false
+    }
+
+    private var queueIconName: String {
+        if queueRunning > 0 { return "waveform" }
+        if queueQueued > 0 { return "hourglass" }
+        if queueFailedRecent { return "exclamationmark.triangle.fill" }
+        return "tray"
+    }
+
+    private var queueCountLabel: String? {
+        if queueRunning > 0 && queueQueued > 0 {
+            return "\(queueRunning)·\(queueQueued)"
+        }
+        if queueRunning > 0 { return "\(queueRunning)" }
+        if queueQueued > 0 { return "\(queueQueued)" }
+        return nil
+    }
+
+    private var queueTint: Color {
+        if queueRunning > 0 || queueQueued > 0 { return Color.rheaAccent }
+        if queueFailedRecent { return .orange }
+        return .secondary
+    }
+
+    private var queueChipTooltip: String {
+        if queueRunning > 0 || queueQueued > 0 {
+            return "Exports: \(queueRunning) running, \(queueQueued) queued — click to open (⌘⇧J)"
+        }
+        if queueFailedRecent { return "Last export failed — click to open the queue (⌘⇧J)" }
+        return "Open the export queue (⌘⇧J)"
     }
 
     // MARK: settings gear
