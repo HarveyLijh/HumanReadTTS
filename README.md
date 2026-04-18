@@ -1,141 +1,347 @@
-# Rhea — internal build notes
+<div align="center">
 
-> Internal documentation for the maintainer. The public README will land
-> when M1.3 ships and the repo goes public.
+<img src="Resources/rhea_v6c.png" alt="Rhea" width="160" />
 
-Rhea is a local-first, bilingual (English + Chinese) macOS TTS reader for
-PDFs and Markdown. The full vision and milestone plan live in
-[`docs/MILESTONES.md`](docs/MILESTONES.md). Architectural decisions live
-in [`docs/decisions.md`](docs/decisions.md).
+# Rhea
 
-## Requirements
+**The local-first, bilingual TTS reader for macOS.**
 
-- macOS 15 Sequoia or newer (Apple Silicon)
-- Xcode 16 or newer (Swift 6 toolchain)
-- Free Apple ID works for local dev and unsigned DMGs. Paid
-  Developer Program ($99/yr) is only needed for signed +
-  notarised DMGs — see the Distribution section below.
+Drop a PDF, Markdown, or EPUB. Hear it read aloud with studio-quality
+on-device neural voices — in English, Chinese, or both. Your papers
+never leave your Mac.
 
-## First-time setup
+[![version](https://img.shields.io/badge/version-0.7.1-e8a033.svg?style=flat-square)](https://github.com/HarveyLijh/Rhea/releases)
+[![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
+[![platform](https://img.shields.io/badge/platform-macOS%2015%2B-lightgrey.svg?style=flat-square)](https://www.apple.com/macos/)
+[![swift](https://img.shields.io/badge/swift-6.0-orange.svg?style=flat-square)](https://swift.org)
+[![arch](https://img.shields.io/badge/arch-Apple%20Silicon-222222.svg?style=flat-square)](https://www.apple.com/mac/)
+
+</div>
+
+---
+
+## Why Rhea
+
+The commercial TTS reader market is broken. Speechify ships a disliked
+subscription. Voice Dream torched its user trust with the 2024 paywall
+revolt. Every "AI reader" wants to upload your PDF to their servers.
+Meanwhile the Chinese-language Mac academic market is **completely
+unserved** — iFlytek has no Mac client, Speechify's Chinese voices are
+an afterthought.
+
+Rhea is the counter. **Fully offline. Fully open source.
+Apache-2.0, forever. No account, no subscription, no cloud.**
+
+- **Bilingual by default** — EN + ZH auto-switch per sentence via
+  on-device language detection. No other reader does this.
+- **Neural voices locally** — Kokoro (English, 28 voices) and
+  Qwen3-TTS (bilingual, 6 voices) run on your M-series chip via MLX.
+- **Research-paper aware** — multi-column layouts, citation
+  stripping, figure/table skipping, user-defined regex skip rules.
+- **Word-level highlighting** — Whisper-based forced alignment
+  paints the exact word being spoken, synchronized to audio.
+- **Zero setup** — download the DMG, open it, drop a PDF. No Docker,
+  no Python venv, no API keys, no onboarding.
+
+## Screenshots
+
+> _Hero screenshots land in v0.8.0 once the visual polish pass ships.
+> For now, here's the shape of the app:_
+
+A single reader window with the library sidebar on the left and the
+document in the middle. A capsule transport HUD at the bottom carries
+every playback control — skip, play, scrub, speed, voice, skip-rules,
+settings — and collapses progressively on narrow windows. Right-click
+any word: "Read from here."
+
+## Install
+
+### One-line download
+
+Grab the latest `.dmg` from
+[Releases](https://github.com/HarveyLijh/Rhea/releases), mount it,
+drag Rhea into **/Applications**. First launch: right-click → **Open**
+(Gatekeeper asks once; afterwards plain double-click works).
+
+Or drop the quarantine flag in Terminal:
 
 ```sh
-git clone git@github.com:harveylijh/rhea.git
-cd rhea
+xattr -dr com.apple.quarantine /Applications/Rhea.app
+```
+
+### Homebrew
+
+_Planned for v0.8.x once the release cadence stabilises._
+
+### Build from source
+
+```sh
+git clone https://github.com/HarveyLijh/Rhea.git
+cd Rhea
 cp Configs/Local.xcconfig.example Configs/Local.xcconfig
-# Edit Configs/Local.xcconfig and set DEVELOPMENT_TEAM to your team ID.
-# Local.xcconfig is gitignored.
+# edit Local.xcconfig to set DEVELOPMENT_TEAM if you have one
 open Rhea.xcodeproj
 ```
 
-Xcode will pick the team automatically once `Local.xcconfig` is in place.
-There is no Tuist, no XcodeGen, no `tuist generate` step. The
-`Rhea.xcodeproj` file is hand-maintained and committed.
+No Tuist, no XcodeGen, no code-gen step — the `.xcodeproj` is
+hand-maintained. Xcode 16+, macOS 15 SDK, Swift 6 toolchain.
+`Scripts/build.sh` runs without Xcode if all you have is the
+Command Line Tools.
 
-## Build & run
+## What's Inside
 
-| Task | Command |
+### 🎯 The transport HUD
+Capsule at the bottom of the window with every playback control at
+arm's length. Skip prev / play / skip next, sentence-granular
+scrubber with live drag preview, time readout, skip-rules counter,
+speed chip (0.5×–4.0×), voice chip (with engine-fallback icon),
+settings gear. Progressively collapses on narrow windows: drops the
+time, then voice label, then speed chip — transport and scrubber
+are always visible.
+
+### 📚 Three document formats
+**PDF** via PDFKit, **Markdown** via Foundation's attributed-string
+parser (preview + source views), **EPUB** via ZIPFoundation + your
+XHTML chapters. Sentence segmentation uses `NLTokenizer`; UTF-16
+offsets throughout, so click-to-start-from-word works natively.
+
+### 🎙 Three voice engines
+- **System** — any AVSpeechSynthesis voice on your Mac. Bilingual
+  auto-switch on by default.
+- **Kokoro** (650 MB download) — 28 studio-quality English voices
+  via MLX on Apple Silicon.
+- **Qwen3-TTS** (~1 GB download) — 6 bilingual EN+ZH speakers via
+  TTSKit / WhisperKit. Downloaded on demand from Settings → Models.
+
+Switch voices mid-read — Rhea restarts the current sentence on the
+new voice and flashes an undo toast with a 4-second timer. Neural
+engine failed? The chip flips to a system-voice icon, a banner
+appears for 2 seconds, and the stale event auto-clears so the chip
+heals when the next synth succeeds.
+
+### ✨ Highlighting
+Soft amber wash on the active sentence; brighter sub-highlight on
+the word currently being spoken (driven by AVSpeechSynthesizer's
+`willSpeakRange` for system voices, or a Whisper forced-alignment
+pass for neural). Auto-scroll follows the sentence — manual scroll
+is honored (we only scroll on sentence change, never word-tick).
+
+### 🎵 Audiobook export
+File → Export Audiobook… (⌘⇧E). Format picker in the save panel —
+**M4A** (AAC, universal) or **WAV** (uncompressed, for external
+MP3 conversion or editing). A proper background queue (⌘⇧J to open)
+tracks multiple jobs with per-row progress, Show in Finder, and
+Play buttons.
+
+### 🖱 Click-to-start-from-word
+Double-click any word in any viewer to jump playback there.
+Right-click for a contextual **Read from here** / **Read from here
+to end** menu.
+
+### ⏮ Resume position
+Close mid-read, reopen — Rhea restores the paused cursor at the
+sentence you left off. Press space to continue.
+
+### 🔇 Skip rules
+Regex patterns stripped from speech before the synthesizer sees the
+text. Ships with three enabled-by-default built-ins:
+
+- Numeric citations: `[12]`, `[12, 13]`, `[12–15]`
+- LaTeX: `\cite{…}`, `\citep{…}`, `\ref{…}`, `\label{…}`
+- Inline cite markers: `cite:smith2019`
+
+Add your own in **Settings → Skip Rules** with live preview on a
+sample sentence. The HUD's `Skip: N` chip shows the active count at a
+glance; toggling mid-read takes effect on the next sentence.
+
+### 🌐 System integration
+- **Services menu** — highlight text in any app, choose
+  **Services → Read with Rhea**.
+- **Global hotkey** — ⌘⇧S reads your clipboard from anywhere.
+- **MenuBarExtra** — transport controls in the menu bar while a
+  document plays.
+- **URL handlers** — `open -a Rhea paper.pdf` and Finder
+  double-click both route to the single existing reader window
+  instead of spawning duplicates.
+
+### 📖 Pronunciation dictionary
+Your voice mispronounces a technical term? Add a pronunciation
+override in **Settings → Pronunciation**. Applies to every engine.
+
+### 📊 Reading stats
+Local-only WPM tracking that feeds the transport's time estimates.
+Opt-out in **Settings → Analytics**; nothing ever leaves the
+device.
+
+## Keyboard Shortcuts
+
+| Key | Action |
 | --- | --- |
-| Build + run (no Xcode required) | `Scripts/build.sh --run` |
-| Build only (debug) | `Scripts/build.sh` |
-| Build + run (release, optimized) | `Scripts/build.sh --release --run` |
-| Wipe build/ first | `Scripts/build.sh --clean --run` |
-| Build via xcodebuild (Debug) | `xcodebuild -project Rhea.xcodeproj -scheme Rhea -configuration Debug build CODE_SIGNING_ALLOWED=NO` |
-| Run tests (requires full Xcode) | `xcodebuild -project Rhea.xcodeproj -scheme Rhea test` |
-| Open in Xcode | `open Rhea.xcodeproj` |
+| `Space` | Play / Pause |
+| `←` / `→` | Previous / Next sentence |
+| `⌘ ]` / `⌘ [` | Speed up / slow down (0.1 step) |
+| `⌘ O` | Open File… |
+| `⌘ ⇧ E` | Export Audiobook… |
+| `⌘ ⇧ J` | Show Exports queue |
+| `⌘ ⇧ S` | Read Clipboard (global, from any app) |
+| `⌘ ⇧ R` | Read Clipboard (from the menubar item) |
+| `⌘ ,` | Open Settings |
 
-`Scripts/build.sh` auto-detects whether you have full Xcode or only the
-Command Line Tools. Without Xcode it compiles directly with `swiftc` and
-assembles a minimal `.app` bundle in `build/Rhea.app`. With Xcode it
-delegates to `xcodebuild` against the project file (canonical path).
-Unit tests require full Xcode.
+## Roadmap
 
-In Xcode: select the `Rhea` scheme, press ⌘R.
+Versioning tracks feature milestones — Rhea is at **v0.7.1**: all
+core reading, playback, and export flows work end-to-end on real
+documents. What's left is polish, distribution, and the
+nice-to-haves that turn a working reader into a product people
+recommend.
 
-## Configuration model
+### ✅ Shipped through v0.7.1
 
-Build settings live in three places, in priority order:
+- Transport HUD with live voice/model switching, undo toast,
+  engine-fallback transparency
+- Click/double-click to start reading from any word (all 3 viewers)
+- Word-level highlighting via `willSpeakRange` + Whisper alignment
+- Sentence-granular scrubber with live drag preview
+- Custom regex skip rules (3 built-ins + user-defined) + dedicated
+  Settings tab with live preview
+- Audiobook export queue — M4A / WAV with a proper Exports window
+- Resume last reading position across relaunches
+- Research-PDF cleanup (author-year citations, figure/table
+  captions, multi-column layouts)
+- Bilingual system + Kokoro + Qwen3-TTS engines with language
+  auto-switch
+- Services menu "Read with Rhea" + global ⌘⇧S clipboard hotkey
+- Pronunciation dictionary + local reading stats
+- Sandboxed + hardened Release builds; unsigned DMG distribution
+  path works without the paid Apple Developer Program
 
-1. **`Configs/Local.xcconfig`** (gitignored) — your team ID and any
-   per-machine overrides.
-2. **`Configs/Rhea.xcconfig`** (committed) — shared base settings; falls
-   through to `Local.xcconfig` via `#include?`.
-3. **`Rhea.xcodeproj/project.pbxproj`** (committed) — target structure,
-   file membership. Build settings here are minimised; prefer xcconfig.
+### 🚧 v0.8.x — Public-ready polish + the critical UX gaps
 
-The sandbox is **OFF in Debug** (faster iteration; helper-subprocess
-work in Month 3 needs it off) and **ON in Release** (hardened-runtime
-defense-in-depth for notarized .dmg distribution). See ADR-003.
+Closing the most-visible deltas vs. Voice Dream / NaturalReader while
+the app walks to v1.
 
-## Repository layout
+- **Document outline / chapter navigator** — sidebar that lists
+  detected PDF outlines, EPUB chapters, and Markdown headings with
+  click-to-jump
+- **Bookmarks with notes** — name and save any number of positions
+  per document (resume is one automatic bookmark; this adds manual
+  ones), inline highlights on selected text, export to Markdown
+- **Sleep timer** — auto-pause after N minutes or at end of the
+  current chapter
+- **Per-document voice + speed memory** — remember which voice and
+  speed you used on each document so a dense paper opens at 1.0×
+  and a novel at 1.6× without re-setting
+- **Voice preview buttons** — ▶︎ on every row in the voice picker
+  plays a sample sentence in that voice
+- **Share Extension** — Safari / Preview / Notes → Share → "Read
+  with Rhea" without the global hotkey
+- **MP3 export** — via a bundled LAME encoder (complements the
+  existing M4A / WAV paths)
+- **Per-document rule scopes** for skip patterns
+- **Homebrew Cask** (`brew install --cask rhea`)
+- **Signed + notarised DMG** via GitHub Releases automation
+- Hero screenshots, app icon through every Asset Catalog slot, DMG
+  background art
 
-```
-.
-├── App/
-│   ├── Sources/                     # SwiftUI app code (Rhea target)
-│   │   ├── RheaApp.swift
-│   │   ├── AppScene.swift
-│   │   ├── Colors.swift
-│   │   ├── Typography.swift
-│   │   └── DropTarget/
-│   │       ├── DropTargetView.swift
-│   │       └── DroppedDocument.swift
-│   ├── Resources/                   # Assets, app-bundle resources
-│   └── Rhea.entitlements            # Used by Release config only
-├── Tests/
-│   └── AppTests/                    # XCTest unit + smoke tests
-├── Packages/                        # Local SwiftPM packages (added per milestone)
-├── Configs/
-│   ├── Rhea.xcconfig                # Shared base (committed)
-│   └── Local.xcconfig.example       # Template for per-machine overrides
-├── Rhea.xcodeproj/                  # Hand-maintained Xcode project
-├── docs/
-│   ├── MILESTONES.md                # Vision + month-by-month plan (authoritative)
-│   └── decisions.md                 # ADR log
-├── LICENSE                          # Apache 2.0
-├── NOTICE
-└── README.md                        # This file
-```
+### 🔮 v0.9.x — Beyond the baseline
 
-`Packages/` is empty in M1.1. The first local package (`RheaDocument`)
-arrives in M1.4 when sentence segmentation lands.
+- **Playback queue / listen-later library** — chain documents and
+  chapters like an audiobook playlist; next item auto-plays on
+  completion
+- **Web / URL article import** — paste a URL or share from Safari;
+  Rhea fetches, strips chrome via Reader-mode extraction, and
+  queues the body
+- **OCR for image-only PDFs** — detect and re-run scanned pages
+  through Apple's Vision framework so pre-2000 papers become
+  readable
+- **Continuous-listening folder / tag queues** — "listen through
+  my 'unread papers' tag"
+- **Shortcuts app integration** — `Read with Rhea` action scriptable
+  from Shortcuts and Automator
+- **Spotlight-indexable library** — your library searchable from
+  system Spotlight
+- **Chapter markers in exported .m4b audiobooks**
+- **Voice cloning** — Qwen3-TTS supports this upstream; bring your
+  own reference audio
 
-## Distribution
+### 🌌 v1.0+ — The bigger bets
 
-Apache-2.0, OSS, .dmg via GitHub Releases + Homebrew Cask. **Not** going
-to the Mac App Store. See ADR-001 and `docs/decisions.md` for context.
+The features cloud competitors lean on for AI parity, re-implemented
+fully on-device so Rhea keeps its privacy wedge. All share a single
+piece of infrastructure: a locally-hosted small LLM (MLX Qwen2.5-3B
+or Llama-3.2-3B) running in the same process space as the TTS
+engines.
 
-### Building a DMG
+- **Chat-with-PDF / document Q&A** — "Summarize Section 3"; "What
+  does the author conclude?"; fully local retrieval over the active
+  document
+- **AI summaries + listening quizzes** — 10-bullet recap and 5-question
+  comprehension check you can answer by ear
+- **Dual-host podcast generation** — ElevenReader's GenFM, but
+  on-device: Rhea scripts a two-voice conversation about your PDF
+  and exports it as an .m4b
+- **Math-aware reading** — detect LaTeX / MathML in research PDFs
+  and read equations as natural English ("the integral from zero
+  to infinity of…") instead of skipping them
+- **RSVP / speed-reading modes** — Voice Dream's signature one-word-at-a-time
+  pacer, reused on top of Rhea's Whisper word-level alignment
+- **Figure caption-only mode** — read what the figures show, not
+  the body
+- **Web extension** for Chrome / Safari — read any page via Rhea
+- **iOS companion app** — sync the document queue across devices
+  (CloudKit — end-to-end encrypted, stays out of Rhea's servers
+  because there are none)
 
-```sh
-Scripts/package.sh            # unsigned DMG under dist/
-Scripts/package.sh --notarize # signed + Apple-notarised (needs paid program)
-```
+_The roadmap keeps moving. Suggestions and priority feedback welcome
+in [Issues](https://github.com/HarveyLijh/Rhea/issues)._
 
-Without `DEVELOPER_ID_APPLICATION` in the env, the script ships an
-ad-hoc-signed DMG. Works fine — Gatekeeper just shows a one-time
-warning when a downloader opens the app. Paste the following into
-the GitHub Release notes so users know what to do:
+## Tech Stack
 
-> **First-run instructions**
-> 1. Mount the DMG and drag Rhea into /Applications.
-> 2. Right-click Rhea.app → **Open** → click **Open** in the dialog.
->    (Plain double-click shows a "blocked" dialog with no Open button
->    — that's a macOS Gatekeeper quirk. Right-click bypasses it.)
-> 3. Opens normally from then on.
->
-> Or run `xattr -dr com.apple.quarantine /Applications/Rhea.app` in
-> Terminal to drop the quarantine flag without the right-click dance.
+- **UI** — SwiftUI, macOS 15 SDK, Swift 6 strict concurrency
+- **TTS engines** — AVSpeechSynthesizer (system),
+  [`kokoro-ios`](https://github.com/mlalma/kokoro-ios) via MLX
+  (Kokoro), [`TTSKit`](https://github.com/argmaxinc/WhisperKit) via
+  MLX (Qwen3-TTS)
+- **Alignment** — WhisperKit forced alignment for word-level
+  highlights under neural voices
+- **PDF** — PDFKit
+- **Markdown** — Foundation's `AttributedString(markdown:)`
+- **EPUB** — ZIPFoundation + custom XHTML loader
+- **Storage** — `UserDefaults` for settings, security-scoped
+  bookmarks for the document library
 
-Signing + notarisation is optional polish. If you want to enable it,
-see the env-var list at the top of `Scripts/package.sh`.
+## Project Conventions
 
-## Conventions
+- **Commits** — Conventional Commits (`feat:`, `fix:`, `perf:`,
+  `refactor:`, `chore:`, `docs:`, `test:`). English, imperative
+  mood, no `Co-Authored-By` trailers.
+- **Branching** — trunk-based on `main`; feature branches when a
+  change spans more than one commit.
+- **Style** — Apple's Swift API Design Guidelines; no external
+  linter rules.
+- **Architecture** — ADRs live in [`docs/decisions.md`](docs/decisions.md).
 
-- **Commits**: Conventional Commits (`feat:`, `fix:`, `refactor:`,
-  `chore:`, `docs:`, `test:`). One milestone per commit when possible.
-  English. No `Co-Authored-By` trailers.
-- **Branch**: trunk-based on `main`. Feature branches when a change
-  spans more than one commit.
-- **Swift**: strict concurrency, Swift 6 mode, deployment target macOS 15.
-- **Style**: Apple's Swift API Design Guidelines. No external linter
-  rule set yet (consider SwiftFormat if/when contributors arrive).
+## Contributing
+
+Rhea is pre-v1 and the feature surface is still moving. The fastest
+way to contribute right now is by **using it on real documents** —
+filing issues when it mispronounces, misreads columns, or drops
+sentences on your particular PDFs gets the product to v1 faster
+than any code PR. Reproduction PDFs make fixes tractable.
+
+For code PRs, pick something from the **🚧 Next up** list above,
+comment on the matching issue, and open a small PR. One milestone
+per PR when possible.
+
+## License
+
+Apache 2.0. See [LICENSE](LICENSE). Bundled third-party components
+keep their own licenses; see [NOTICE](NOTICE).
+
+---
+
+<div align="center">
+
+Made on an M-series Mac · No cloud, no account, no subscription, ever.
+
+</div>

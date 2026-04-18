@@ -8,8 +8,8 @@
 
 // --- Versioning -----------------------------------------------------
 
-CURRENT_PROJECT_VERSION = 1
-MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 71
+MARKETING_VERSION = 0.7.1
 
 // --- Swift toolchain ------------------------------------------------
 

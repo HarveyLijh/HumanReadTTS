@@ -37,9 +37,16 @@ Configs/Local.xcconfig
 *.swp
 *.swo
 
-# Trellis personal
-.trellis/.developer
-# local dev artifacts kept out of the repo
+# Agent / workflow tooling — local-only, not part of the product
+.claude/
+.cursor/
+.trellis/
+
+# Internal maintenance docs — not user-facing
+docs/HANDOFF.md
+docs/MILESTONES.md
+
+# Local dev artifacts kept out of the repo
 /fake.pdf
 /*.pdf
 /text.txt
