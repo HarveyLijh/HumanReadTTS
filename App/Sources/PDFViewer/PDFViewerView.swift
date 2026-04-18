@@ -157,51 +157,81 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     }
 
     private func applyHighlight(view: PDFView, coordinator: Coordinator) {
-        removeHighlight(coordinator: coordinator)
+        // The sentence wash rarely needs to change — it only needs
+        // a rebuild when the active sentence changes, not on every
+        // word-level subRange tick from the Whisper aligner. Rebuild
+        // the sub-highlight separately so word ticks are cheap.
+        let sentenceID = activeSentence.map {
+            SentenceKey(blockIndex: $0.blockIndex, offsetInBlock: $0.offsetInBlock)
+        }
+        let subRangeChanged = coordinator.lastSubRange != spokenSubRange
+        let sentenceChanged = coordinator.lastSentenceKey != sentenceID
 
-        guard let sentence = activeSentence,
-              let sentenceSelection = selection(for: sentence) else { return }
+        if sentenceChanged {
+            removeSentenceAnnotations(coordinator: coordinator)
+            removeSubAnnotations(coordinator: coordinator)
+            coordinator.lastSentenceKey = sentenceID
+            coordinator.lastSubRange = nil
 
-        // Sentence-wide soft wash.
-        let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
-        for lineSelection in sentenceSelection.selectionsByLine() {
-            for page in lineSelection.pages {
-                let bounds = lineSelection.bounds(for: page)
-                let annotation = PDFAnnotation(
-                    bounds: bounds,
-                    forType: .highlight,
-                    withProperties: nil
-                )
-                annotation.color = soft
-                page.addAnnotation(annotation)
-                coordinator.annotations.append((annotation, page))
+            if let sentence = activeSentence,
+               let sentenceSelection = selection(for: sentence) {
+                let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+                for lineSelection in sentenceSelection.selectionsByLine() {
+                    for page in lineSelection.pages {
+                        let bounds = lineSelection.bounds(for: page)
+                        let annotation = PDFAnnotation(
+                            bounds: bounds,
+                            forType: .highlight,
+                            withProperties: nil
+                        )
+                        annotation.color = soft
+                        page.addAnnotation(annotation)
+                        coordinator.sentenceAnnotations.append((annotation, page))
+                    }
+                }
+                // Only scroll on sentence change so the user's manual
+                // scroll-wheel use during playback isn't interrupted
+                // by every word tick from the aligner.
+                view.go(to: sentenceSelection)
             }
         }
 
-        // Brighter word-level sub-highlight on top for system voices
-        // that deliver willSpeakRange callbacks. The range is in the
-        // *spoken* text; for PDFs the rendered and spoken text lines
-        // up in the common case (no transformations), so mapping
-        // sentence.offsetInBlock + sub.location into the page works.
-        if let sub = spokenSubRange,
-           let wordSelection = wordSelection(for: sentence, subRange: sub) {
-            let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
-            for lineSelection in wordSelection.selectionsByLine() {
-                for page in lineSelection.pages {
-                    let bounds = lineSelection.bounds(for: page)
-                    let annotation = PDFAnnotation(
-                        bounds: bounds,
-                        forType: .highlight,
-                        withProperties: nil
-                    )
-                    annotation.color = bright
-                    page.addAnnotation(annotation)
-                    coordinator.annotations.append((annotation, page))
+        if subRangeChanged {
+            removeSubAnnotations(coordinator: coordinator)
+            coordinator.lastSubRange = spokenSubRange
+            if let sentence = activeSentence,
+               let sub = spokenSubRange,
+               let wordSelection = wordSelection(for: sentence, subRange: sub) {
+                let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+                for lineSelection in wordSelection.selectionsByLine() {
+                    for page in lineSelection.pages {
+                        let bounds = lineSelection.bounds(for: page)
+                        let annotation = PDFAnnotation(
+                            bounds: bounds,
+                            forType: .highlight,
+                            withProperties: nil
+                        )
+                        annotation.color = bright
+                        page.addAnnotation(annotation)
+                        coordinator.subAnnotations.append((annotation, page))
+                    }
                 }
             }
         }
+    }
 
-        view.go(to: sentenceSelection)
+    private func removeSentenceAnnotations(coordinator: Coordinator) {
+        for (annotation, page) in coordinator.sentenceAnnotations {
+            page.removeAnnotation(annotation)
+        }
+        coordinator.sentenceAnnotations = []
+    }
+
+    private func removeSubAnnotations(coordinator: Coordinator) {
+        for (annotation, page) in coordinator.subAnnotations {
+            page.removeAnnotation(annotation)
+        }
+        coordinator.subAnnotations = []
     }
 
     private func wordSelection(for sentence: Sentence, subRange: NSRange) -> PDFSelection? {
@@ -214,10 +244,15 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     }
 
     private func removeHighlight(coordinator: Coordinator) {
-        for (annotation, page) in coordinator.annotations {
-            page.removeAnnotation(annotation)
-        }
-        coordinator.annotations = []
+        removeSentenceAnnotations(coordinator: coordinator)
+        removeSubAnnotations(coordinator: coordinator)
+        coordinator.lastSentenceKey = nil
+        coordinator.lastSubRange = nil
+    }
+
+    fileprivate struct SentenceKey: Equatable {
+        let blockIndex: Int
+        let offsetInBlock: Int
     }
 
     /// O(1) sentence → `PDFSelection` lookup. Uses
@@ -235,7 +270,16 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     }
 
     final class Coordinator {
-        var annotations: [(PDFAnnotation, PDFPage)] = []
+        /// Split into sentence-level and sub-level so a word tick
+        /// only rebuilds the (usually 1-line) sub-highlight — the
+        /// multi-line sentence wash stays cached until the sentence
+        /// itself changes. Previously every word tick tore down and
+        /// rebuilt both, which for a multi-line sentence meant 3–6
+        /// PDFAnnotation removals + creations per tick.
+        var sentenceAnnotations: [(PDFAnnotation, PDFPage)] = []
+        var subAnnotations: [(PDFAnnotation, PDFPage)] = []
+        var lastSentenceKey: SentenceKey?
+        var lastSubRange: NSRange?
     }
 }
 

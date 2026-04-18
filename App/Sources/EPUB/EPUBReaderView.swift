@@ -103,6 +103,15 @@ private struct EPUBTextView: NSViewRepresentable {
     let spokenSubRange: NSRange?
     let onReadFromOffset: (Int) -> Void
 
+    final class Coordinator {
+        var lastAttributedIdentity: ObjectIdentifier?
+        var lastSentenceRange: NSRange?
+        var lastSubRange: NSRange?
+        var lastScrolledSentenceIndex: Int?
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = NSScrollView()
         scroll.hasVerticalScroller = true
@@ -135,40 +144,80 @@ private struct EPUBTextView: NSViewRepresentable {
 
         tv.onReadFromOffset = onReadFromOffset
 
-        if storage.length != attributed.length || storage.string != attributed.string {
+        let identity = ObjectIdentifier(attributed)
+        if context.coordinator.lastAttributedIdentity != identity {
             storage.setAttributedString(attributed)
+            context.coordinator.lastAttributedIdentity = identity
+            context.coordinator.lastSentenceRange = nil
+            context.coordinator.lastSubRange = nil
+            context.coordinator.lastScrolledSentenceIndex = nil
         }
-        applyHighlight(to: tv, storage: storage)
+        applyHighlight(to: tv, storage: storage, coordinator: context.coordinator)
     }
 
-    private func applyHighlight(to textView: NSTextView, storage: NSTextStorage) {
-        let fullRange = NSRange(location: 0, length: storage.length)
+    /// Same incremental-highlight strategy as the Markdown reader:
+    /// bounded clears + scroll-only-on-sentence-change, so the
+    /// Whisper aligner's word-level ticks stop thrashing the whole
+    /// text storage and the user's manual scrolling doesn't get
+    /// yanked back on every update.
+    private func applyHighlight(
+        to textView: NSTextView,
+        storage: NSTextStorage,
+        coordinator: Coordinator
+    ) {
         storage.beginEditing()
-        storage.removeAttribute(.backgroundColor, range: fullRange)
 
-        if let sentence = activeSentence {
-            let sentenceRange = NSRange(
-                location: sentence.offsetInBlock,
-                length: sentence.lengthInBlock
-            )
-            if NSMaxRange(sentenceRange) <= storage.length {
-                let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
-                storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
-
-                if let sub = spokenSubRange {
-                    let subOrigin = sentence.offsetInBlock + sub.location
-                    let subRange = NSRange(location: subOrigin, length: sub.length)
-                    if NSMaxRange(subRange) <= storage.length {
-                        let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
-                        storage.addAttribute(.backgroundColor, value: bright, range: subRange)
-                    }
-                }
-
-                storage.endEditing()
-                textView.scrollRangeToVisible(sentenceRange)
-                return
-            }
+        if let last = coordinator.lastSubRange,
+           NSMaxRange(last) <= storage.length {
+            storage.removeAttribute(.backgroundColor, range: last)
         }
+        if let last = coordinator.lastSentenceRange,
+           NSMaxRange(last) <= storage.length {
+            storage.removeAttribute(.backgroundColor, range: last)
+        }
+
+        guard let sentence = activeSentence else {
+            coordinator.lastSentenceRange = nil
+            coordinator.lastSubRange = nil
+            storage.endEditing()
+            return
+        }
+
+        let sentenceRange = NSRange(
+            location: sentence.offsetInBlock,
+            length: sentence.lengthInBlock
+        )
+        guard NSMaxRange(sentenceRange) <= storage.length else {
+            coordinator.lastSentenceRange = nil
+            coordinator.lastSubRange = nil
+            storage.endEditing()
+            return
+        }
+
+        let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+        storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
+        coordinator.lastSentenceRange = sentenceRange
+
+        if let sub = spokenSubRange {
+            let subOrigin = sentence.offsetInBlock + sub.location
+            let subRange = NSRange(location: subOrigin, length: sub.length)
+            if NSMaxRange(subRange) <= storage.length {
+                let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+                storage.addAttribute(.backgroundColor, value: bright, range: subRange)
+                coordinator.lastSubRange = subRange
+            } else {
+                coordinator.lastSubRange = nil
+            }
+        } else {
+            coordinator.lastSubRange = nil
+        }
+
         storage.endEditing()
+
+        let currentIndex = sentence.offsetInBlock
+        if coordinator.lastScrolledSentenceIndex != currentIndex {
+            coordinator.lastScrolledSentenceIndex = currentIndex
+            textView.scrollRangeToVisible(sentenceRange)
+        }
     }
 }

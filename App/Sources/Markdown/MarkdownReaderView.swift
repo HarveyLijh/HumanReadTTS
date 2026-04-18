@@ -324,6 +324,28 @@ private struct MarkdownTextView: NSViewRepresentable {
     let spokenSubRange: NSRange?
     let onReadFromOffset: (Int) -> Void
 
+    final class Coordinator {
+        /// ObjectIdentifier of the most-recently-assigned attributed
+        /// string. Used as a cheap content-identity check so we only
+        /// reassign text storage when the document actually changes —
+        /// `storage.string` equality is O(N) and was the main cost
+        /// on every highlight tick for large markdown files.
+        var lastAttributedIdentity: ObjectIdentifier?
+        /// Range of the previous sentence wash — we remove attributes
+        /// from just that range on the next tick instead of scanning
+        /// the full storage, which was the second hot spot.
+        var lastSentenceRange: NSRange?
+        /// Range of the previous word-level sub-highlight.
+        var lastSubRange: NSRange?
+        /// Last sentence index we auto-scrolled to. Scrolling only
+        /// fires on index change, not every spokenSubRange word tick,
+        /// so the user can scroll manually without the viewport
+        /// snapping back every second.
+        var lastScrolledSentenceIndex: Int?
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func makeNSView(context: Context) -> NSScrollView {
         makeReadOnlyTextScrollView(onReadFromOffset: onReadFromOffset)
     }
@@ -332,17 +354,21 @@ private struct MarkdownTextView: NSViewRepresentable {
         guard let tv = nsView.documentView as? ClickableReaderTextView,
               let storage = tv.textStorage else { return }
 
-        // Keep the closure fresh so it captures the latest sentence
-        // array (the host reads `sentences` every time it fires).
         tv.onReadFromOffset = onReadFromOffset
 
-        if storage.length != attributed.length || storage.string != attributed.string {
+        let identity = ObjectIdentifier(attributed)
+        if context.coordinator.lastAttributedIdentity != identity {
             storage.setAttributedString(attributed)
+            context.coordinator.lastAttributedIdentity = identity
+            context.coordinator.lastSentenceRange = nil
+            context.coordinator.lastSubRange = nil
+            context.coordinator.lastScrolledSentenceIndex = nil
         }
 
-        applyHighlight(
+        applyHighlightIncremental(
             to: tv,
             storage: storage,
+            coordinator: context.coordinator,
             sentence: activeSentence,
             spokenSubRange: spokenSubRange
         )
@@ -410,43 +436,84 @@ private func makeReadOnlyTextScrollView(
     return scroll
 }
 
+/// Incremental highlight updater. Two big wins over the naive
+/// "remove all, re-apply" pass that was running on every
+/// `spokenSubRange` tick from the Whisper aligner:
+///
+/// 1. **Bounded clears.** We only strip the background from the
+///    range we previously painted, not the full document. On a
+///    100k-character markdown file the full clear walked every
+///    attribute run; the bounded clear is O(ranges we touched).
+/// 2. **Scroll-only-on-sentence-change.** `scrollRangeToVisible`
+///    fired on every word tick, yanking the viewport back while the
+///    user was mid-scroll. Now it only fires when the sentence
+///    index changes — manual scrolling during playback finally
+///    works.
 @MainActor
-private func applyHighlight(
+private func applyHighlightIncremental(
     to textView: NSTextView,
     storage: NSTextStorage,
+    coordinator: MarkdownTextView.Coordinator,
     sentence: Sentence?,
-    spokenSubRange: NSRange? = nil
+    spokenSubRange: NSRange?
 ) {
-    let fullRange = NSRange(location: 0, length: storage.length)
     storage.beginEditing()
-    storage.removeAttribute(.backgroundColor, range: fullRange)
 
-    if let sentence {
-        let sentenceRange = NSRange(
-            location: sentence.offsetInBlock,
-            length: sentence.lengthInBlock
-        )
-        if NSMaxRange(sentenceRange) <= storage.length {
-            // Soft sentence-wide wash.
-            let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
-            storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
-
-            // Brighter sub-highlight for the word currently being
-            // spoken (system voice). Offset the sub-range by the
-            // sentence start.
-            if let sub = spokenSubRange {
-                let subOrigin = sentence.offsetInBlock + sub.location
-                let subRange = NSRange(location: subOrigin, length: sub.length)
-                if NSMaxRange(subRange) <= storage.length {
-                    let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
-                    storage.addAttribute(.backgroundColor, value: bright, range: subRange)
-                }
-            }
-
-            storage.endEditing()
-            textView.scrollRangeToVisible(sentenceRange)
-            return
-        }
+    // Clear the previously-highlighted ranges (bounded), not the
+    // whole document.
+    if let last = coordinator.lastSubRange,
+       NSMaxRange(last) <= storage.length {
+        storage.removeAttribute(.backgroundColor, range: last)
     }
+    if let last = coordinator.lastSentenceRange,
+       NSMaxRange(last) <= storage.length {
+        storage.removeAttribute(.backgroundColor, range: last)
+    }
+
+    guard let sentence else {
+        coordinator.lastSentenceRange = nil
+        coordinator.lastSubRange = nil
+        storage.endEditing()
+        return
+    }
+
+    let sentenceRange = NSRange(
+        location: sentence.offsetInBlock,
+        length: sentence.lengthInBlock
+    )
+    guard NSMaxRange(sentenceRange) <= storage.length else {
+        coordinator.lastSentenceRange = nil
+        coordinator.lastSubRange = nil
+        storage.endEditing()
+        return
+    }
+
+    let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+    storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
+    coordinator.lastSentenceRange = sentenceRange
+
+    if let sub = spokenSubRange {
+        let subOrigin = sentence.offsetInBlock + sub.location
+        let subRange = NSRange(location: subOrigin, length: sub.length)
+        if NSMaxRange(subRange) <= storage.length {
+            let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+            storage.addAttribute(.backgroundColor, value: bright, range: subRange)
+            coordinator.lastSubRange = subRange
+        } else {
+            coordinator.lastSubRange = nil
+        }
+    } else {
+        coordinator.lastSubRange = nil
+    }
+
     storage.endEditing()
+
+    // Only scroll when the *sentence* changes. Word-level ticks from
+    // the aligner don't pull the viewport any more; the user's
+    // manual scroll wheel / trackpad stays in charge.
+    let currentIndex = sentence.offsetInBlock
+    if coordinator.lastScrolledSentenceIndex != currentIndex {
+        coordinator.lastScrolledSentenceIndex = currentIndex
+        textView.scrollRangeToVisible(sentenceRange)
+    }
 }

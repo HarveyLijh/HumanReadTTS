@@ -142,7 +142,7 @@ struct PlaybackTransportView: View {
         }
         .buttonStyle(.plain)
         .disabled(isDisabled)
-        .help("Previous sentence · \(secondsEstimate(for: .previous))")
+        .help("Previous sentence")
         .keyboardShortcut(.leftArrow, modifiers: [.command])
     }
 
@@ -154,7 +154,7 @@ struct PlaybackTransportView: View {
         }
         .buttonStyle(.plain)
         .disabled(isDisabled)
-        .help("Next sentence · \(secondsEstimate(for: .next))")
+        .help("Next sentence")
         .keyboardShortcut(.rightArrow, modifiers: [.command])
     }
 
@@ -455,30 +455,6 @@ struct PlaybackTransportView: View {
         .help("Open Settings")
     }
 
-    // MARK: seconds-estimate helper
-
-    private enum Direction { case next, previous }
-
-    private func secondsEstimate(for direction: Direction) -> String {
-        let idx = player.state.sentenceIndex ?? 0
-        let target: Int
-        switch direction {
-        case .next: target = idx
-        case .previous: target = max(idx - 1, 0)
-        }
-        guard target >= 0, target < player.sentences.count else {
-            return "≈15s"
-        }
-        let words = player.sentences[target].text.roughWordCount
-        // Prefer the user's measured reading wpm (settles at ~130 to
-        // ~180 depending on voice) when available — falls back to the
-        // 165 wpm baseline for fresh installs where ReadingStats
-        // hasn't built up a sample yet.
-        let statsWpm = ReadingStats.shared.wordsPerMinute
-        let baseWpm = (statsWpm > 0 ? statsWpm : 165.0) * settings.rate
-        let seconds = Double(words) / max(baseWpm, 1) * 60.0
-        return "≈\(Int(seconds.rounded()))s"
-    }
 }
 
 // MARK: - Speed popover
