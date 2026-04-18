@@ -88,6 +88,11 @@ hand-maintained. Xcode 16+, macOS 15 SDK, Swift 6 toolchain.
 `Scripts/build.sh` runs without Xcode if all you have is the
 Command Line Tools.
 
+After building, `Scripts/run.sh` launches the last Debug build from
+DerivedData (no more typing the long Xcode-hashed path).
+`Scripts/run.sh --build` rebuilds first; `--release` opens the
+Release bundle if you need to sanity-check distribution output.
+
 ## What's Inside
 
 ### 🎯 The transport HUD
