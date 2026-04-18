@@ -40,6 +40,7 @@ struct LibrarySidebarView: View {
                     .font(.system(size: 12, weight: .medium))
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color.rheaAccent)
             .controlSize(.small)
             .help("Create a blank scratchpad · ⌘N")
 
