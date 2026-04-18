@@ -18,6 +18,14 @@ struct ScratchpadView: View {
     let player: SpeechPlayer
     @Binding var text: String
 
+    enum ViewMode: String, CaseIterable, Identifiable {
+        case raw = "Raw"
+        case preview = "Preview"
+        var id: Self { self }
+    }
+
+    @State private var viewMode: ViewMode = .raw
+
     /// A snapshot of `text` at the last successful segment. When the
     /// user edits after playback has started, this drifts away from
     /// `text` and the next play auto-resegments.
@@ -27,7 +35,7 @@ struct ScratchpadView: View {
         VStack(alignment: .leading, spacing: 0) {
             toolbar
             Divider()
-            editor
+            content
         }
         .background(Color.rheaSurface)
         .task(id: text) {
@@ -56,6 +64,16 @@ struct ScratchpadView: View {
 
             Spacer()
 
+            Picker("", selection: $viewMode) {
+                ForEach(ViewMode.allCases) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(width: 150)
+            .help("Raw = editable Markdown source. Preview = rendered.")
+
             Button {
                 saveAsMarkdown()
             } label: {
@@ -71,11 +89,20 @@ struct ScratchpadView: View {
         .background(.ultraThinMaterial)
     }
 
-    private var editor: some View {
-        ScratchpadEditor(text: $text)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
-            .background(Color.rheaSurface)
+    @ViewBuilder
+    private var content: some View {
+        switch viewMode {
+        case .raw:
+            ScratchpadEditor(text: $text)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
+                .background(Color.rheaSurface)
+        case .preview:
+            ScratchpadPreview(markdown: text)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
+                .background(Color.rheaSurface)
+        }
     }
 
     private var characterSummary: String {
@@ -87,9 +114,10 @@ struct ScratchpadView: View {
 
     /// If the text has changed since the last segment (or never
     /// segmented), rebuild the sentence queue on the shared player.
-    /// Called when the user presses play on the HUD — so hitting
-    /// play mid-edit always reads the on-screen content, not a
-    /// stale cache. No-op when nothing has changed.
+    /// Runs the text through `MarkdownRenderer` first so Markdown
+    /// syntax (`##`, `**`, `[link](url)`, etc.) never reaches the
+    /// synthesizer — the spoken output matches the rendered Preview,
+    /// not the raw typing. No-op when nothing has changed.
     private func ensureLoaded() {
         let snapshot = text
         guard snapshot != lastSegmentedText else { return }
@@ -98,7 +126,10 @@ struct ScratchpadView: View {
         }
         lastSegmentedText = snapshot
         Task { @MainActor in
-            let block = DocumentBlock(text: snapshot, pageIndex: 0, offsetInPage: 0)
+            let rendered = MarkdownRenderer.render(snapshot)
+            let block = DocumentBlock(
+                text: rendered.string, pageIndex: 0, offsetInPage: 0
+            )
             let parsed = await SentenceSegmenter.segment([block])
             player.load(parsed)
         }
@@ -181,6 +212,57 @@ private struct ScratchpadEditor: NSViewRepresentable {
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             text.wrappedValue = textView.string
+        }
+    }
+}
+
+/// Read-only rendered view of the scratchpad's Markdown. Reuses
+/// `MarkdownRenderer` — the same attributed-string pipeline the
+/// MarkdownReaderView uses for .md files — so the Preview style
+/// matches what a loaded Markdown document looks like.
+@MainActor
+private struct ScratchpadPreview: NSViewRepresentable {
+    let markdown: String
+
+    final class Coordinator {
+        var lastRenderedSource: String?
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeNSView(context: Context) -> NSScrollView {
+        let scroll = NSScrollView()
+        scroll.hasVerticalScroller = true
+        scroll.hasHorizontalScroller = false
+        scroll.borderType = .noBorder
+        scroll.drawsBackground = false
+
+        let textView = NSTextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isRichText = true
+        textView.backgroundColor = .clear
+        textView.drawsBackground = false
+        textView.autoresizingMask = [.width]
+        textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.containerSize = NSSize(
+            width: 0, height: CGFloat.greatestFiniteMagnitude
+        )
+
+        scroll.documentView = textView
+        return scroll
+    }
+
+    func updateNSView(_ nsView: NSScrollView, context: Context) {
+        guard let textView = nsView.documentView as? NSTextView,
+              let storage = textView.textStorage else { return }
+        // Only re-render when the source actually changed — walking
+        // the markdown parser on every view update is wasteful when
+        // the parent re-renders for unrelated reasons.
+        if context.coordinator.lastRenderedSource != markdown {
+            let rendered = MarkdownRenderer.render(markdown)
+            storage.setAttributedString(rendered)
+            context.coordinator.lastRenderedSource = markdown
         }
     }
 }
