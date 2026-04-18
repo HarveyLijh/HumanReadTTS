@@ -84,4 +84,39 @@ final class LibraryTests: XCTestCase {
         XCTAssertEqual(library.entries.count, 2)
         XCTAssertEqual(library.entries.first?.title, tempFile.lastPathComponent)
     }
+
+    // MARK: resume position
+
+    func test_recordPosition_persistsIndex() {
+        let library = Library(defaults: defaults)
+        library.record(url: tempFile)
+        library.recordPosition(url: tempFile, sentenceIndex: 42)
+        XCTAssertEqual(library.savedPosition(for: tempFile), 42)
+    }
+
+    func test_recordPosition_survivesReload() {
+        let first = Library(defaults: defaults)
+        first.record(url: tempFile)
+        first.recordPosition(url: tempFile, sentenceIndex: 17)
+
+        let second = Library(defaults: defaults)
+        XCTAssertEqual(second.savedPosition(for: tempFile), 17)
+    }
+
+    func test_record_preservesSavedPosition() {
+        let library = Library(defaults: defaults)
+        library.record(url: tempFile)
+        library.recordPosition(url: tempFile, sentenceIndex: 25)
+
+        // Re-recording (e.g. user reopens from Recents) must not
+        // wipe the saved position — dedup removes the entry and
+        // re-inserts, which would otherwise lose the index.
+        library.record(url: tempFile)
+        XCTAssertEqual(library.savedPosition(for: tempFile), 25)
+    }
+
+    func test_savedPosition_returnsNilForUntrackedURL() {
+        let library = Library(defaults: defaults)
+        XCTAssertNil(library.savedPosition(for: tempFile))
+    }
 }

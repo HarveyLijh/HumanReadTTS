@@ -171,6 +171,27 @@ final class SpeechPlayer {
         alignmentTask = nil
     }
 
+    /// Seek to `index` but stay paused. Used to restore the user's
+    /// last reading position when they reopen a document — they
+    /// see the prior sentence highlighted and the transport paused,
+    /// then press space or the play button to resume. Auto-playing
+    /// a document the user hasn't touched in a session would be
+    /// surprising and violate the "transparency of side effects"
+    /// rule.
+    func seekPaused(to index: Int) {
+        guard !sentences.isEmpty else { return }
+        let clamped = max(0, min(index, sentences.count - 1))
+        synth.stopSpeaking(at: .immediate)
+        pcm.stop()
+        spokenSubRange = nil
+        prefetchedKokoro.removeAll()
+        prefetchedQwen.removeAll()
+        alignmentTask?.cancel()
+        alignmentTask = nil
+        nextIndex = clamped
+        state = .paused(sentenceIndex: clamped)
+    }
+
     /// Public seek-and-play. If the player is idle, transitions to
     /// playing at `index`. If paused, starts playing at `index`. If
     /// already playing, moves to `index` and keeps playing. Used by

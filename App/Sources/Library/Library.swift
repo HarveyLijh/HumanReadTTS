@@ -24,7 +24,9 @@ final class Library {
 
     /// Record that the user opened `url`. Moves an existing entry
     /// for the same file path to the top and updates its
-    /// timestamp; creates a new entry otherwise.
+    /// timestamp; creates a new entry otherwise. Preserves any
+    /// previously-stored `lastSentenceIndex` so reopening the same
+    /// document restores reading position.
     ///
     /// Dedup compares stored `originalPath` strings — never resolves
     /// existing bookmarks — so recording a drop doesn't trigger TCC
@@ -38,6 +40,9 @@ final class Library {
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
+            let previousPosition = entries
+                .first(where: { $0.originalPath == canonicalPath })?
+                .lastSentenceIndex
             entries.removeAll { existing in
                 existing.originalPath == canonicalPath
             }
@@ -45,7 +50,8 @@ final class Library {
                 title: url.lastPathComponent,
                 lastOpened: Date(),
                 bookmarkData: bookmark,
-                originalPath: canonicalPath
+                originalPath: canonicalPath,
+                lastSentenceIndex: previousPosition
             )
             entries.insert(entry, at: 0)
             save()
@@ -53,6 +59,34 @@ final class Library {
             // Best-effort only; a failed bookmark isn't fatal. The
             // file just won't appear in the recents list.
         }
+    }
+
+    /// Persist the current reading position for `url`. Called from
+    /// the RootView's playback-state observer so every sentence
+    /// advance snapshots where the user is — a crash or abrupt quit
+    /// loses at most one sentence. No-op when `url` isn't tracked
+    /// (shouldn't happen, since `record(url:)` runs before playback
+    /// starts).
+    func recordPosition(url: URL, sentenceIndex: Int) {
+        let canonicalPath = url.standardizedFileURL.path
+        guard let idx = entries.firstIndex(where: {
+            $0.originalPath == canonicalPath
+        }) else { return }
+        guard entries[idx].lastSentenceIndex != sentenceIndex else {
+            return
+        }
+        entries[idx].lastSentenceIndex = sentenceIndex
+        save()
+    }
+
+    /// Resume index stored alongside `url`, if any. Used by the
+    /// reader on document load to seek the player to a paused state
+    /// at the last-known sentence.
+    func savedPosition(for url: URL) -> Int? {
+        let canonicalPath = url.standardizedFileURL.path
+        return entries
+            .first(where: { $0.originalPath == canonicalPath })?
+            .lastSentenceIndex
     }
 
     /// Resolve a bookmark back to a URL. Tries both plain and

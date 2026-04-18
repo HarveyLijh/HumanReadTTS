@@ -28,6 +28,11 @@ struct RootView: View {
     @State private var undoBannerText: String = ""
     @State private var undoPrevious: String?
     @State private var undoDismissTask: Task<Void, Never>?
+    /// Resume index consumed by the content viewer on next load.
+    /// Set from the library when adopting a document; cleared once
+    /// the viewer has applied it so a re-render won't snap playback
+    /// back. See `content(for:)` and `seekPaused` on the player.
+    @State private var pendingResumeIndex: Int?
 
     var body: some View {
         NavigationSplitView {
@@ -50,6 +55,18 @@ struct RootView: View {
         }
         .onChange(of: player.lastSwitchEvent) { _, event in
             handleSwitchEvent(event)
+        }
+        .onChange(of: player.state.sentenceIndex) { _, newIndex in
+            recordPosition(for: newIndex)
+        }
+        .onChange(of: player.sentences) { _, newSentences in
+            // Viewer finished loading — apply any pending resume
+            // index. We trigger on the transition out of "empty"
+            // rather than eagerly, because the viewer clears the
+            // queue on document change and re-fills asynchronously.
+            if !newSentences.isEmpty {
+                applyPendingResume()
+            }
         }
         .dropDestination(for: URL.self) { urls, _ in
             guard let url = urls.first, let next = DroppedDocument(url: url) else {
@@ -171,9 +188,35 @@ struct RootView: View {
 
     private func adopt(_ next: DroppedDocument) {
         player.stop()
+        // Look up resume position BEFORE `library.record(url:)` moves
+        // the entry to the top — the record call preserves the
+        // existing `lastSentenceIndex`, so both orderings work, but
+        // reading up-front keeps intent obvious.
+        pendingResumeIndex = library.savedPosition(for: next.url)
         document = next
         library.record(url: next.url)
         selectedEntryID = library.entries.first?.id
+    }
+
+    /// Observe sentence-index changes and persist them to the
+    /// library entry backing the current document. Fires often (per
+    /// sentence advance) but `Library.recordPosition` guards against
+    /// no-op writes so UserDefaults churn is bounded.
+    private func recordPosition(for sentenceIndex: Int?) {
+        guard let sentenceIndex, let document else { return }
+        library.recordPosition(
+            url: document.url, sentenceIndex: sentenceIndex
+        )
+    }
+
+    /// Handed to viewers. Once the viewer loads its sentences into
+    /// the player, this seeks the player to the saved paused index
+    /// and clears `pendingResumeIndex` so the same resume doesn't
+    /// re-apply on rerender.
+    private func applyPendingResume() {
+        guard let idx = pendingResumeIndex else { return }
+        player.seekPaused(to: idx)
+        pendingResumeIndex = nil
     }
 
     // MARK: export banners

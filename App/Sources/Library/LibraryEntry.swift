@@ -19,18 +19,27 @@ struct LibraryEntry: Identifiable, Codable, Equatable, Hashable {
     let lastOpened: Date
     let bookmarkData: Data
     var originalPath: String?
+    /// Sentence index the player stopped at last time this document
+    /// was open. Restored as a *paused* position on reopen so the
+    /// user presses space (or the transport play button) to resume —
+    /// matches Speechify / Kindle-reader conventions and avoids
+    /// surprise auto-playback on launch. Optional so entries written
+    /// by older builds decode cleanly.
+    var lastSentenceIndex: Int?
 
     init(
         id: UUID = UUID(),
         title: String,
         lastOpened: Date,
         bookmarkData: Data,
-        originalPath: String? = nil
+        originalPath: String? = nil,
+        lastSentenceIndex: Int? = nil
     ) {
         self.id = id
         self.title = title
         self.lastOpened = lastOpened
         self.bookmarkData = bookmarkData
         self.originalPath = originalPath
+        self.lastSentenceIndex = lastSentenceIndex
     }
 }
