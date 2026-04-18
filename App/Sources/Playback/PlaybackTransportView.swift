@@ -21,7 +21,6 @@ struct PlaybackTransportView: View {
 
     @Environment(\.openSettings) private var openSettings
 
-    @State private var scrubIndex: Double?
     @State private var showingSpeedPopover = false
     @State private var showingVoicePopover = false
     @State private var showingSkipPopover = false
@@ -69,7 +68,6 @@ struct PlaybackTransportView: View {
             skipBack
             playPause
             skipForward
-            scrubber
             timeReadout
             skipChip
             speedChip
@@ -83,7 +81,7 @@ struct PlaybackTransportView: View {
             skipBack
             playPause
             skipForward
-            scrubber
+            timeReadout
             skipChip
             speedChip
             voiceChip(style: .short)
@@ -96,7 +94,7 @@ struct PlaybackTransportView: View {
             skipBack
             playPause
             skipForward
-            scrubber(minWidth: 120)
+            timeReadout
             speedChip
             voiceChip(style: .iconOnly)
             settingsButton
@@ -105,14 +103,14 @@ struct PlaybackTransportView: View {
 
     /// Last-resort layout for very narrow windows. Drops the speed
     /// chip entirely (still reachable via ⌘] / ⌘[ or the voice
-    /// menu's parent Settings link). Keeps the transport, scrubber,
-    /// voice, and gear — the must-haves.
+    /// menu's parent Settings link). Keeps the transport, time, voice,
+    /// and gear — the must-haves.
     private var tinyLayout: some View {
         hudRow {
             skipBack
             playPause
             skipForward
-            scrubber(minWidth: 80)
+            timeReadout
             voiceChip(style: .iconOnly)
             settingsButton
         }
@@ -175,116 +173,34 @@ struct PlaybackTransportView: View {
         .help(player.state.isPlaying ? "Pause" : "Play")
     }
 
-    // MARK: scrubber
-
-    private var scrubber: some View { scrubber(minWidth: 180) }
-
-    private func scrubber(minWidth: CGFloat) -> some View {
-        let progress = player.progress
-        let total = max(Double(progress.total - 1), 0)
-        let bindingValue = scrubIndex ?? Double(progress.currentIndex)
-        let isDragging = scrubIndex != nil
-        return Slider(
-            value: Binding(
-                get: { bindingValue },
-                set: { newValue in
-                    // Hold the drag locally so the UI doesn't flicker
-                    // back to the player's live index during drag.
-                    scrubIndex = newValue
-                }
-            ),
-            in: 0...max(total, 1),
-            step: 1,
-            onEditingChanged: { editing in
-                guard !editing, let target = scrubIndex else { return }
-                let idx = Int(target.rounded())
-                player.playFromSentence(idx)
-                scrubIndex = nil
-            }
-        )
-        .controlSize(.small)
-        .frame(minWidth: minWidth, maxWidth: 280)
-        .disabled(isDisabled || progress.total < 2)
-        .help(scrubberTooltip(at: bindingValue))
-        .overlay(alignment: .top) {
-            if isDragging, progress.total > 1 {
-                // Floating preview capsule that tracks the thumb's
-                // rough position. The thumb is hidden under the user's
-                // cursor during drag; this bubble above the track is
-                // where the user's eye actually goes.
-                scrubberPreviewBubble(at: bindingValue, total: total)
-                    .offset(y: -32)
-            }
-        }
-    }
-
-    /// Bubble rendered above the scrubber during drag. We lay it out
-    /// inside a GeometryReader so its horizontal offset tracks the
-    /// slider's thumb instead of always sitting centred — otherwise
-    /// a drag to either edge makes the preview drift away from the
-    /// thumb by half a bubble width, which is visually confusing.
-    private func scrubberPreviewBubble(
-        at value: Double, total: Double
-    ) -> some View {
-        let idx = Int(value.rounded())
-        let clamped = max(0, min(idx, player.sentences.count - 1))
-        let sentence = player.sentences.indices.contains(clamped)
-            ? player.sentences[clamped] : nil
-        let preview = sentence.map { String($0.text.prefix(80)) } ?? ""
-        return GeometryReader { geo in
-            let fraction = total > 0 ? value / total : 0
-            let thumbX = geo.size.width * fraction
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Sentence \(clamped + 1) of \(player.sentences.count)")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                Text(preview)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                    .truncationMode(.tail)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .frame(maxWidth: 300, alignment: .leading)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.black.opacity(0.12), lineWidth: 0.5)
-            )
-            .fixedSize(horizontal: false, vertical: true)
-            .offset(x: max(0, min(thumbX - 150, geo.size.width - 160)))
-        }
-        .frame(height: 44)
-        .allowsHitTesting(false)
-        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .bottom)))
-    }
-
-    private func scrubberTooltip(at value: Double) -> String {
-        let idx = Int(value.rounded())
-        guard idx >= 0, idx < player.sentences.count else {
-            return "Jump to sentence"
-        }
-        let preview = player.sentences[idx].text.prefix(60)
-        return "Sentence \(idx + 1) of \(player.sentences.count) — “\(preview)…”"
-    }
-
     // MARK: time readout
 
+    /// Elapsed / total display in `h:mm:ss` format. Replaces the
+    /// old interactive scrubber — seeking is now entirely click-a-
+    /// word / right-click "Read from here", and the skip buttons
+    /// cover sentence granularity. This frees the HUD's horizontal
+    /// space and gives the user a legible time at a glance.
     private var timeReadout: some View {
         let progress = player.progress
-        return Text("\(format(progress.estimatedElapsed)) / \(format(progress.estimatedElapsed + progress.estimatedRemaining))")
-            .font(.system(size: 11, design: .monospaced))
-            .foregroundStyle(.secondary)
-            .frame(minWidth: 82)
-            .help("Estimated — based on words per minute from your reading stats.")
+        let total = progress.estimatedElapsed + progress.estimatedRemaining
+        return VStack(spacing: 1) {
+            Text("\(formatHMS(progress.estimatedElapsed)) / \(formatHMS(total))")
+                .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.primary)
+            Text("\(formatHMS(progress.estimatedRemaining)) left")
+                .font(.system(size: 10, design: .monospaced))
+                .foregroundStyle(.secondary)
+        }
+        .frame(minWidth: 112)
+        .help("Estimated — based on words per minute from your reading stats.")
     }
 
-    private func format(_ seconds: TimeInterval) -> String {
-        let total = Int(seconds.rounded())
-        let m = total / 60
+    private func formatHMS(_ seconds: TimeInterval) -> String {
+        let total = max(0, Int(seconds.rounded()))
+        let h = total / 3600
+        let m = (total % 3600) / 60
         let s = total % 60
-        return String(format: "%d:%02d", m, s)
+        return String(format: "%d:%02d:%02d", h, m, s)
     }
 
     // MARK: skip-rules chip

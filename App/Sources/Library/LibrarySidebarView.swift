@@ -7,17 +7,59 @@ struct LibrarySidebarView: View {
     @Binding var selectedID: LibraryEntry.ID?
 
     var body: some View {
-        List(selection: $selectedID) {
-            if library.entries.isEmpty {
-                emptyRow
-            } else {
-                ForEach(library.entries) { entry in
-                    row(for: entry).tag(entry.id)
+        VStack(spacing: 0) {
+            toolbar
+            Divider()
+            List(selection: $selectedID) {
+                if library.entries.isEmpty {
+                    emptyRow
+                } else {
+                    ForEach(library.entries) { entry in
+                        row(for: entry).tag(entry.id)
+                    }
                 }
             }
+            .listStyle(.sidebar)
         }
-        .listStyle(.sidebar)
         .navigationTitle("Library")
+    }
+
+    /// Top-of-sidebar row with quick-create buttons. "New note" posts
+    /// the same notification as ⌘N so the create-scratchpad flow is
+    /// discoverable for users who don't remember the shortcut.
+    /// "Open file…" is the obvious companion.
+    private var toolbar: some View {
+        HStack(spacing: 6) {
+            Button {
+                NotificationCenter.default.post(
+                    name: AppScene.newScratchpadNotification, object: nil
+                )
+            } label: {
+                Label("New note", systemImage: "square.and.pencil")
+                    .labelStyle(.titleAndIcon)
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .help("Create a blank scratchpad · ⌘N")
+
+            Button {
+                NotificationCenter.default.post(
+                    name: AppScene.openFileNotification, object: nil
+                )
+            } label: {
+                Label("Open…", systemImage: "folder")
+                    .labelStyle(.titleAndIcon)
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help("Open a PDF, Markdown, or EPUB · ⌘O")
+
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
     }
 
     private var emptyRow: some View {

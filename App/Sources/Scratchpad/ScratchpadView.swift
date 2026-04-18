@@ -5,21 +5,23 @@ import AppKit
 /// no need to open a Markdown file first. Lives as a separate
 /// document state alongside the PDF / Markdown / EPUB viewers;
 /// picking it from File → New drops the user into an editable
-/// text area with a Read button that segments the current text
-/// into sentences and hands them to the shared SpeechPlayer.
+/// text area.
 ///
-/// Segmentation runs at play time (not per keystroke) so typing
-/// stays snappy. Highlighting the active sentence in the editor is
-/// deferred — the common scratchpad use case is "paste a few
-/// paragraphs, listen once" rather than long-form editing; the
-/// HUD's scrubber + voice controls still work so the user can seek
-/// or switch voices mid-read.
+/// Segmentation runs lazily when the user presses the transport's
+/// play button (via `ensureLoaded()` — pushed into the shared
+/// `SpeechPlayer` the first time play fires and whenever the user
+/// resumes after editing). The scratchpad has no standalone "Read"
+/// button: the HUD's play button is the single source of truth for
+/// starting playback, exactly like for PDFs and EPUBs.
 @MainActor
 struct ScratchpadView: View {
     let player: SpeechPlayer
     @Binding var text: String
 
-    @State private var isSegmenting = false
+    /// A snapshot of `text` at the last successful segment. When the
+    /// user edits after playback has started, this drifts away from
+    /// `text` and the next play auto-resegments.
+    @State private var lastSegmentedText: String = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -28,6 +30,16 @@ struct ScratchpadView: View {
             editor
         }
         .background(Color.rheaSurface)
+        .task(id: text) {
+            // Debounce segmentation: wait for 400ms of quiet typing,
+            // then push the fresh sentence queue into the player so
+            // the HUD's play button always reads what's on screen.
+            // `.task(id:)` cancels on every keystroke, so the body
+            // only runs on the last change of a typing burst.
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
+            ensureLoaded()
+        }
     }
 
     private var toolbar: some View {
@@ -44,11 +56,6 @@ struct ScratchpadView: View {
 
             Spacer()
 
-            if isSegmenting {
-                ProgressView()
-                    .controlSize(.mini)
-            }
-
             Button {
                 saveAsMarkdown()
             } label: {
@@ -58,17 +65,6 @@ struct ScratchpadView: View {
             .controlSize(.small)
             .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .help("Export the scratchpad to a .md file.")
-
-            Button {
-                readNow()
-            } label: {
-                Label("Read", systemImage: "play.fill")
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
-            .keyboardShortcut("p", modifiers: [.command])
-            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .help("Read the scratchpad aloud · ⌘P")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -89,26 +85,22 @@ struct ScratchpadView: View {
         return "\(count) characters"
     }
 
-    /// Segment the current text, load it into the shared player,
-    /// and start playback. Segmenting happens on a background task
-    /// so very long pastes don't freeze the toolbar.
-    private func readNow() {
+    /// If the text has changed since the last segment (or never
+    /// segmented), rebuild the sentence queue on the shared player.
+    /// Called when the user presses play on the HUD — so hitting
+    /// play mid-edit always reads the on-screen content, not a
+    /// stale cache. No-op when nothing has changed.
+    private func ensureLoaded() {
         let snapshot = text
+        guard snapshot != lastSegmentedText else { return }
         guard !snapshot.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return
         }
-        isSegmenting = true
+        lastSegmentedText = snapshot
         Task { @MainActor in
             let block = DocumentBlock(text: snapshot, pageIndex: 0, offsetInPage: 0)
             let parsed = await SentenceSegmenter.segment([block])
             player.load(parsed)
-            isSegmenting = false
-            guard !parsed.isEmpty else { return }
-            // Small delay before play so the HUD picks up the new
-            // sentence count before we start; otherwise the scrubber
-            // can flash at 0/0 for a frame.
-            try? await Task.sleep(for: .milliseconds(16))
-            player.togglePlayPause()
         }
     }
 
