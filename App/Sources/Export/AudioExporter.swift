@@ -99,7 +99,7 @@ enum AudioExporter {
 
         for (index, sentence) in sentences.enumerated() {
             var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
-            spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+            spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
 
             let buffer: AVAudioPCMBuffer
             do {

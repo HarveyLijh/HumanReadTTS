@@ -63,12 +63,25 @@ final class SpeechSettings {
         didSet { defaults.set(skipFigureCaptions, forKey: skipFigureCaptionsKey) }
     }
 
+    /// User-editable regex skip patterns. Applied at speak time
+    /// via `ResearchCleanup.clean(...)`, so the visible document
+    /// stays untouched but the synthesizer receives cleaner text.
+    /// Seeded with `SkipRule.builtIns` on first launch; users can
+    /// add, edit, disable, or delete custom rules from the Skip
+    /// Rules Settings tab. Built-ins are disable-able but not
+    /// deletable (preserves the safe default if the user wants
+    /// them back).
+    var skipRules: [SkipRule] = SkipRule.builtIns {
+        didSet { persistSkipRules() }
+    }
+
     private let defaults: UserDefaults
     private let rateKey = "app.rhea.mac.speech.rate.v1"
     private let pitchKey = "app.rhea.mac.speech.pitch.v1"
     private let voiceKey = "app.rhea.mac.speech.voice.v1"
     private let stripCitationsKey = "app.rhea.mac.speech.stripCitations.v1"
     private let skipFigureCaptionsKey = "app.rhea.mac.speech.skipFigureCaptions.v1"
+    private let skipRulesKey = "app.rhea.mac.speech.skipRules.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -81,6 +94,7 @@ final class SpeechSettings {
         voiceIdentifier = defaults.string(forKey: voiceKey)
         stripCitations = defaults.bool(forKey: stripCitationsKey)
         skipFigureCaptions = defaults.bool(forKey: skipFigureCaptionsKey)
+        skipRules = Self.loadSkipRules(from: defaults, key: skipRulesKey)
     }
 
     func reset() {
@@ -89,6 +103,29 @@ final class SpeechSettings {
         voiceIdentifier = nil
         stripCitations = false
         skipFigureCaptions = false
+        skipRules = SkipRule.builtIns
+    }
+
+    private func persistSkipRules() {
+        guard let data = try? JSONEncoder().encode(skipRules) else { return }
+        defaults.set(data, forKey: skipRulesKey)
+    }
+
+    /// Loads the stored skip rules, or seeds with `SkipRule.builtIns`
+    /// on first launch. If the JSON exists but has been externally
+    /// edited to drop the built-ins, we re-merge them at the top so
+    /// the safe defaults always remain reachable — only toggle-off
+    /// hides a built-in, never a corrupt JSON payload.
+    private static func loadSkipRules(
+        from defaults: UserDefaults, key: String
+    ) -> [SkipRule] {
+        guard let data = defaults.data(forKey: key),
+              let decoded = try? JSONDecoder().decode([SkipRule].self, from: data) else {
+            return SkipRule.builtIns
+        }
+        let existing = Set(decoded.map(\.id))
+        let missingBuiltIns = SkipRule.builtIns.filter { !existing.contains($0.id) }
+        return missingBuiltIns + decoded
     }
 
     /// Maps user-facing speed to `AVSpeechUtterance.rate`, clamped

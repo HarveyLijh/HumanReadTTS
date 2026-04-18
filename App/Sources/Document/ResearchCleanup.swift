@@ -55,15 +55,39 @@ enum ResearchCleanup {
         return regex.firstMatch(in: trimmed, options: [], range: range) != nil
     }
 
+    /// Apply every enabled `SkipRule` to `text`. Rules with invalid
+    /// patterns are silently skipped — the Settings editor validates
+    /// on save, so the only way a broken rule reaches here is an
+    /// external edit to UserDefaults, which we don't need to hard-
+    /// fail on.
+    static func applyCustomRules(_ text: String, rules: [SkipRule]) -> String {
+        rules
+            .filter(\.isEnabled)
+            .reduce(text) { acc, rule in
+                replace(in: acc, pattern: rule.pattern, with: "")
+            }
+    }
+
     /// Apply the full cleanup pass, gated by the user's settings
     /// flags. Collapses any runs of spaces the removals leave
     /// behind so sentences don't read with awkward gaps.
-    static func clean(_ text: String, stripCitations: Bool) -> String {
+    static func clean(
+        _ text: String,
+        stripCitations: Bool,
+        skipRules: [SkipRule] = []
+    ) -> String {
         var out = text
         if stripCitations {
-            out = stripNumericCitations(out)
             out = stripAuthorYearCitations(out)
             out = stripBracketedAuthorYear(out)
+        }
+        // User rules run after the author-year patterns so a user
+        // rule can't accidentally drop a parenthetical before the
+        // built-in matcher gets a chance. The numeric-citation
+        // built-in now lives in SkipRule.builtIns, so it flows
+        // through `applyCustomRules` naturally.
+        if !skipRules.isEmpty {
+            out = applyCustomRules(out, rules: skipRules)
         }
         // Normalise leftover double-spaces / orphaned punctuation.
         // Order matters: collapse whitespace first so " ," becomes

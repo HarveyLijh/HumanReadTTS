@@ -27,11 +27,15 @@ struct SettingsView: View {
                 .tabItem { Label("Pronunciation", systemImage: "character.book.closed") }
                 .tag(2)
 
+            SkipRulesSettingsView()
+                .tabItem { Label("Skip Rules", systemImage: "scissors") }
+                .tag(3)
+
             AnalyticsSettingsView()
                 .tabItem { Label("Analytics", systemImage: "chart.bar") }
-                .tag(3)
+                .tag(4)
         }
-        .frame(width: 580, height: 500)
+        .frame(width: 620, height: 540)
     }
 
     private var playbackTab: some View {
@@ -113,12 +117,12 @@ struct SettingsView: View {
             }
 
             Section {
-                Toggle("Skip inline citations when reading", isOn: $settings.stripCitations)
+                Toggle("Skip author–year citations (Smith et al., 2019)", isOn: $settings.stripCitations)
                 Toggle("Skip figure and table captions", isOn: $settings.skipFigureCaptions)
             } header: {
                 Text("Research PDFs")
             } footer: {
-                Text("Removes inline `[12]` or `(Smith et al., 2019)` from spoken text; hides `Figure N:` / `Table N:` blocks when loading a PDF. The visible document is unchanged.")
+                Text("Author–year uses a curated regex that stays accurate on tricky cases; hides `Figure N:` / `Table N:` blocks when loading a PDF. For `[12]`, `\\cite{…}`, and custom patterns, see the Skip Rules tab. The visible document is unchanged.")
                     .foregroundStyle(.secondary)
             }
 

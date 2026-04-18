@@ -350,7 +350,7 @@ final class SpeechPlayer {
 
     private func speakWithSystem(sentence: Sentence, settings: SpeechSettings) {
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
-        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
         let utterance = AVSpeechUtterance(string: spokenText)
         utterance.voice = Self.systemVoice(for: sentence.text, settings: settings)
         utterance.rate = settings.avSpeechRate
@@ -379,7 +379,7 @@ final class SpeechPlayer {
         }
 
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
-        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
         Task { @MainActor [weak self] in
             guard let self else { return }
             await KokoroEngine.shared.loadIfNeeded()
@@ -441,7 +441,7 @@ final class SpeechPlayer {
         }
 
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
-        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
         let language = Self.languageCode(for: sentence.text)
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -520,7 +520,7 @@ final class SpeechPlayer {
         let sentence = sentences[nextIdx]
         let speed = Float(settings.rate)
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
-        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
         let language = Self.languageCode(for: sentence.text)
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -545,7 +545,7 @@ final class SpeechPlayer {
         let sentence = sentences[nextIdx]
         let speed = Float(settings.rate)
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
-        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations)
+        spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
