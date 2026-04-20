@@ -2,9 +2,26 @@ import SwiftUI
 
 /// Sidebar list of recently-opened documents. Click to reopen; the
 /// owning `RootView` handles the bookmark resolution and swap.
+///
+/// Right-click surfaces two per-entry actions:
+///   * "Generate Audio…" — opens the dedicated export options sheet
+///     for the right-clicked entry (independent of whatever the user
+///     currently has open).
+///   * "Remove from Library" — drops the entry + saved reading
+///     position. The underlying file is untouched.
 struct LibrarySidebarView: View {
     @Bindable var library: Library
+    @Bindable var exporter = ExportCoordinator.shared
     @Binding var selectedID: LibraryEntry.ID?
+    /// Called when the user picks "Generate Audio…" from an entry's
+    /// context menu. The parent view resolves the entry into a sheet
+    /// presentation; keeping this as a closure means the sidebar
+    /// doesn't need to know about the sheet's state.
+    var onRequestExport: (LibraryEntry) -> Void = { _ in }
+    /// Called when the user picks "Remove from Library". The parent
+    /// forwards to `library.remove(id:)` so it can also clean up
+    /// selection and other related UI state.
+    var onRequestRemove: (LibraryEntry) -> Void = { _ in }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,7 +32,27 @@ struct LibrarySidebarView: View {
                     emptyRow
                 } else {
                     ForEach(library.entries) { entry in
-                        row(for: entry).tag(entry.id)
+                        row(for: entry)
+                            .tag(entry.id)
+                            .contextMenu {
+                                Button {
+                                    onRequestExport(entry)
+                                } label: {
+                                    Label(
+                                        "Generate Audio for Entire Article…",
+                                        systemImage: "waveform.badge.plus"
+                                    )
+                                }
+                                Divider()
+                                Button(role: .destructive) {
+                                    onRequestRemove(entry)
+                                } label: {
+                                    Label(
+                                        "Remove from Library",
+                                        systemImage: "xmark.bin"
+                                    )
+                                }
+                            }
                     }
                 }
             }
@@ -57,10 +94,87 @@ struct LibrarySidebarView: View {
             .controlSize(.small)
             .help("Open a PDF, Markdown, or EPUB · ⌘O")
 
+            queueButton
+
             Spacer()
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
+    }
+
+    /// Always-visible export queue indicator. Reflects
+    /// ExportCoordinator state at a glance: tray when empty, waveform
+    /// + "running·queued" while jobs are in flight, orange triangle
+    /// when the most recent run failed. Click opens the dedicated
+    /// Exports window so the user never has to remember ⌘⇧J.
+    private var queueButton: some View {
+        Button {
+            NotificationCenter.default.post(
+                name: AppScene.showExportsNotification, object: nil
+            )
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: queueIconName)
+                if let label = queueCountLabel {
+                    Text(label)
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                }
+            }
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(queueTint)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .help(queueTooltip)
+    }
+
+    private var queueRunning: Int {
+        exporter.jobs.filter {
+            if case .running = $0.state { return true }
+            return false
+        }.count
+    }
+
+    private var queueQueued: Int {
+        exporter.jobs.filter {
+            if case .queued = $0.state { return true }
+            return false
+        }.count
+    }
+
+    private var queueFailedRecent: Bool {
+        if case .failed = exporter.state { return true }
+        return false
+    }
+
+    private var queueIconName: String {
+        if queueRunning > 0 { return "waveform" }
+        if queueQueued > 0 { return "hourglass" }
+        if queueFailedRecent { return "exclamationmark.triangle.fill" }
+        return "tray"
+    }
+
+    private var queueCountLabel: String? {
+        if queueRunning > 0 && queueQueued > 0 {
+            return "\(queueRunning)·\(queueQueued)"
+        }
+        if queueRunning > 0 { return "\(queueRunning)" }
+        if queueQueued > 0 { return "\(queueQueued)" }
+        return nil
+    }
+
+    private var queueTint: Color {
+        if queueRunning > 0 || queueQueued > 0 { return Color.rheaAccent }
+        if queueFailedRecent { return .orange }
+        return .secondary
+    }
+
+    private var queueTooltip: String {
+        if queueRunning > 0 || queueQueued > 0 {
+            return "Exports: \(queueRunning) running, \(queueQueued) queued — click to open (⌘⇧J)"
+        }
+        if queueFailedRecent { return "Last export failed — click to open the queue (⌘⇧J)" }
+        return "Open the export queue (⌘⇧J)"
     }
 
     private var emptyRow: some View {
