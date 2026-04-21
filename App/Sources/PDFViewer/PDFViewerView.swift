@@ -28,7 +28,6 @@ struct PDFViewerView: View {
                     spokenSubRange: player.spokenSubRange,
                     onReadFromLocation: handleReadFromLocation
                 )
-                .ignoresSafeArea()
                 .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
                 .task(id: url) {
                     let extracted = await PDFTextExtractor.extract(
@@ -136,12 +135,19 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     func makeNSView(context: Context) -> PDFView {
         let view = ClickablePDFView()
         view.onReadFromLocation = onReadFromLocation
-        view.autoScales = true
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
         view.backgroundColor = NSColor(Color.rheaSurface)
+        view.autoScales = true
         view.document = document
         view.unregisterDraggedTypes()
+        // `autoScales` is evaluated once against current bounds when
+        // the document is assigned. In a split view the detail column
+        // often has 0-width at makeNSView time, so PDFKit picks a
+        // fit-scale that leaves the page clipped when the view
+        // finally resizes. `needsInitialFit` lets the subclass re-run
+        // the fit once real bounds arrive.
+        view.needsInitialFit = true
         return view
     }
 
@@ -152,6 +158,9 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         if nsView.document !== document {
             removeHighlight(coordinator: context.coordinator)
             nsView.document = document
+            if let clickable = nsView as? ClickablePDFView {
+                clickable.needsInitialFit = true
+            }
         }
         applyHighlight(view: nsView, coordinator: context.coordinator)
     }
@@ -294,10 +303,205 @@ private struct PDFViewRepresentable: NSViewRepresentable {
 /// so the host can look up the sentence without any translation.
 private final class ClickablePDFView: PDFView {
     var onReadFromLocation: ((PDFClickLocation) -> Void)?
+    /// Set by the host when a document is (re)assigned so the next
+    /// valid layout pass forces a refit. Separate from the zoom-lock
+    /// below because loading a new document always wants to reset the
+    /// fit, even if the user had zoomed in on the previous one.
+    var needsInitialFit: Bool = false
+
+    /// Turned on by explicit user zoom (⌘+wheel) and cleared by
+    /// `restoreDefaultLook()`. While off, every width change re-runs
+    /// the fit-to-width computation; this is the piece that keeps the
+    /// page aligned after the NavigationSplitView sidebar animates in.
+    private var userControlsZoom = false
 
     private var pendingMenuLocation: PDFClickLocation?
+    private var panAnchorWindowPoint: NSPoint?
+    private var panStartClipOrigin: NSPoint = .zero
+    private var pushedPanCursor = false
+    private var lastFitWidth: CGFloat = 0
+    private var scrollMonitor: Any?
+    private var mouseMonitor: Any?
+    private var keyMonitor: Any?
+    private static let zoomStep: CGFloat = 1.08
+    private static let minZoomMultiplier: CGFloat = 0.25
+    private static let maxZoomMultiplier: CGFloat = 6.0
+
+    override var acceptsFirstResponder: Bool { true }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if window == nil {
+            removeEventMonitors()
+        } else {
+            installEventMonitors()
+        }
+    }
+
+    deinit {
+        removeEventMonitors()
+    }
+
+    // Window-level NSEvent monitors. PDFView wraps an internal
+    // NSScrollView that consumes `scrollWheel`, `otherMouseDown`,
+    // and key events before they can bubble to this subclass, so
+    // method overrides on `ClickablePDFView` never fire. Local
+    // monitors run inside the app's event loop before the view
+    // hierarchy sees the event, letting us intercept ⌘+wheel zoom,
+    // middle-button pan, and Escape while leaving normal scroll /
+    // click behavior untouched.
+    private func installEventMonitors() {
+        removeEventMonitors()
+        scrollMonitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) {
+            [weak self] event in
+            guard let self else { return event }
+            return self.handleScroll(event)
+        }
+        let mouseMask: NSEvent.EventTypeMask = [
+            .otherMouseDown, .otherMouseDragged, .otherMouseUp
+        ]
+        mouseMonitor = NSEvent.addLocalMonitorForEvents(matching: mouseMask) {
+            [weak self] event in
+            guard let self else { return event }
+            return self.handleMouse(event)
+        }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
+            [weak self] event in
+            guard let self else { return event }
+            return self.handleKey(event)
+        }
+    }
+
+    private func removeEventMonitors() {
+        if let m = scrollMonitor { NSEvent.removeMonitor(m); scrollMonitor = nil }
+        if let m = mouseMonitor { NSEvent.removeMonitor(m); mouseMonitor = nil }
+        if let m = keyMonitor { NSEvent.removeMonitor(m); keyMonitor = nil }
+    }
+
+    private func eventIsOverMe(_ event: NSEvent) -> Bool {
+        guard event.window === self.window, self.window != nil else { return false }
+        let viewPoint = convert(event.locationInWindow, from: nil)
+        return bounds.contains(viewPoint)
+    }
+
+    private func handleScroll(_ event: NSEvent) -> NSEvent? {
+        guard event.modifierFlags.contains(.command), eventIsOverMe(event) else {
+            return event
+        }
+        let delta = event.scrollingDeltaY != 0
+            ? event.scrollingDeltaY
+            : event.deltaY
+        guard abs(delta) > 0.01 else { return nil }
+        let factor: CGFloat = delta > 0
+            ? Self.zoomStep
+            : 1.0 / Self.zoomStep
+        let viewPoint = convert(event.locationInWindow, from: nil)
+        zoom(by: factor, around: viewPoint)
+        return nil  // consume so PDFView doesn't also scroll
+    }
+
+    private func handleMouse(_ event: NSEvent) -> NSEvent? {
+        // buttonNumber == 2 is the middle button; Logitech / MX
+        // Master wheel-click maps here.
+        guard event.buttonNumber == 2 else { return event }
+        switch event.type {
+        case .otherMouseDown:
+            guard eventIsOverMe(event) else { return event }
+            window?.makeFirstResponder(self)
+            panAnchorWindowPoint = event.locationInWindow
+            panStartClipOrigin = enclosingClipView?.bounds.origin ?? .zero
+            if !pushedPanCursor {
+                NSCursor.closedHand.push()
+                pushedPanCursor = true
+            }
+            return nil
+        case .otherMouseDragged:
+            guard let anchor = panAnchorWindowPoint,
+                  let clipView = enclosingClipView else { return event }
+            let current = event.locationInWindow
+            let dx = anchor.x - current.x
+            // Clip view origin moves +y to scroll the document *down*
+            // when flipped; window y increases upward, so invert when
+            // the clip isn't flipped.
+            let dy = clipView.isFlipped
+                ? current.y - anchor.y
+                : anchor.y - current.y
+            var origin = panStartClipOrigin
+            origin.x += dx
+            origin.y += dy
+            clipView.scroll(to: origin)
+            clipView.enclosingScrollView?.reflectScrolledClipView(clipView)
+            return nil
+        case .otherMouseUp:
+            if panAnchorWindowPoint != nil {
+                endPan()
+                return nil
+            }
+            return event
+        default:
+            return event
+        }
+    }
+
+    private func handleKey(_ event: NSEvent) -> NSEvent? {
+        // keyCode 53 is Escape. Only consume when the PDFView (or
+        // one of its descendants) is first responder, so Esc on the
+        // sidebar or transport still does whatever else it did.
+        guard event.keyCode == 53, isFirstResponderSelfOrDescendant() else {
+            return event
+        }
+        restoreDefaultLook()
+        return nil
+    }
+
+    private func isFirstResponderSelfOrDescendant() -> Bool {
+        guard let responder = window?.firstResponder as? NSView else {
+            return false
+        }
+        var cursor: NSView? = responder
+        while let current = cursor {
+            if current === self { return true }
+            cursor = current.superview
+        }
+        return false
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        // SwiftUI sets the frame directly rather than marking the
+        // view dirty, so `layout()` isn't reliably called. Drive the
+        // fit-to-width recomputation off every real width change,
+        // because `autoScales` frequently misses the post-init width
+        // shrink when the NavigationSplitView sidebar animates in.
+        guard newSize.width > 1,
+              newSize.height > 1,
+              document != nil,
+              !userControlsZoom else { return }
+        needsInitialFit = false
+        // Deferred so PDFKit finishes the in-flight frame propagation
+        // before we read `scaleFactorForSizeToFit`; reading it too
+        // early returns the old fit scale against the old bounds.
+        DispatchQueue.main.async { [weak self] in
+            self?.applyFitToWidth()
+        }
+    }
+
+    private func applyFitToWidth() {
+        guard !userControlsZoom, document != nil else { return }
+        let fit = scaleFactorForSizeToFit
+        guard fit > 0 else { return }
+        // `autoScales` has to be off before manually setting
+        // `scaleFactor`; otherwise PDFKit ignores the assignment.
+        autoScales = false
+        scaleFactor = fit
+        lastFitWidth = bounds.width
+    }
 
     override func mouseDown(with event: NSEvent) {
+        // Claim first responder so Escape / key-based shortcuts reach
+        // `keyDown(with:)`. PDFView doesn't always promote itself on
+        // click when hosted inside SwiftUI.
+        window?.makeFirstResponder(self)
         super.mouseDown(with: event)
         guard event.clickCount == 2 else { return }
         guard let location = pdfLocation(for: event) else { return }
@@ -345,6 +549,118 @@ private final class ClickablePDFView: PDFView {
         onReadFromLocation?(location)
     }
 
+    // MARK: - Zoom, pan, restore
+
+    private func endPan() {
+        panAnchorWindowPoint = nil
+        if pushedPanCursor {
+            NSCursor.pop()
+            pushedPanCursor = false
+        }
+    }
+
+    private var enclosingClipView: NSClipView? {
+        // PDFView wraps its document in a private scroll view; walk
+        // the subview tree to find the clip view we can scroll.
+        func find(in view: NSView) -> NSClipView? {
+            if let scroll = view as? NSScrollView { return scroll.contentView }
+            for sub in view.subviews {
+                if let clip = find(in: sub) { return clip }
+            }
+            return nil
+        }
+        return find(in: self)
+    }
+
+    private func zoom(by factor: CGFloat, around viewPoint: NSPoint) {
+        let fitScale = scaleFactorForSizeToFit
+        guard fitScale > 0 else { return }
+        let minScale = fitScale * Self.minZoomMultiplier
+        let maxScale = fitScale * Self.maxZoomMultiplier
+        let oldScale = scaleFactor
+        let newScale = max(minScale, min(maxScale, oldScale * factor))
+        guard abs(newScale - oldScale) > 0.0001 else { return }
+
+        guard let clipView = enclosingClipView else {
+            userControlsZoom = true
+            autoScales = false
+            scaleFactor = newScale
+            return
+        }
+
+        // Canonical "zoom-around-cursor" affine used by Figma,
+        // Photoshop, Google Maps, etc. In a single step:
+        //
+        //     newOffset = cursor − (cursor − oldOffset) × (newScale / oldScale)
+        //
+        // `cursor` and `offset` are both in the document view's
+        // coord system (the clip view's bounds is expressed in that
+        // system too). Derived from the invariant "the document
+        // point under the cursor before the zoom is the document
+        // point under the cursor after the zoom":
+        //
+        //     (cursor − oldOffset) / oldScale == (cursor − newOffset) / newScale
+        //
+        // Solving for newOffset gives the formula above. Working in
+        // one step avoids a pdfkit race where `scaleFactor` and
+        // `scroll(to:)` applied separately can interleave.
+        let cursorInClip = clipView.convert(viewPoint, from: self)
+        let cursorInDoc = NSPoint(
+            x: clipView.bounds.origin.x + cursorInClip.x,
+            y: clipView.bounds.origin.y + cursorInClip.y
+        )
+        let scaleRatio = newScale / oldScale
+        // Textbook "zoom-around-cursor" form (Figma / PureRef /
+        // Photoshop / Google Maps all do this). The post-zoom clip
+        // origin must satisfy:
+        //
+        //     cursorInDoc × scaleRatio − newOffset == cursorInClip
+        //
+        // which keeps the viewport-local cursor pixel pointing at
+        // the same document content after the scale change.
+        let anchoredOffset = NSPoint(
+            x: cursorInDoc.x * scaleRatio - cursorInClip.x,
+            y: cursorInDoc.y * scaleRatio - cursorInClip.y
+        )
+
+        userControlsZoom = true
+        autoScales = false
+        // Apply scale and offset atomically to avoid the PDFKit
+        // race. `setBoundsOrigin` is synchronous (no animation),
+        // which `scroll(to:)` would otherwise wrap in an implicit
+        // CA animation and cause a one-frame drift.
+        scaleFactor = newScale
+        clipView.setBoundsOrigin(anchoredOffset)
+        clipView.enclosingScrollView?.reflectScrolledClipView(clipView)
+    }
+
+    private func restoreDefaultLook() {
+        // Remember the page the user is currently looking at, so we
+        // can keep their reading position after the zoom reset.
+        let anchorPoint = convert(
+            NSPoint(x: bounds.midX, y: bounds.midY),
+            from: nil
+        )
+        let anchorPage = page(for: anchorPoint, nearest: true)
+
+        userControlsZoom = false
+        applyFitToWidth()
+
+        // Reset horizontal pan to 0 and keep the vertical position
+        // aligned to the anchor page the user was reading. Skipping
+        // this would leave the user's current paragraph off-screen
+        // after a deep zoom-out.
+        if let anchorPage {
+            go(to: anchorPage)
+        }
+        if let clipView = enclosingClipView {
+            var origin = clipView.bounds.origin
+            origin.x = 0
+            clipView.scroll(to: origin)
+            clipView.enclosingScrollView?.reflectScrolledClipView(clipView)
+        }
+    }
+
     private func pdfLocation(for event: NSEvent) -> PDFClickLocation? {
         let viewPoint = convert(event.locationInWindow, from: nil)
         guard let page = self.page(for: viewPoint, nearest: true),
@@ -356,3 +672,4 @@ private final class ClickablePDFView: PDFView {
         return PDFClickLocation(pageIndex: pageIndex, pageOffset: charIdx)
     }
 }
+
