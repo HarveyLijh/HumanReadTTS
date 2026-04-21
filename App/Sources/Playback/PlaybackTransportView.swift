@@ -658,6 +658,10 @@ private struct VoicePopover: View {
 private struct SkipRulesPopover: View {
     @Bindable var settings: SpeechSettings
 
+    @State private var showingAddForm = false
+    @State private var newName: String = ""
+    @State private var newPattern: String = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -677,36 +681,149 @@ private struct SkipRulesPopover: View {
             Divider()
 
             if settings.skipRules.isEmpty {
-                Text("No rules configured. Add one in Settings → Skip Rules.")
+                Text("No rules configured. Add one below.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 4)
             } else {
-                ForEach($settings.skipRules) { $rule in
-                    Toggle(isOn: $rule.isEnabled) {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(rule.name)
-                                .font(.system(size: 12))
-                                .lineLimit(1)
-                            Text(rule.pattern)
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                        }
-                    }
-                    .toggleStyle(.switch)
-                    .controlSize(.mini)
+                ForEach(settings.skipRules) { rule in
+                    ruleRow(rule)
                 }
             }
 
             Divider()
+
+            if showingAddForm {
+                addForm
+            } else {
+                Button {
+                    showingAddForm = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 11))
+                        Text("Add custom rule")
+                            .font(.system(size: 11))
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
 
             Text("Changes apply at the next sentence.")
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
         }
         .padding(12)
-        .frame(width: 320)
+        .frame(width: 340)
+    }
+
+    @ViewBuilder
+    private func ruleRow(_ rule: SkipRule) -> some View {
+        let isValid = rule.compiles
+        HStack(spacing: 6) {
+            Toggle(isOn: isEnabledBinding(for: rule.id)) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(rule.name)
+                        .font(.system(size: 12))
+                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        if !isValid {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                                .font(.system(size: 9))
+                        }
+                        Text(rule.pattern)
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(isValid ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.orange))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }
+            }
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+
+            if !rule.isBuiltIn {
+                Button {
+                    let id = rule.id
+                    // Defer mutation so the button's view tree isn't
+                    // torn down mid-action — a Binding into the
+                    // ForEach array otherwise reads a stale index on
+                    // removal and crashes.
+                    DispatchQueue.main.async {
+                        settings.skipRules.removeAll { $0.id == id && !$0.isBuiltIn }
+                    }
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Delete this custom rule")
+            }
+        }
+    }
+
+    /// Id-keyed toggle binding so mutations to `skipRules` (delete,
+    /// reorder) don't strand an index-based `Binding` captured in a
+    /// ForEach row.
+    private func isEnabledBinding(for id: UUID) -> Binding<Bool> {
+        Binding(
+            get: { settings.skipRules.first(where: { $0.id == id })?.isEnabled ?? false },
+            set: { newValue in
+                if let i = settings.skipRules.firstIndex(where: { $0.id == id }) {
+                    settings.skipRules[i].isEnabled = newValue
+                }
+            }
+        )
+    }
+
+    private var addForm: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            TextField("Name (e.g. Page markers)", text: $newName)
+                .textFieldStyle(.roundedBorder)
+                .controlSize(.small)
+            TextField("Regex pattern", text: $newPattern)
+                .textFieldStyle(.roundedBorder)
+                .font(.system(.caption, design: .monospaced))
+                .controlSize(.small)
+            HStack(spacing: 6) {
+                Spacer()
+                Button("Cancel") {
+                    resetAddForm()
+                }
+                .controlSize(.small)
+                Button("Add") {
+                    addCustomRule()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(!canAdd)
+            }
+        }
+    }
+
+    private var canAdd: Bool {
+        let n = newName.trimmingCharacters(in: .whitespaces)
+        let p = newPattern.trimmingCharacters(in: .whitespaces)
+        guard !n.isEmpty, !p.isEmpty else { return false }
+        return (try? NSRegularExpression(pattern: p)) != nil
+    }
+
+    private func addCustomRule() {
+        let n = newName.trimmingCharacters(in: .whitespaces)
+        let p = newPattern.trimmingCharacters(in: .whitespaces)
+        guard !n.isEmpty, !p.isEmpty else { return }
+        settings.skipRules.append(
+            SkipRule(name: n, pattern: p, isEnabled: true, isBuiltIn: false)
+        )
+        resetAddForm()
+    }
+
+    private func resetAddForm() {
+        newName = ""
+        newPattern = ""
+        showingAddForm = false
     }
 }

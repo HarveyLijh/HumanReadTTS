@@ -417,6 +417,7 @@ final class SpeechPlayer {
     private func speakWithKokoro(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
         let speed = Float(settings.rate)
         let myIndex = nextIndex
+        let expectedVoiceID = "kokoro:" + voiceID
 
         // Cache hit: pre-buffered during the previous sentence.
         if let samples = prefetchedKokoro.removeValue(forKey: myIndex) {
@@ -443,11 +444,15 @@ final class SpeechPlayer {
                 let samples = try await KokoroEngine.shared.synthesize(
                     text: spokenText, voiceID: voiceID, speed: speed
                 )
-                // The user may have skipped or stopped while we were
-                // synthesising. Only play if we're still on the same
-                // sentence and still in playing state.
+                // The user may have skipped, stopped, or switched voice
+                // while we were synthesising. Only play if we're still
+                // on the same sentence, still in playing state, and the
+                // voice the user now wants still matches what we just
+                // synthesized — otherwise we'd briefly emit the prior
+                // voice before the new one's synth lands.
                 guard self.state.sentenceIndex == myIndex,
-                      case .playing = self.state else { return }
+                      case .playing = self.state,
+                      SpeechSettings.shared.voiceIdentifier == expectedVoiceID else { return }
                 let start = ContinuousClock.now
                 self.pcm.play(samples: samples) { [weak self] in
                     self?.didFinishCurrent()
@@ -480,6 +485,7 @@ final class SpeechPlayer {
     private func speakWithQwen(sentence: Sentence, voiceID: String, settings: SpeechSettings) {
         let speed = Float(settings.rate)
         let myIndex = nextIndex
+        let expectedVoiceID = "qwen:" + voiceID
 
         if let samples = prefetchedQwen.removeValue(forKey: myIndex) {
             let start = ContinuousClock.now
@@ -507,7 +513,8 @@ final class SpeechPlayer {
                     text: spokenText, voiceID: voiceID, language: language, speed: speed
                 )
                 guard self.state.sentenceIndex == myIndex,
-                      case .playing = self.state else { return }
+                      case .playing = self.state,
+                      SpeechSettings.shared.voiceIdentifier == expectedVoiceID else { return }
                 let start = ContinuousClock.now
                 self.pcm.play(samples: samples) { [weak self] in
                     self?.didFinishCurrent()
@@ -554,7 +561,8 @@ final class SpeechPlayer {
                 samples: samples, text: text, sampleRate: sampleRate
             ) else { return }
             guard !Task.isCancelled,
-                  self.state.sentenceIndex == sentenceIndex else { return }
+                  case .playing(let current) = self.state,
+                  current == sentenceIndex else { return }
             for word in words {
                 let target = playbackStart.advanced(
                     by: .milliseconds(Int((word.startSeconds * 1000).rounded()))
@@ -562,8 +570,14 @@ final class SpeechPlayer {
                 if ContinuousClock.now < target {
                     try? await Task.sleep(until: target, clock: .continuous)
                 }
+                // Bail if the user paused or skipped: the task's
+                // wall-clock timeline is decoupled from the audio
+                // player, so without this guard word highlights keep
+                // ticking through the rest of the sentence after
+                // `pcm.stop()` silences the audio.
                 guard !Task.isCancelled,
-                      self.state.sentenceIndex == sentenceIndex else { return }
+                      case .playing(let stillCurrent) = self.state,
+                      stillCurrent == sentenceIndex else { return }
                 self.spokenSubRange = word.characterRange
             }
         }
@@ -578,13 +592,18 @@ final class SpeechPlayer {
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
         spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
         let language = Self.languageCode(for: sentence.text)
+        let expectedVoiceID = "qwen:" + voiceID
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
                 let samples = try await QwenEngine.shared.synthesize(
                     text: spokenText, voiceID: voiceID, language: language, speed: speed
                 )
-                guard nextIdx == self.nextIndex + 1 else { return }
+                // `setVoice` resets `nextIndex` to the current sentence,
+                // so the index guard alone lets a stale-voice synth
+                // poison the cache — match the voice too.
+                guard nextIdx == self.nextIndex + 1,
+                      SpeechSettings.shared.voiceIdentifier == expectedVoiceID else { return }
                 self.prefetchedQwen[nextIdx] = samples
             } catch { /* silent; main path retries */ }
         }
@@ -602,14 +621,19 @@ final class SpeechPlayer {
         let speed = Float(settings.rate)
         var spokenText = PronunciationDictionary.shared.apply(to: sentence.text)
         spokenText = ResearchCleanup.clean(spokenText, stripCitations: settings.stripCitations, skipRules: settings.skipRules)
+        let expectedVoiceID = "kokoro:" + voiceID
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
                 let samples = try await KokoroEngine.shared.synthesize(
                     text: spokenText, voiceID: voiceID, speed: speed
                 )
-                // Drop prefetch if the user skipped/stopped during synth.
-                guard nextIdx == self.nextIndex + 1 else { return }
+                // Drop prefetch if the user skipped / stopped / switched
+                // voice during synth. A stale voice slipping through
+                // here would play the old voice one sentence into the
+                // future, after the switch has otherwise landed.
+                guard nextIdx == self.nextIndex + 1,
+                      SpeechSettings.shared.voiceIdentifier == expectedVoiceID else { return }
                 self.prefetchedKokoro[nextIdx] = samples
             } catch {
                 // Silent; main-path synth will surface the error.
@@ -620,10 +644,17 @@ final class SpeechPlayer {
     // MARK: delegate callbacks (dispatched from main by Delegate)
 
     fileprivate func didFinishCurrent() {
+        // Only advance on real end-of-sentence. A `pcm.stop()` during
+        // pause (neural engines) fires the scheduled buffer's
+        // completion callback as a side effect — if we advanced here
+        // we'd bump `nextIndex` past the sentence the user paused on
+        // and fall through to `state = .idle`, so the next Play press
+        // would restart from sentence 0 instead of resuming in place.
+        guard case .playing = state else { return }
         recordSentenceForStats()
         spokenSubRange = nil
         nextIndex += 1
-        if nextIndex < sentences.count, state.isPlaying {
+        if nextIndex < sentences.count {
             speakCurrent()
         } else {
             state = .idle

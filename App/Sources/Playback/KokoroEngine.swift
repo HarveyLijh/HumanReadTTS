@@ -11,6 +11,22 @@ import MLXUtilsLibrary
 // `PDFDocument`.
 extension KokoroTTS: @unchecked @retroactive Sendable {}
 extension MLXArray: @unchecked @retroactive Sendable {}
+// `KokoroSwift.Language` is a plain `String`-raw enum with no
+// associated values. The upstream package hasn't declared it
+// `Sendable`, so under Swift 6 strict concurrency we can't pass it
+// across a `@Sendable` boundary without this retroactive conformance.
+extension KokoroSwift.Language: @retroactive @unchecked Sendable {}
+
+/// Non-`@MainActor` actor whose sole job is to run synthesis bodies
+/// one-at-a-time on a cooperative thread. Ordering is FIFO per Swift
+/// actor semantics, which is what we want: the main-path synth that
+/// the user is listening to should play before any still-pending
+/// prefetch that was kicked off for it.
+private actor SynthGate {
+    func run<T: Sendable>(_ body: @Sendable () throws -> T) async rethrows -> T {
+        try body()
+    }
+}
 
 /// Owns the loaded Kokoro TTS engine and its voice catalogue.
 /// Loading is on-demand: nothing happens until either
@@ -49,6 +65,18 @@ final class KokoroEngine {
 
     private var tts: KokoroTTS?
     private var voiceArrays: [String: MLXArray] = [:]
+
+    /// Serializes every call into `KokoroTTS.generateAudio`.
+    ///
+    /// The underlying MisakiSwift `EnglishG2P` holds a single `NLTagger`
+    /// and sets `tagger.string` then `tagger.setLanguage(range:)` in two
+    /// non-atomic steps. Two concurrent `generateAudio` calls — e.g. the
+    /// main-path synth for sentence N on the freshly-picked voice while
+    /// the prefetch for N+1 on the old voice is still running — race on
+    /// that tagger, and the second `setLanguage` sees a range computed
+    /// from a string the tagger no longer holds. That trips a Swift
+    /// string-range precondition and kills the app.
+    private let gate = SynthGate()
 
     private static let log = Logger(subsystem: "app.rhea.mac", category: "kokoro")
 
@@ -113,7 +141,7 @@ final class KokoroEngine {
 
         let language: KokoroSwift.Language = voiceID.hasPrefix("a") ? .enUS : .enGB
 
-        let samples: [Float] = try await Task.detached(priority: .userInitiated) {
+        return try await gate.run { [tts, voiceArray, language, text, speed] in
             let (samples, _) = try tts.generateAudio(
                 voice: voiceArray,
                 language: language,
@@ -121,9 +149,7 @@ final class KokoroEngine {
                 speed: speed
             )
             return samples
-        }.value
-
-        return samples
+        }
     }
 
     /// Sample rate of the audio Kokoro returns.

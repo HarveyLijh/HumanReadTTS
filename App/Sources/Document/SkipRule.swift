@@ -66,6 +66,13 @@ struct SkipRule: Identifiable, Codable, Equatable, Hashable, Sendable {
                 isEnabled: true,
                 isBuiltIn: true
             ),
+            SkipRule(
+                id: UUID(uuidString: "00000000-0000-4000-8000-000000000004")!,
+                name: "Author-year citations — [Smith et al., 2020; Jones, 2021]",
+                pattern: #"\[[A-Z][\w'.\-]*(?:\s+(?:and|&)\s+[A-Z][\w'.\-]*|\s+et\s+al\.?)*,?\s+\d{4}[a-z]?(?:\s*;\s*[A-Z][\w'.\-]*(?:\s+(?:and|&)\s+[A-Z][\w'.\-]*|\s+et\s+al\.?)*,?\s+\d{4}[a-z]?)*\s*\]"#,
+                isEnabled: true,
+                isBuiltIn: true
+            ),
         ]
     }
 }
