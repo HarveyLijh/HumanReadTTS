@@ -343,6 +343,53 @@ per PR when possible.
 Apache 2.0. See [LICENSE](LICENSE). Bundled third-party components
 keep their own licenses; see [NOTICE](NOTICE).
 
+## Releasing
+
+Releases are built and published by GitHub Actions
+(`.github/workflows/release.yml`). Pushing an annotated semver tag
+fires the workflow, which runs `Scripts/package.sh` on a macOS arm64
+runner, attaches the resulting `.dmg` + `.sha256` to a new GitHub
+Release, and generates notes from the commit log since the previous
+tag.
+
+```sh
+# 1. Bump MARKETING_VERSION in Configs/Rhea.xcconfig (or wherever the
+#    Info.plist's CFBundleShortVersionString is set) to match the tag.
+# 2. Commit the bump, then:
+git tag v0.8.0
+git push origin v0.8.0          # or: git push --tags
+```
+
+- The tag name becomes the Release title. Tags containing `-`
+  (e.g. `v0.8.0-rc1`) are auto-marked as **pre-release**.
+- **Signing is optional.** Without the signing secrets the workflow
+  still ships an unsigned DMG and the release notes include the
+  standard first-launch right-click → **Open** instructions.
+- To sign + notarise, add these Actions secrets under
+  Settings → Secrets and variables → Actions:
+  `APPLE_TEAM_ID`, `DEVELOPER_ID_APPLICATION`, `NOTARY_APPLE_ID`,
+  `NOTARY_PASSWORD`, `BUILD_CERTIFICATE_BASE64` (base64-encoded
+  Developer ID `.p12`), `BUILD_CERTIFICATE_PASSWORD`,
+  `KEYCHAIN_PASSWORD`.
+- **Dry run**: the workflow also supports `workflow_dispatch`
+  (Actions → Release → *Run workflow*). That path uploads the DMG as
+  a workflow **artifact** instead of publishing a Release — useful
+  for smoke-testing the pipeline before committing to a public
+  version number.
+- **First build** takes ~15–25 min (cold SPM cache). Subsequent
+  builds reuse `~/Library/Developer/Xcode/DerivedData/**/SourcePackages`
+  via `actions/cache@v4`.
+
+If something goes wrong after publishing, delete the tag + release to
+retry:
+
+```sh
+git push origin :refs/tags/v0.8.0   # delete remote tag
+git tag -d v0.8.0                   # delete local tag
+# delete the Release in the GitHub UI, or:
+gh release delete v0.8.0 --yes
+```
+
 ---
 
 <div align="center">
