@@ -127,6 +127,23 @@ struct SettingsView: View {
             }
 
             Section {
+                LabeledContent {
+                    Button("Show Welcome Tour…") {
+                        NotificationCenter.default.post(
+                            name: .rheaShowOnboarding, object: nil
+                        )
+                    }
+                } label: {
+                    Text("Welcome tour")
+                }
+            } header: {
+                Text("Help")
+            } footer: {
+                Text("Walk through the basics again — voice, shortcuts, and a sample document.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
                 Button("Reset to defaults", role: .destructive) {
                     settings.reset()
                 }

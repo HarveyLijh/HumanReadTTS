@@ -79,6 +79,14 @@ struct AppScene: Scene {
                 .keyboardShortcut("J", modifiers: [.command, .shift])
             }
 
+            CommandGroup(replacing: .help) {
+                Button("Show Welcome Tour…") {
+                    NotificationCenter.default.post(
+                        name: .rheaShowOnboarding, object: nil
+                    )
+                }
+            }
+
             CommandMenu("Playback") {
                 Button("Play / Pause") {
                     NotificationCenter.default.post(

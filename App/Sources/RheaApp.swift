@@ -13,6 +13,8 @@ struct RheaApp: App {
         }
         .defaultSize(width: 620, height: 420)
 
+        OnboardingScene()
+
         Settings {
             SettingsView()
         }

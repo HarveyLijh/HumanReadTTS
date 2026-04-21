@@ -82,4 +82,10 @@ extension Notification.Name {
     /// Posted by `AppDelegateShim.application(_:open:)` so the main
     /// SwiftUI scene can adopt the URL without spawning a new window.
     static let rheaOpenURL = Notification.Name("app.rhea.mac.openURL")
+
+    /// Posted by the Settings "Show Welcome Tour" button and the
+    /// Help menu entry so the RootView (which owns an
+    /// `openWindow` environment handle) can raise the onboarding
+    /// window without direct SwiftUI plumbing.
+    static let rheaShowOnboarding = Notification.Name("app.rhea.mac.showOnboarding")
 }

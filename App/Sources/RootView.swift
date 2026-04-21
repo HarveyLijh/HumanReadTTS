@@ -38,19 +38,46 @@ struct RootView: View {
     /// Dropping a real document or picking a library entry resets
     /// this to nil so the reader takes back over.
     @State private var scratchpadText: String?
+    /// Library entry currently driving the "Generate Audio…" sheet.
+    /// Driven by the sidebar context menu; `nil` keeps the sheet
+    /// dismissed. Using the entry itself (not just an id) lets the
+    /// sheet present even after the entry is removed from the
+    /// library mid-flow.
+    @State private var exportSheetEntry: LibraryEntry?
+
+    @State private var onboarding = OnboardingState.shared
 
     var body: some View {
         NavigationSplitView {
-            LibrarySidebarView(library: library, selectedID: $selectedEntryID)
-                .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
+            LibrarySidebarView(
+                library: library,
+                selectedID: $selectedEntryID,
+                onRequestExport: { entry in
+                    exportSheetEntry = entry
+                },
+                onRequestRemove: { entry in
+                    handleRemove(entry)
+                }
+            )
+            .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } detail: {
             detail
         }
+        .sheet(item: $exportSheetEntry) { entry in
+            ExportOptionsSheet(
+                entry: entry,
+                library: library,
+                coordinator: exporter,
+                onDismiss: { exportSheetEntry = nil }
+            )
+        }
         .overlay(targetingHighlight)
         .overlay(alignment: .top) {
-            if case .running(let fraction) = exporter.state {
-                exportProgressBanner(fraction: fraction)
-            } else if case .failed(let message) = exporter.state {
+            // Running-export progress is surfaced by the sidebar's
+            // export queue chip — no need to cover the reader with a
+            // modal banner. Failures still surface here because the
+            // chip is purely a counter.
+            if case .failed(let message) = exporter.state {
                 exportErrorBanner(message: message)
             } else if fallbackBannerVisible {
                 fallbackBanner
@@ -98,10 +125,25 @@ struct RootView: View {
             // Routed via `AppDelegateShim.application(_:open:)` so
             // `open -a Rhea file.pdf` and Finder double-clicks swap
             // the document in the existing window rather than
-            // triggering `WindowGroup` to spawn a new scene.
+            // triggering `WindowGroup` to spawn a new scene. Also
+            // used by the welcome tour to hand off its sample.
             guard let url = note.userInfo?["url"] as? URL,
                   let next = DroppedDocument(url: url) else { return }
             adopt(next)
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: .rheaShowOnboarding)
+        ) { _ in
+            presentOnboarding()
+        }
+        .task {
+            // Fire once after the window lands. Dispatching inside
+            // .task lets the main window fully mount first, so the
+            // welcome window layers on top instead of racing the
+            // reader's appearance.
+            if onboarding.needsToShow {
+                presentOnboarding()
+            }
         }
         .onReceive(
             NotificationCenter.default.publisher(for: AppScene.exportNotification)
@@ -233,6 +275,27 @@ struct RootView: View {
         }
     }
 
+    /// Forget the given library entry. If it was the currently-open
+    /// document we also clear the viewer + selection so the reader
+    /// doesn't keep painting a document the user just removed from
+    /// their recents. The underlying file on disk is untouched.
+    private func handleRemove(_ entry: LibraryEntry) {
+        let isCurrent: Bool = {
+            guard let resolved = library.resolve(entry), let current = document else {
+                return false
+            }
+            return resolved.standardizedFileURL == current.url.standardizedFileURL
+        }()
+        library.remove(id: entry.id)
+        if selectedEntryID == entry.id {
+            selectedEntryID = nil
+        }
+        if isCurrent {
+            player.stop()
+            document = nil
+        }
+    }
+
     /// Observe sentence-index changes and persist them to the
     /// library entry backing the current document. Fires often (per
     /// sentence advance) but `Library.recordPosition` guards against
@@ -255,22 +318,6 @@ struct RootView: View {
     }
 
     // MARK: export banners
-
-    private func exportProgressBanner(fraction: Double) -> some View {
-        VStack(spacing: 4) {
-            Text("Exporting audiobook…")
-                .font(RheaFont.ui(12))
-            ProgressView(value: fraction)
-                .progressViewStyle(.linear)
-                .frame(width: 260)
-            Text(String(format: "%.0f%%", fraction * 100))
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(.secondary)
-        }
-        .padding(12)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .padding(.top, 12)
-    }
 
     /// Toast-style warning for engine fallbacks. Auto-dismisses
     /// after ~2s so the user knows WHY their chosen neural voice
@@ -392,6 +439,13 @@ struct RootView: View {
         .padding(10)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
         .padding(.top, 12)
+    }
+
+    /// Open the welcome window at step 0 — shared by the first-
+    /// launch auto-open and the Settings / Help menu re-entry.
+    private func presentOnboarding() {
+        onboarding.prepareForPresentation()
+        openWindow(id: OnboardingScene.windowID)
     }
 
     /// Present NSOpenPanel for the File → Open File… menu (⌘O).

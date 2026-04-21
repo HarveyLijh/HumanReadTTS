@@ -79,6 +79,17 @@ final class Library {
         save()
     }
 
+    /// Drop the recents entry (and its bookmark + saved position).
+    /// The underlying file is untouched — "remove from library" is
+    /// strictly a UI-surface operation, same as Finder's "Remove
+    /// from Recents". No-op when the id isn't in the list.
+    func remove(id: LibraryEntry.ID) {
+        let before = entries.count
+        entries.removeAll { $0.id == id }
+        guard entries.count != before else { return }
+        save()
+    }
+
     /// Resume index stored alongside `url`, if any. Used by the
     /// reader on document load to seek the player to a paused state
     /// at the last-known sentence.

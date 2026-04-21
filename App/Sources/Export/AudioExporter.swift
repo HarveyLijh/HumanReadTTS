@@ -44,17 +44,24 @@ enum AudioExporter {
 
     /// Export `sentences` to `destination` in `format`. `progress`
     /// is called on the main actor with fraction of sentences
-    /// completed.
+    /// completed. `overrides` lets the per-job panel pin a specific
+    /// voice / rate / pitch without mutating the shared settings
+    /// the live synthesizer is reading from.
     static func export(
         sentences: [Sentence],
         to destination: URL,
         format: AudioExportFormat = .m4a,
+        overrides: ExportOverrides = .none,
         progress: @escaping @MainActor (Double) -> Void = { _ in }
     ) async throws {
         guard !sentences.isEmpty else { throw ExportError.emptyQueue }
 
         let settings = SpeechSettings.shared
-        let voiceID = settings.voiceIdentifier ?? ""
+        let resolvedVoice = overrides.effectiveVoice(fallback: settings.voiceIdentifier)
+        let resolvedRate = overrides.effectiveRate(fallback: settings.rate)
+        let resolvedPitch = overrides.effectivePitch(fallback: settings.pitchMultiplier)
+
+        let voiceID = resolvedVoice ?? ""
         let useKokoro = voiceID.hasPrefix("kokoro:")
         let useQwen = voiceID.hasPrefix("qwen:")
         let kokoroVoice = useKokoro ? String(voiceID.dropFirst("kokoro:".count)) : nil
@@ -100,7 +107,7 @@ enum AudioExporter {
             do {
                 if useKokoro, let kokoroVoice {
                     let samples = try await synthesizeWithKokoro(
-                        text: spokenText, voiceID: kokoroVoice, speed: Float(settings.rate)
+                        text: spokenText, voiceID: kokoroVoice, speed: Float(resolvedRate)
                     )
                     buffer = try makeBuffer(samples: samples, format: pcmFormat)
                 } else if useQwen, let qwenVoice {
@@ -108,12 +115,17 @@ enum AudioExporter {
                         text: spokenText,
                         voiceID: qwenVoice,
                         language: Self.languageCode(for: sentence.text),
-                        speed: Float(settings.rate)
+                        speed: Float(resolvedRate)
                     )
                     buffer = try makeBuffer(samples: samples, format: pcmFormat)
                 } else {
                     buffer = try await synthesizeWithSystem(
-                        text: spokenText, settings: settings, format: pcmFormat
+                        text: spokenText,
+                        settings: settings,
+                        voiceIdentifier: resolvedVoice,
+                        rate: resolvedRate,
+                        pitchMultiplier: resolvedPitch,
+                        format: pcmFormat
                     )
                 }
             } catch let error as ExportError {
@@ -172,15 +184,30 @@ enum AudioExporter {
     /// supported path for pulling PCM out of a synthesizer without
     /// playing it through the speakers. Collects all partial
     /// buffers into one continuous Float32 buffer at `format`.
+    ///
+    /// Accepts the resolved voice / rate / pitch directly so the
+    /// per-job override panel doesn't have to mutate the shared
+    /// `SpeechSettings` to pin an alternative system voice.
     private static func synthesizeWithSystem(
-        text: String, settings: SpeechSettings, format: AVAudioFormat
+        text: String,
+        settings: SpeechSettings,
+        voiceIdentifier: String?,
+        rate: Double,
+        pitchMultiplier: Double,
+        format: AVAudioFormat
     ) async throws -> AVAudioPCMBuffer {
         let synth = AVSpeechSynthesizer()
 
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = resolveSystemVoice(for: text, settings: settings)
-        utterance.rate = settings.avSpeechRate
-        utterance.pitchMultiplier = Float(settings.pitchMultiplier)
+        utterance.voice = resolveSystemVoice(
+            for: text, voiceIdentifier: voiceIdentifier
+        )
+        let mapped = AVSpeechUtteranceDefaultSpeechRate * Float(rate)
+        utterance.rate = min(
+            AVSpeechUtteranceMaximumSpeechRate,
+            max(AVSpeechUtteranceMinimumSpeechRate, mapped)
+        )
+        utterance.pitchMultiplier = Float(pitchMultiplier)
 
         return try await withCheckedThrowingContinuation { cont in
             var collected: [Float] = []
@@ -204,10 +231,11 @@ enum AudioExporter {
     }
 
     private static func resolveSystemVoice(
-        for text: String, settings: SpeechSettings
+        for text: String, voiceIdentifier: String?
     ) -> AVSpeechSynthesisVoice? {
-        if let id = settings.voiceIdentifier,
+        if let id = voiceIdentifier,
            !id.hasPrefix("kokoro:"),
+           !id.hasPrefix("qwen:"),
            let v = AVSpeechSynthesisVoice(identifier: id) {
             return v
         }

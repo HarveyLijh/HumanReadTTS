@@ -21,6 +21,11 @@ struct ExportJob: Identifiable, Equatable {
     let sentences: [Sentence]
     let destination: URL
     let format: AudioExportFormat
+    /// Per-job voice/rate/pitch overrides set by the dedicated
+    /// "Generate Audio…" panel. Empty/`.none` means "use the live
+    /// SpeechSettings at synth time", matching the original
+    /// File → Export Audiobook flow.
+    let overrides: ExportOverrides
     var state: State
 
     init(
@@ -28,7 +33,8 @@ struct ExportJob: Identifiable, Equatable {
         title: String,
         sentences: [Sentence],
         destination: URL,
-        format: AudioExportFormat
+        format: AudioExportFormat,
+        overrides: ExportOverrides = .none
     ) {
         self.id = id
         self.title = title
@@ -36,6 +42,7 @@ struct ExportJob: Identifiable, Equatable {
         self.sentences = sentences
         self.destination = destination
         self.format = format
+        self.overrides = overrides
         self.state = .queued
     }
 }
@@ -128,13 +135,15 @@ final class ExportCoordinator {
         sentences: [Sentence],
         destination: URL,
         format: AudioExportFormat,
-        title: String
+        title: String,
+        overrides: ExportOverrides = .none
     ) {
         let job = ExportJob(
             title: title,
             sentences: sentences,
             destination: destination,
-            format: format
+            format: format,
+            overrides: overrides
         )
         jobs.append(job)
         kickProcessing()
@@ -194,11 +203,13 @@ final class ExportCoordinator {
             let job = jobs[nextIdx]
             Self.log.info("starting job \(job.id, privacy: .public) → \(job.destination.path, privacy: .public)")
 
+            let started = ContinuousClock.now
             do {
                 try await AudioExporter.export(
                     sentences: job.sentences,
                     to: job.destination,
-                    format: job.format
+                    format: job.format,
+                    overrides: job.overrides
                 ) { [weak self] fraction in
                     guard let self else { return }
                     if let idx = self.jobs.firstIndex(where: { $0.id == job.id }) {
@@ -210,6 +221,19 @@ final class ExportCoordinator {
                     jobs[idx].state = .succeeded(at: job.destination)
                 }
                 state = .succeeded(at: job.destination)
+                // Feed real elapsed wall-clock back into the
+                // estimator so future ETA previews tighten up for
+                // this machine + engine combination.
+                let elapsed = ContinuousClock.now - started
+                let resolvedVoice = job.overrides.effectiveVoice(
+                    fallback: SpeechSettings.shared.voiceIdentifier
+                )
+                ExportEstimator.recordObservation(
+                    sentences: job.sentences,
+                    voiceIdentifier: resolvedVoice,
+                    elapsed: TimeInterval(elapsed.components.seconds)
+                        + Double(elapsed.components.attoseconds) / 1e18
+                )
                 NSWorkspace.shared.activateFileViewerSelecting([job.destination])
             } catch let error as AudioExporter.ExportError {
                 let msg = error.errorDescription ?? "Export failed."
