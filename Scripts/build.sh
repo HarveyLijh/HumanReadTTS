@@ -219,7 +219,7 @@ else
     <key>NSHighResolutionCapable</key><true/>
     <key>CFBundleSupportedPlatforms</key>
     <array><string>MacOSX</string></array>
-    <key>NSHumanReadableCopyright</key><string>Copyright © 2026 Harvey Li</string>
+    <key>NSHumanReadableCopyright</key><string>Copyright © 2026 The Rhea Authors</string>
 </dict>
 </plist>
 PLIST

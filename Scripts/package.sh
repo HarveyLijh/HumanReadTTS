@@ -9,7 +9,7 @@
 # right-click → Open.
 #
 # Required env vars for full notarisation:
-#   DEVELOPER_ID_APPLICATION   e.g. "Developer ID Application: Harvey Li (XXXXXXXXXX)"
+#   DEVELOPER_ID_APPLICATION   e.g. "Developer ID Application: Your Name (XXXXXXXXXX)"
 #   NOTARY_APPLE_ID            Apple ID used for notarytool (email)
 #   NOTARY_TEAM_ID             e.g. "XXXXXXXXXX"
 #   NOTARY_PASSWORD            app-specific password (create at appleid.apple.com)
