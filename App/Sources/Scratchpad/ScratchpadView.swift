@@ -120,11 +120,34 @@ struct ScratchpadView: View {
             ScratchpadPreview(
                 markdown: text,
                 activeSentence: activeSentence,
-                spokenSubRange: player.spokenSubRange
+                spokenSubRange: player.spokenSubRange,
+                onReadFromOffset: handleReadFromOffset
             )
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
                 .background(Color.rheaSurface)
+        }
+    }
+
+    /// Double-click / "Read from here" handler for the Preview
+    /// view. Mirrors `MarkdownReaderView.handleReadFromOffset` so
+    /// clicks in the scratchpad behave identically to clicks in a
+    /// loaded `.md` file.
+    ///
+    /// If the typing-debounce in `.task(id: text)` hasn't fired yet
+    /// (the user typed and clicked within 400 ms), the player's
+    /// sentence queue can lag the rendered text. We synchronously
+    /// re-segment in that case so the offset resolves against the
+    /// text the user is actually looking at.
+    private func handleReadFromOffset(_ offset: Int) {
+        Task { @MainActor in
+            if text != lastSegmentedText {
+                await loadIntoPlayerSynchronously()
+            }
+            guard let idx = ReaderHitTester.sentenceIndex(
+                forOffset: offset, in: player.sentences
+            ) else { return }
+            player.playFromSentence(idx)
         }
     }
 
@@ -277,6 +300,10 @@ private struct ScratchpadPreview: NSViewRepresentable {
     let markdown: String
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    /// Double-click / "Read from here" callback. Kept optional so
+    /// the scratchpad preview can be reused in contexts (screenshots,
+    /// unit tests) that don't drive playback.
+    let onReadFromOffset: ((Int) -> Void)?
 
     final class Coordinator {
         var lastRenderedSource: String?
@@ -294,7 +321,12 @@ private struct ScratchpadPreview: NSViewRepresentable {
         scroll.borderType = .noBorder
         scroll.drawsBackground = false
 
-        let textView = NSTextView()
+        // Use the same click-to-start subclass the Markdown and
+        // EPUB readers use. Without it the scratchpad preview was a
+        // passive NSTextView and the Speechify-style double-click
+        // affordance silently did nothing.
+        let textView = ClickableReaderTextView()
+        textView.onReadFromOffset = onReadFromOffset
         textView.isEditable = false
         textView.isSelectable = true
         textView.isRichText = true
@@ -311,8 +343,12 @@ private struct ScratchpadPreview: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let textView = nsView.documentView as? NSTextView,
+        guard let textView = nsView.documentView as? ClickableReaderTextView,
               let storage = textView.textStorage else { return }
+        // Re-bind the callback on every update so swapping the
+        // host (e.g. a different scratchpad instance sharing the
+        // same NSView) points clicks at the right player.
+        textView.onReadFromOffset = onReadFromOffset
         // Only re-render when the source actually changed — walking
         // the markdown parser on every view update is wasteful when
         // the parent re-renders for unrelated reasons.
