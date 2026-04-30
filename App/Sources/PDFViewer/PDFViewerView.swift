@@ -12,6 +12,8 @@ struct PDFViewerView: View {
     @State private var loadResult: LoadResult = .loading
     @State private var blocks: [DocumentBlock] = []
     @State private var sentences: [Sentence] = []
+    @State private var search = SearchState()
+    @State private var searchSelections: [PDFSelection] = []
 
     var body: some View {
         Group {
@@ -21,14 +23,31 @@ struct PDFViewerView: View {
                     .controlSize(.small)
                     .tint(Color.rheaAccent)
             case .loaded(let document):
-                PDFViewRepresentable(
-                    document: document,
-                    blocks: blocks,
-                    activeSentence: activeSentence,
-                    spokenSubRange: player.spokenSubRange,
-                    onReadFromLocation: handleReadFromLocation
-                )
-                .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
+                ZStack(alignment: .topTrailing) {
+                    PDFViewRepresentable(
+                        document: document,
+                        blocks: blocks,
+                        activeSentence: activeSentence,
+                        spokenSubRange: player.spokenSubRange,
+                        searchSelections: searchSelections,
+                        currentSearchIndex: search.currentIndex,
+                        onReadFromLocation: handleReadFromLocation
+                    )
+                    .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
+
+                    if search.isPresented {
+                        SearchBar(
+                            state: search,
+                            onSubmit: { runSearch(in: document) },
+                            onNext: { advanceMatch(by: 1) },
+                            onPrev: { advanceMatch(by: -1) },
+                            onDismiss: dismissSearch
+                        )
+                        .padding(.top, 8)
+                        .padding(.trailing, 12)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                }
                 .task(id: url) {
                     let extracted = await PDFTextExtractor.extract(
                         document,
@@ -53,6 +72,90 @@ struct PDFViewerView: View {
                 loadResult = .failed
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
+            presentSearch()
+        }
+    }
+
+    // MARK: - Search
+
+    private func presentSearch() {
+        if !search.isPresented {
+            withAnimation(.easeOut(duration: 0.15)) {
+                search.isPresented = true
+            }
+        }
+        if case .loaded(let document) = loadResult {
+            runSearch(in: document)
+        }
+    }
+
+    private func dismissSearch() {
+        withAnimation(.easeOut(duration: 0.15)) {
+            search.isPresented = false
+        }
+        searchSelections = []
+        search.totalMatches = 0
+        search.currentIndex = -1
+    }
+
+    /// Resolves the current query against the PDF. Plain queries route
+    /// through PDFKit's native findString (case-insensitive when the
+    /// toggle is off). Regex falls back to a per-page scan because
+    /// PDFKit doesn't expose a regex API; we walk each `page.string`
+    /// with NSRegularExpression and translate the matches into
+    /// `PDFSelection`s via `page.selection(for: NSRange)`.
+    private func runSearch(in document: PDFDocument) {
+        let query = search.query
+        guard !query.isEmpty else {
+            searchSelections = []
+            search.totalMatches = 0
+            search.currentIndex = -1
+            return
+        }
+
+        var selections: [PDFSelection] = []
+        if search.useRegex {
+            var options: NSRegularExpression.Options = []
+            if !search.caseSensitive { options.insert(.caseInsensitive) }
+            guard let regex = try? NSRegularExpression(pattern: query, options: options) else {
+                searchSelections = []
+                search.totalMatches = 0
+                search.currentIndex = -1
+                return
+            }
+            for pageIndex in 0..<document.pageCount {
+                guard let page = document.page(at: pageIndex),
+                      let pageString = page.string else { continue }
+                let nsString = pageString as NSString
+                let full = NSRange(location: 0, length: nsString.length)
+                for match in regex.matches(in: pageString, options: [], range: full) {
+                    guard match.range.length > 0,
+                          let selection = page.selection(for: match.range) else {
+                        continue
+                    }
+                    selections.append(selection)
+                }
+            }
+        } else {
+            var options: NSString.CompareOptions = []
+            if !search.caseSensitive { options.insert(.caseInsensitive) }
+            selections = document.findString(query, withOptions: options)
+        }
+
+        searchSelections = selections
+        search.totalMatches = selections.count
+        if selections.isEmpty {
+            search.currentIndex = -1
+        } else if search.currentIndex < 0 || search.currentIndex >= selections.count {
+            search.currentIndex = 0
+        }
+    }
+
+    private func advanceMatch(by delta: Int) {
+        guard !searchSelections.isEmpty else { return }
+        let next = (search.currentIndex + delta + searchSelections.count) % searchSelections.count
+        search.currentIndex = next
     }
 
     private var activeSentence: Sentence? {
@@ -128,6 +231,8 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     let blocks: [DocumentBlock]
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let searchSelections: [PDFSelection]
+    let currentSearchIndex: Int
     let onReadFromLocation: (PDFClickLocation) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -163,6 +268,37 @@ private struct PDFViewRepresentable: NSViewRepresentable {
             }
         }
         applyHighlight(view: nsView, coordinator: context.coordinator)
+        applySearchSelections(view: nsView, coordinator: context.coordinator)
+    }
+
+    /// Drives PDFView's native match highlight + scroll. Updates the
+    /// yellow `highlightedSelections` bag whenever the match set
+    /// changes, then issues `setCurrentSelection` only when the active
+    /// match changes — `setCurrentSelection` triggers a scroll, so we
+    /// guard against re-issuing for the same selection on every state
+    /// tick.
+    private func applySearchSelections(view: PDFView, coordinator: Coordinator) {
+        let selectionIDs = searchSelections.map(ObjectIdentifier.init)
+        if coordinator.lastSearchSelectionIDs != selectionIDs {
+            view.highlightedSelections = searchSelections.isEmpty ? nil : searchSelections
+            coordinator.lastSearchSelectionIDs = selectionIDs
+        }
+        let active: PDFSelection?
+        if currentSearchIndex >= 0, currentSearchIndex < searchSelections.count {
+            active = searchSelections[currentSearchIndex]
+        } else {
+            active = nil
+        }
+        let activeID = active.map(ObjectIdentifier.init)
+        if coordinator.lastCurrentSearchID != activeID {
+            coordinator.lastCurrentSearchID = activeID
+            if let active {
+                view.setCurrentSelection(active, animate: false)
+                view.scrollSelectionToVisible(nil)
+            } else {
+                view.setCurrentSelection(nil, animate: false)
+            }
+        }
     }
 
     private func applyHighlight(view: PDFView, coordinator: Coordinator) {
@@ -289,6 +425,12 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         var subAnnotations: [(PDFAnnotation, PDFPage)] = []
         var lastSentenceKey: SentenceKey?
         var lastSubRange: NSRange?
+        /// PDFSelection identity bag used to decide when to re-publish
+        /// `highlightedSelections`. PDFSelection isn't Hashable, so we
+        /// stash ObjectIdentifiers — same instance means PDFKit has
+        /// already mounted the highlight.
+        var lastSearchSelectionIDs: [ObjectIdentifier] = []
+        var lastCurrentSearchID: ObjectIdentifier?
     }
 }
 

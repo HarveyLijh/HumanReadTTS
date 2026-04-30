@@ -48,3 +48,26 @@ struct WindowAccessor: NSViewRepresentable {
         }
     }
 }
+
+/// Reflects an "edited" boolean back to the hosting NSWindow's
+/// `isDocumentEdited`. AppKit draws the dot inside the close traffic
+/// light when this is true — the same affordance Notes / TextEdit use
+/// for unsaved changes. Updates on every render pass so toggling the
+/// state in SwiftUI propagates immediately.
+struct WindowEditedFlag: NSViewRepresentable {
+    var isEdited: Bool
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async { [weak view] in
+            view?.window?.isDocumentEdited = isEdited
+        }
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        DispatchQueue.main.async { [weak view] in
+            view?.window?.isDocumentEdited = isEdited
+        }
+    }
+}

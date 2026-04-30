@@ -15,6 +15,8 @@ struct AppScene: Scene {
     static let newScratchpadNotification = Notification.Name("app.rhea.mac.newScratchpad")
     static let speedFasterNotification = Notification.Name("app.rhea.mac.speedFaster")
     static let speedSlowerNotification = Notification.Name("app.rhea.mac.speedSlower")
+    static let saveNotification = Notification.Name("app.rhea.mac.save")
+    static let findNotification = Notification.Name("app.rhea.mac.find")
 
     var body: some Scene {
         WindowGroup("Rhea") {
@@ -31,6 +33,12 @@ struct AppScene: Scene {
                     window.isMovableByWindowBackground = true
                     window.styleMask.insert(NSWindow.StyleMask.fullSizeContentView)
                     window.backgroundColor = NSColor.clear
+                    // Wrap the existing SwiftUI delegate so close
+                    // attempts on dirty markdown buffers route through
+                    // our Save / Don't Save sheet — without replacing
+                    // the delegate outright, which clobbers SwiftUI's
+                    // own window plumbing.
+                    DirtyCloseGuard.attach(to: window)
                 })
         }
         .windowStyle(.hiddenTitleBar)
@@ -61,6 +69,31 @@ struct AppScene: Scene {
                     )
                 }
                 .keyboardShortcut("O", modifiers: [.command])
+
+                Divider()
+
+                Button("Save") {
+                    NotificationCenter.default.post(
+                        name: AppScene.saveNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("S", modifiers: [.command])
+            }
+
+            // Edit menu: place Find after the Pasteboard group (Cut /
+            // Copy / Paste / Delete / Select All), which SwiftUI always
+            // emits for the standard menu. `.textEditing` and
+            // `.saveItem` are document-app placements that this scene
+            // doesn't generate, so anchoring there silently drops the
+            // entries — that bit us in 4-29.
+            CommandGroup(after: .pasteboard) {
+                Divider()
+                Button("Find…") {
+                    NotificationCenter.default.post(
+                        name: AppScene.findNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("F", modifiers: [.command])
             }
 
             CommandGroup(after: CommandGroupPlacement.importExport) {

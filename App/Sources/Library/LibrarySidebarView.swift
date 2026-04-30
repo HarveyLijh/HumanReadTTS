@@ -12,6 +12,7 @@ import SwiftUI
 struct LibrarySidebarView: View {
     @Bindable var library: Library
     @Bindable var exporter = ExportCoordinator.shared
+    @Bindable var markdownStore = MarkdownDocumentStore.shared
     @Binding var selectedID: LibraryEntry.ID?
     /// Called when the user picks "Generate Audio…" from an entry's
     /// context menu. The parent view resolves the entry into a sheet
@@ -190,11 +191,20 @@ struct LibrarySidebarView: View {
     }
 
     private func row(for entry: LibraryEntry) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(entry.title)
-                .font(RheaFont.ui(13))
-                .lineLimit(1)
-                .truncationMode(.middle)
+        let isDirty = entry.originalPath.map { markdownStore.isDirty(path: $0) } ?? false
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                if isDirty {
+                    Circle()
+                        .fill(Color.rheaAccent)
+                        .frame(width: 6, height: 6)
+                        .help("Unsaved changes")
+                }
+                Text(entry.title)
+                    .font(RheaFont.ui(13))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
             Text(Self.formatted(entry.lastOpened))
                 .font(RheaFont.ui(11))
                 .foregroundStyle(.secondary)

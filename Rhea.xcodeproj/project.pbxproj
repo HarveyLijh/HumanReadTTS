@@ -18,6 +18,7 @@
 		2B00000000000000000A0011 /* PDFViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0011 /* PDFViewerView.swift */; };
 		2B00000000000000000A0012 /* PDFDocumentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0012 /* PDFDocumentLoader.swift */; };
 		2B00000000000000000A0021 /* MarkdownReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0021 /* MarkdownReaderView.swift */; };
+		2B00000000000000000A0022 /* MarkdownDocumentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0022 /* MarkdownDocumentStore.swift */; };
 		2B00000000000000000A0031 /* DocumentBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0031 /* DocumentBlock.swift */; };
 		2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0032 /* PDFTextExtractor.swift */; };
 		2B00000000000000000A0033 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0033 /* Sentence.swift */; };
@@ -73,6 +74,7 @@
 		2B00000000000000000B000D /* LibrarySidebarFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000D /* LibrarySidebarFormatterTests.swift */; };
 		2B00000000000000000A00E1 /* ReaderHitTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E1 /* ReaderHitTester.swift */; };
 		2B00000000000000000A00E2 /* ClickableReaderTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E2 /* ClickableReaderTextView.swift */; };
+		2B00000000000000000A00E3 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E3 /* SearchBar.swift */; };
 		2B00000000000000000B000E /* ReaderHitTesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000E /* ReaderHitTesterTests.swift */; };
 		2B00000000000000000A0036 /* SkipRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0036 /* SkipRule.swift */; };
 		2B00000000000000000A0064 /* SkipRulesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0064 /* SkipRulesSettingsView.swift */; };
@@ -115,6 +117,7 @@
 		2A00000000000000000A0011 /* PDFViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFViewerView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0012 /* PDFDocumentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoader.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0021 /* MarkdownReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownReaderView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0022 /* MarkdownDocumentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocumentStore.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0031 /* DocumentBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBlock.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0032 /* PDFTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractor.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0033 /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
@@ -165,6 +168,7 @@
 		2A00000000000000000B000D /* LibrarySidebarFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarFormatterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E1 /* ReaderHitTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderHitTester.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E2 /* ClickableReaderTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickableReaderTextView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00E3 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		2A00000000000000000B000E /* ReaderHitTesterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderHitTesterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0036 /* SkipRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRule.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0064 /* SkipRulesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRulesSettingsView.swift; sourceTree = "<group>"; };
@@ -304,6 +308,7 @@
 			isa = PBXGroup;
 			children = (
 				2A00000000000000000A0021 /* MarkdownReaderView.swift */,
+				2A00000000000000000A0022 /* MarkdownDocumentStore.swift */,
 			);
 			path = Markdown;
 			sourceTree = "<group>";
@@ -425,6 +430,7 @@
 			children = (
 				2A00000000000000000A00E1 /* ReaderHitTester.swift */,
 				2A00000000000000000A00E2 /* ClickableReaderTextView.swift */,
+				2A00000000000000000A00E3 /* SearchBar.swift */,
 			);
 			path = Reader;
 			sourceTree = "<group>";
@@ -688,6 +694,7 @@
 				2B00000000000000000A0011 /* PDFViewerView.swift in Sources */,
 				2B00000000000000000A0012 /* PDFDocumentLoader.swift in Sources */,
 				2B00000000000000000A0021 /* MarkdownReaderView.swift in Sources */,
+				2B00000000000000000A0022 /* MarkdownDocumentStore.swift in Sources */,
 				2B00000000000000000A0031 /* DocumentBlock.swift in Sources */,
 				2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */,
 				2B00000000000000000A0033 /* Sentence.swift in Sources */,
@@ -724,6 +731,7 @@
 				2B00000000000000000A0075 /* ModelManager.swift in Sources */,
 				2B00000000000000000A00E1 /* ReaderHitTester.swift in Sources */,
 				2B00000000000000000A00E2 /* ClickableReaderTextView.swift in Sources */,
+				2B00000000000000000A00E3 /* SearchBar.swift in Sources */,
 				2B00000000000000000A0036 /* SkipRule.swift in Sources */,
 				2B00000000000000000A0064 /* SkipRulesSettingsView.swift in Sources */,
 				2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */,

@@ -27,6 +27,14 @@ struct MarkdownReaderView: View {
     @State private var sentences: [Sentence] = []
     @State private var loadFailed = false
     @State private var viewMode: ViewMode = .preview
+    @State private var search = SearchState()
+    @State private var searchMatches: [NSRange] = []
+    /// Source the preview was last rendered from. Lets us re-render
+    /// only when the editor's buffer actually drifts past what's on
+    /// screen instead of on every mode switch.
+    @State private var lastRenderedSource: String?
+
+    @Bindable private var store = MarkdownDocumentStore.shared
 
     enum ViewMode: String, CaseIterable, Identifiable {
         case preview = "Preview"
@@ -41,25 +49,62 @@ struct MarkdownReaderView: View {
             modeBar
             Divider()
 
-            if loadFailed {
-                errorState
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                switch viewMode {
-                case .preview:
-                    MarkdownTextView(
-                        attributed: rendered,
-                        activeSentence: activeSentence,
-                        spokenSubRange: player.spokenSubRange,
-                        onReadFromOffset: handleReadFromOffset
+            ZStack(alignment: .topTrailing) {
+                Group {
+                    if loadFailed {
+                        errorState
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        switch viewMode {
+                        case .preview:
+                            MarkdownTextView(
+                                attributed: rendered,
+                                activeSentence: activeSentence,
+                                spokenSubRange: player.spokenSubRange,
+                                searchMatches: searchMatches,
+                                currentMatchIndex: search.currentIndex,
+                                onReadFromOffset: handleReadFromOffset
+                            )
+                        case .source:
+                            EditableSourceTextView(
+                                url: url,
+                                searchMatches: searchMatches,
+                                currentMatchIndex: search.currentIndex
+                            )
+                        }
+                    }
+                }
+
+                if search.isPresented {
+                    SearchBar(
+                        state: search,
+                        onSubmit: runSearch,
+                        onNext: { advanceMatch(by: 1) },
+                        onPrev: { advanceMatch(by: -1) },
+                        onDismiss: dismissSearch
                     )
-                case .source:
-                    SourceTextView(text: rawSource)
+                    .padding(.top, 8)
+                    .padding(.trailing, 12)
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
         }
         .task(id: url) {
             await load()
+        }
+        .onChange(of: viewMode) { _, newMode in
+            if newMode == .preview { refreshPreviewIfNeeded() }
+        }
+        .onChange(of: store.documents[url.standardizedFileURL.path]?.currentText) { _, _ in
+            // The editor or an external save changed the buffer. Re-run
+            // the active search so highlight ranges track edits.
+            if search.isPresented { runSearch() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
+            presentSearch()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: AppScene.saveNotification)) { _ in
+            saveCurrent()
         }
     }
 
@@ -73,12 +118,35 @@ struct MarkdownReaderView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             .frame(width: 180)
+
+            if isDirty {
+                Text("Edited")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule().fill(Color.secondary.opacity(0.12))
+                    )
+            }
+
             Spacer()
+
+            Button {
+                presentSearch()
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .buttonStyle(.borderless)
+            .help("Find in document (\u{2318}F)")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .background(.ultraThinMaterial)
     }
+
+    private var isDirty: Bool { store.isDirty(url: url) }
 
     private var activeSentence: Sentence? {
         guard let index = player.state.sentenceIndex,
@@ -97,27 +165,17 @@ struct MarkdownReaderView: View {
         let started = ContinuousClock.now
         do {
             let raw = try String(contentsOf: url, encoding: .utf8)
-            rawSource = raw
+            // Register with the store before rendering so the editor's
+            // first read of `currentText` already reflects the on-disk
+            // baseline (or a preserved dirty buffer from a previous
+            // open of the same file).
+            store.register(url: url, contents: raw)
+            let buffer = store.currentText(url: url) ?? raw
+            rawSource = buffer
             Self.log.info("read \(raw.count) chars")
 
-            let parseStart = ContinuousClock.now
-            let attributed = MarkdownRenderer.render(raw)
-            Self.log.info("rendered markdown in \(ContinuousClock.now - parseStart, privacy: .public)")
-
-            rendered = attributed
+            await renderAndSegment(from: buffer, started: started)
             loadFailed = false
-
-            let segmentStart = ContinuousClock.now
-            let plain = attributed.string
-            let block = DocumentBlock(text: plain, pageIndex: 0, offsetInPage: 0)
-            let parsed = await SentenceSegmenter.segment([block])
-            let merged = Self.coalesceTableRows(parsed, in: attributed)
-            Self.log.info("segmented \(parsed.count) → \(merged.count) sentences in \(ContinuousClock.now - segmentStart, privacy: .public)")
-
-            sentences = merged
-            player.load(merged)
-
-            Self.log.info("TOTAL md load \(ContinuousClock.now - started, privacy: .public)")
         } catch {
             Self.log.error("failed to read \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
             rawSource = ""
@@ -126,6 +184,98 @@ struct MarkdownReaderView: View {
             loadFailed = true
             player.load([])
         }
+    }
+
+    /// Render the preview from the supplied source text and refresh
+    /// the sentence queue. Pulled out of `load()` so re-renders after
+    /// edits don't have to re-read the file from disk.
+    private func renderAndSegment(from buffer: String, started: ContinuousClock.Instant) async {
+        let parseStart = ContinuousClock.now
+        let attributed = MarkdownRenderer.render(buffer)
+        Self.log.info("rendered markdown in \(ContinuousClock.now - parseStart, privacy: .public)")
+
+        rendered = attributed
+        lastRenderedSource = buffer
+
+        let segmentStart = ContinuousClock.now
+        let plain = attributed.string
+        let block = DocumentBlock(text: plain, pageIndex: 0, offsetInPage: 0)
+        let parsed = await SentenceSegmenter.segment([block])
+        let merged = Self.coalesceTableRows(parsed, in: attributed)
+        Self.log.info("segmented \(parsed.count) → \(merged.count) sentences in \(ContinuousClock.now - segmentStart, privacy: .public)")
+
+        sentences = merged
+        player.load(merged)
+
+        Self.log.info("TOTAL md load \(ContinuousClock.now - started, privacy: .public)")
+    }
+
+    /// Re-render the preview from the editor's latest buffer when the
+    /// user flips back from Source. Skipping when the buffer hasn't
+    /// changed avoids re-segmenting — playback offsets stay valid.
+    private func refreshPreviewIfNeeded() {
+        let latest = store.currentText(url: url) ?? rawSource
+        guard latest != lastRenderedSource else { return }
+        rawSource = latest
+        Task { @MainActor in
+            await renderAndSegment(from: latest, started: ContinuousClock.now)
+            if search.isPresented { runSearch() }
+        }
+    }
+
+    // MARK: - Save
+
+    private func saveCurrent() {
+        guard isDirty else { return }
+        let success = store.save(url: url)
+        if !success {
+            Self.log.error("failed to save \(url.lastPathComponent, privacy: .public)")
+            NSSound.beep()
+        }
+    }
+
+    // MARK: - Search
+
+    private func presentSearch() {
+        if !search.isPresented {
+            withAnimation(.easeOut(duration: 0.15)) {
+                search.isPresented = true
+            }
+        }
+        runSearch()
+    }
+
+    private func dismissSearch() {
+        withAnimation(.easeOut(duration: 0.15)) {
+            search.isPresented = false
+        }
+        searchMatches = []
+        search.totalMatches = 0
+        search.currentIndex = -1
+    }
+
+    private func runSearch() {
+        let haystack: String
+        switch viewMode {
+        case .preview:
+            haystack = rendered.string
+        case .source:
+            haystack = store.currentText(url: url) ?? rawSource
+        }
+        let matches = TextSearcher.search(in: haystack, options: search)
+        searchMatches = matches
+        search.totalMatches = matches.count
+        if matches.isEmpty {
+            search.currentIndex = -1
+        } else if search.currentIndex < 0 || search.currentIndex >= matches.count {
+            search.currentIndex = 0
+        }
+    }
+
+    private func advanceMatch(by delta: Int) {
+        guard !searchMatches.isEmpty else { return }
+        let next = (search.currentIndex + delta + searchMatches.count) % searchMatches.count
+        search.currentIndex = next
     }
 
     /// Collapse sentences that fall inside the same rendered table row
@@ -651,6 +801,8 @@ private struct MarkdownTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let searchMatches: [NSRange]
+    let currentMatchIndex: Int
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -671,6 +823,10 @@ private struct MarkdownTextView: NSViewRepresentable {
         /// so the user can scroll manually without the viewport
         /// snapping back every second.
         var lastScrolledSentenceIndex: Int?
+        /// Ranges last painted as search results — cleared incrementally
+        /// when the query/options/match-set change.
+        var lastSearchRanges: [NSRange] = []
+        var lastCurrentSearchRange: NSRange?
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -692,6 +848,8 @@ private struct MarkdownTextView: NSViewRepresentable {
             context.coordinator.lastSentenceRange = nil
             context.coordinator.lastSubRange = nil
             context.coordinator.lastScrolledSentenceIndex = nil
+            context.coordinator.lastSearchRanges = []
+            context.coordinator.lastCurrentSearchRange = nil
         }
 
         applyHighlightIncremental(
@@ -701,30 +859,125 @@ private struct MarkdownTextView: NSViewRepresentable {
             sentence: activeSentence,
             spokenSubRange: spokenSubRange
         )
+
+        applySearchHighlights(
+            to: tv,
+            storage: storage,
+            coordinator: context.coordinator,
+            matches: searchMatches,
+            currentIndex: currentMatchIndex
+        )
     }
 }
 
-private struct SourceTextView: NSViewRepresentable {
-    let text: String
+/// Editable markdown source view. Backed by a non-clickable
+/// NSTextView with `isEditable = true` and `allowsUndo = true` so
+/// AppKit hands us \u{2318}Z / \u{21E7}\u{2318}Z for free. Every
+/// change is mirrored into `MarkdownDocumentStore` so the dirty dot,
+/// preview re-render, and quit warning all observe the same state.
+private struct EditableSourceTextView: NSViewRepresentable {
+    let url: URL
+    let searchMatches: [NSRange]
+    let currentMatchIndex: Int
 
-    func makeNSView(context: Context) -> NSScrollView {
-        // Source view: plain NSTextView, no click-to-start — the
-        // raw markdown source offsets don't line up with rendered
-        // sentence offsets, so a click there wouldn't map cleanly.
-        let scroll = makeReadOnlyTextScrollView(onReadFromOffset: nil)
-        if let tv = scroll.documentView as? NSTextView {
-            tv.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
-            tv.textColor = NSColor.labelColor
-            tv.string = text
+    final class Coordinator: NSObject, NSTextViewDelegate {
+        let url: URL
+        let store: MarkdownDocumentStore
+        var ignoreNextChange: Bool = false
+        /// Search-match ranges last painted, for incremental clears.
+        var lastSearchRanges: [NSRange] = []
+        var lastCurrentSearchRange: NSRange?
+
+        init(url: URL, store: MarkdownDocumentStore) {
+            self.url = url
+            self.store = store
         }
+
+        func textDidChange(_ notification: Notification) {
+            guard !ignoreNextChange,
+                  let tv = notification.object as? NSTextView else {
+                return
+            }
+            store.update(url: url, text: tv.string)
+        }
+    }
+
+    @MainActor
+    func makeCoordinator() -> Coordinator {
+        Coordinator(url: url, store: MarkdownDocumentStore.shared)
+    }
+
+    @MainActor
+    func makeNSView(context: Context) -> NSScrollView {
+        let scroll = NSScrollView()
+        scroll.hasVerticalScroller = true
+        scroll.hasHorizontalScroller = false
+        scroll.borderType = .noBorder
+        scroll.drawsBackground = true
+        scroll.backgroundColor = NSColor(Color.rheaSurface)
+
+        let tv = NSTextView()
+        tv.isEditable = true
+        tv.isSelectable = true
+        tv.isRichText = false
+        tv.allowsUndo = true
+        tv.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+        tv.textColor = NSColor.labelColor
+        tv.backgroundColor = NSColor(Color.rheaSurface)
+        tv.drawsBackground = true
+        tv.textContainerInset = NSSize(width: 32, height: 24)
+        tv.autoresizingMask = [.width]
+        tv.textContainer?.widthTracksTextView = true
+        tv.textContainer?.containerSize = NSSize(
+            width: 0, height: CGFloat.greatestFiniteMagnitude
+        )
+        tv.delegate = context.coordinator
+        // Smart substitutions break code samples + markdown syntax.
+        tv.isAutomaticQuoteSubstitutionEnabled = false
+        tv.isAutomaticDashSubstitutionEnabled = false
+        tv.isAutomaticTextReplacementEnabled = false
+        tv.isAutomaticSpellingCorrectionEnabled = false
+        tv.isAutomaticDataDetectionEnabled = false
+        tv.isAutomaticLinkDetectionEnabled = false
+
+        let initial = MarkdownDocumentStore.shared.currentText(url: url) ?? ""
+        context.coordinator.ignoreNextChange = true
+        tv.string = initial
+        context.coordinator.ignoreNextChange = false
+
+        scroll.documentView = tv
         return scroll
     }
 
+    @MainActor
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let tv = nsView.documentView as? NSTextView else { return }
-        if tv.string != text {
-            tv.string = text
+        guard let tv = nsView.documentView as? NSTextView,
+              let storage = tv.textStorage else { return }
+
+        // Pull the latest buffer from the store so external changes
+        // (Cmd+Z deep into a snapshot, "Discard" from the close sheet,
+        // or a fresh load) propagate back into the visible text — but
+        // skip the assignment when the strings already match so we
+        // don't clobber the user's selection on every keystroke.
+        let buffer = MarkdownDocumentStore.shared.currentText(url: url) ?? ""
+        if tv.string != buffer {
+            context.coordinator.ignoreNextChange = true
+            tv.string = buffer
+            context.coordinator.ignoreNextChange = false
+            // Reassigning `string` strips attributes, so any search
+            // highlights need to be repainted from scratch.
+            context.coordinator.lastSearchRanges = []
+            context.coordinator.lastCurrentSearchRange = nil
         }
+
+        applySearchHighlightsRaw(
+            storage: storage,
+            textView: tv,
+            lastRanges: &context.coordinator.lastSearchRanges,
+            lastCurrent: &context.coordinator.lastCurrentSearchRange,
+            matches: searchMatches,
+            currentIndex: currentMatchIndex
+        )
     }
 }
 
@@ -844,5 +1097,84 @@ private func applyHighlightIncremental(
     if coordinator.lastScrolledSentenceIndex != currentIndex {
         coordinator.lastScrolledSentenceIndex = currentIndex
         textView.scrollRangeToVisible(sentenceRange)
+    }
+}
+
+// MARK: - Search highlights
+
+/// Yellow background that visually separates from the orange playback
+/// wash. Drawn after the playback paint so on overlap the user can
+/// still tell where the matches are.
+private let searchMatchColor = NSColor.systemYellow.withAlphaComponent(0.45)
+private let searchCurrentMatchColor = NSColor.systemYellow.withAlphaComponent(0.85)
+
+/// Clears the previously-painted search ranges, paints fresh
+/// highlights for the new match set, and scrolls the current match
+/// into view. Used by the Preview view so its coordinator can keep
+/// the rest of its caching logic intact.
+@MainActor
+private func applySearchHighlights(
+    to textView: NSTextView,
+    storage: NSTextStorage,
+    coordinator: MarkdownTextView.Coordinator,
+    matches: [NSRange],
+    currentIndex: Int
+) {
+    applySearchHighlightsRaw(
+        storage: storage,
+        textView: textView,
+        lastRanges: &coordinator.lastSearchRanges,
+        lastCurrent: &coordinator.lastCurrentSearchRange,
+        matches: matches,
+        currentIndex: currentIndex
+    )
+}
+
+/// Lower-level shared implementation reused by both the Preview and
+/// Source text views. Operates only on the storage's attributes — the
+/// bounded clear keeps the cost proportional to the number of visible
+/// matches, not document length.
+@MainActor
+private func applySearchHighlightsRaw(
+    storage: NSTextStorage,
+    textView: NSTextView,
+    lastRanges: inout [NSRange],
+    lastCurrent: inout NSRange?,
+    matches: [NSRange],
+    currentIndex: Int
+) {
+    storage.beginEditing()
+    defer { storage.endEditing() }
+
+    let length = storage.length
+    for range in lastRanges where NSMaxRange(range) <= length {
+        storage.removeAttribute(.underlineStyle, range: range)
+        storage.removeAttribute(.underlineColor, range: range)
+    }
+    if let last = lastCurrent, NSMaxRange(last) <= length {
+        storage.removeAttribute(.backgroundColor, range: last)
+    }
+    lastRanges = []
+    lastCurrent = nil
+
+    guard !matches.isEmpty else { return }
+
+    for range in matches where NSMaxRange(range) <= length {
+        storage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
+        storage.addAttribute(.underlineColor, value: searchMatchColor, range: range)
+    }
+    lastRanges = matches.filter { NSMaxRange($0) <= length }
+
+    guard currentIndex >= 0, currentIndex < matches.count else { return }
+    let current = matches[currentIndex]
+    if NSMaxRange(current) <= length {
+        storage.addAttribute(.backgroundColor, value: searchCurrentMatchColor, range: current)
+        lastCurrent = current
+        // Defer the scroll so it runs after the storage edit
+        // completes; calling scrollRangeToVisible inside the begin/end
+        // pair occasionally races AppKit's internal layout pass.
+        DispatchQueue.main.async { [weak textView] in
+            textView?.scrollRangeToVisible(current)
+        }
     }
 }

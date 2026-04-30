@@ -16,6 +16,7 @@ struct RootView: View {
     @Environment(\.openWindow) private var openWindow
 
     @State private var library = Library()
+    @Bindable private var markdownStore = MarkdownDocumentStore.shared
     @State private var document: DroppedDocument?
     @State private var selectedEntryID: LibraryEntry.ID?
     @State private var isTargeted = false
@@ -194,6 +195,15 @@ struct RootView: View {
         }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
         .animation(.easeOut(duration: 0.18), value: document)
+        .background(WindowEditedFlag(isEdited: currentDocumentIsDirty))
+    }
+
+    /// Whether the document currently in view has unsaved markdown
+    /// edits. Drives the close-button dot and the close-confirmation
+    /// sheet. PDFs and EPUBs are read-only, so they're always clean.
+    private var currentDocumentIsDirty: Bool {
+        guard let document, document.kind == .markdown else { return false }
+        return markdownStore.isDirty(url: document.url)
     }
 
     @ViewBuilder
