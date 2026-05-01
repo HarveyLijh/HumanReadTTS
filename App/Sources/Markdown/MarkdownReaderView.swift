@@ -1096,10 +1096,17 @@ private struct EditableSourceTextView: NSViewRepresentable {
         /// Search-match ranges last painted, for incremental clears.
         var lastSearchRanges: [NSRange] = []
         var lastCurrentSearchRange: NSRange?
+        /// Per-view undo manager so text-edit undo invocations die with
+        /// the NSTextView. Without this, AppKit registers undo on the
+        /// window's UndoManager, which outlives the view and crashes
+        /// in `_undoRedoTextOperation:` when the storage is freed.
+        let textUndoManager: UndoManager
 
+        @MainActor
         init(url: URL, store: MarkdownDocumentStore) {
             self.url = url
             self.store = store
+            self.textUndoManager = UndoManager()
         }
 
         func textDidChange(_ notification: Notification) {
@@ -1108,6 +1115,10 @@ private struct EditableSourceTextView: NSViewRepresentable {
                 return
             }
             store.update(url: url, text: tv.string)
+        }
+
+        func undoManager(for view: NSTextView) -> UndoManager? {
+            textUndoManager
         }
     }
 
@@ -1153,6 +1164,7 @@ private struct EditableSourceTextView: NSViewRepresentable {
         context.coordinator.ignoreNextChange = true
         tv.string = initial
         context.coordinator.ignoreNextChange = false
+        context.coordinator.textUndoManager.removeAllActions()
 
         scroll.documentView = tv
         return scroll
@@ -1173,6 +1185,9 @@ private struct EditableSourceTextView: NSViewRepresentable {
             context.coordinator.ignoreNextChange = true
             tv.string = buffer
             context.coordinator.ignoreNextChange = false
+            // External buffer change: drop pending undo so ⌘Z can't
+            // try to roll back into bytes the user never typed.
+            context.coordinator.textUndoManager.removeAllActions()
             // Reassigning `string` strips attributes, so any search
             // highlights need to be repainted from scratch.
             context.coordinator.lastSearchRanges = []
