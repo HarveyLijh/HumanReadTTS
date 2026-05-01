@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import WebKit
 import os
 
 /// The Markdown reader. Two view modes:
@@ -33,6 +34,14 @@ struct MarkdownReaderView: View {
     /// only when the editor's buffer actually drifts past what's on
     /// screen instead of on every mode switch.
     @State private var lastRenderedSource: String?
+
+    /// Cache of resolved Mermaid diagrams keyed by raw source. The
+    /// renderer reads this when emitting attachments so cached images
+    /// appear inline immediately on subsequent re-renders.
+    @State private var mermaidImages: [String: NSImage] = [:]
+    /// Sources we're currently rendering off-thread. Prevents kicking
+    /// off duplicate WKWebView renders for the same diagram.
+    @State private var inflightMermaid: Set<String> = []
 
     @Bindable private var store = MarkdownDocumentStore.shared
 
@@ -191,7 +200,7 @@ struct MarkdownReaderView: View {
     /// edits don't have to re-read the file from disk.
     private func renderAndSegment(from buffer: String, started: ContinuousClock.Instant) async {
         let parseStart = ContinuousClock.now
-        let attributed = MarkdownRenderer.render(buffer)
+        let attributed = MarkdownRenderer.render(buffer, mermaidImages: mermaidImages)
         Self.log.info("rendered markdown in \(ContinuousClock.now - parseStart, privacy: .public)")
 
         rendered = attributed
@@ -208,6 +217,52 @@ struct MarkdownReaderView: View {
         player.load(merged)
 
         Self.log.info("TOTAL md load \(ContinuousClock.now - started, privacy: .public)")
+
+        kickOffMermaidRenders(in: attributed)
+    }
+
+    /// Walks the rendered string for Mermaid placeholders and starts a
+    /// WKWebView render for any source we haven't already cached or
+    /// dispatched. When each render resolves we update the cache and
+    /// re-render `attributed` only — sentences/playback offsets stay
+    /// stable because the attachment occupies a single `\u{FFFC}` code
+    /// point regardless of whether it shows the placeholder or the
+    /// final diagram.
+    private func kickOffMermaidRenders(in attributed: NSAttributedString) {
+        let sources = Self.uniqueMermaidSources(in: attributed)
+        for source in sources where mermaidImages[source] == nil
+                                  && !inflightMermaid.contains(source) {
+            inflightMermaid.insert(source)
+            Task { @MainActor in
+                defer { inflightMermaid.remove(source) }
+                do {
+                    let image = try await MermaidWebRenderer.shared.render(source: source)
+                    mermaidImages[source] = image
+                    rerenderAttributedFromCache()
+                } catch {
+                    Self.log.error("mermaid render failed: \(error.localizedDescription, privacy: .public)")
+                }
+            }
+        }
+    }
+
+    /// Re-renders the attributed string against `lastRenderedSource`
+    /// so newly-resolved Mermaid images replace placeholders. We
+    /// deliberately skip `SentenceSegmenter` here — character content
+    /// is byte-identical to the placeholder version, so the cached
+    /// `sentences` array is still valid.
+    private func rerenderAttributedFromCache() {
+        guard let buffer = lastRenderedSource else { return }
+        rendered = MarkdownRenderer.render(buffer, mermaidImages: mermaidImages)
+    }
+
+    private static func uniqueMermaidSources(in attributed: NSAttributedString) -> Set<String> {
+        var sources = Set<String>()
+        let full = NSRange(location: 0, length: attributed.length)
+        attributed.enumerateAttribute(.rheaMermaidSource, in: full, options: []) { value, _, _ in
+            if let s = value as? String { sources.insert(s) }
+        }
+        return sources
     }
 
     /// Re-render the preview from the editor's latest buffer when the
@@ -361,6 +416,12 @@ extension NSAttributedString.Key {
     /// merge sentence-tokenized cells back into one row-level sentence
     /// so TTS reads tables left-to-right a row at a time.
     static let rheaTableRowID = NSAttributedString.Key("rheaTableRowID")
+
+    /// Raw Mermaid source attached to each placeholder attachment. The
+    /// reader view uses it to look up a freshly-rendered diagram in
+    /// the image cache and to dispatch deferred renders for sources
+    /// it hasn't seen yet.
+    static let rheaMermaidSource = NSAttributedString.Key("rheaMermaidSource")
 }
 
 // MARK: - Markdown rendering
@@ -383,7 +444,10 @@ extension NSAttributedString.Key {
 ///   them in the correct grid slot — with thin horizontal dividers
 ///   between rows (no vertical borders, matching our reading layout).
 enum MarkdownRenderer {
-    static func render(_ markdown: String) -> NSAttributedString {
+    static func render(
+        _ markdown: String,
+        mermaidImages: [String: NSImage] = [:]
+    ) -> NSAttributedString {
         let theme = Theme()
 
         let attributed: AttributedString
@@ -405,11 +469,47 @@ enum MarkdownRenderer {
         let result = NSMutableAttributedString()
         var lastBlockKey: [Int]? = nil
         var pendingTable: TableAccumulator? = nil
+        var pendingMermaid: (identity: Int, source: String)? = nil
 
         for run in attributed.runs {
             let runRange = run.range
             let runText = String(attributed[runRange].characters)
             guard !runText.isEmpty else { continue }
+
+            // Mermaid code fences (```mermaid …```) are rendered as a
+            // single inline NSTextAttachment instead of styled code so
+            // diagrams show up alongside prose. We accumulate runs that
+            // share a code-block identity and flush once when the block
+            // ends, mirroring the table accumulator pattern below.
+            if let info = mermaidCodeBlockInfo(from: run.presentationIntent) {
+                if let pending = pendingMermaid, pending.identity != info.identity {
+                    flushMermaid(
+                        pending, into: result, theme: theme, images: mermaidImages
+                    )
+                    pendingMermaid = nil
+                }
+                if pendingMermaid == nil {
+                    if let existing = pendingTable {
+                        flushTable(existing, into: result, theme: theme)
+                        pendingTable = nil
+                    }
+                    pendingMermaid = (info.identity, runText)
+                    lastBlockKey = nil
+                } else {
+                    pendingMermaid?.source.append(runText)
+                }
+                continue
+            }
+
+            // Leaving a mermaid block: flush it before processing the
+            // next run so the trailing `\n\n` separator lands first.
+            if let pending = pendingMermaid {
+                flushMermaid(
+                    pending, into: result, theme: theme, images: mermaidImages
+                )
+                pendingMermaid = nil
+                lastBlockKey = nil
+            }
 
             let tableInfo = tableInfo(from: run.presentationIntent)
 
@@ -481,8 +581,117 @@ enum MarkdownRenderer {
         if let existing = pendingTable {
             flushTable(existing, into: result, theme: theme)
         }
+        if let pending = pendingMermaid {
+            flushMermaid(pending, into: result, theme: theme, images: mermaidImages)
+        }
 
         return result
+    }
+
+    // MARK: Mermaid extraction
+
+    private struct MermaidCodeBlockInfo {
+        let identity: Int
+    }
+
+    /// Returns metadata for a run that lives inside a fenced code block
+    /// whose language hint is "mermaid" (case-insensitive). Anything
+    /// else — including unlabeled or differently-tagged code — falls
+    /// back to the standard styled-code path.
+    private static func mermaidCodeBlockInfo(
+        from intent: PresentationIntent?
+    ) -> MermaidCodeBlockInfo? {
+        guard let intent else { return nil }
+        for component in intent.components {
+            if case .codeBlock(let language) = component.kind,
+               language?.lowercased() == "mermaid" {
+                return MermaidCodeBlockInfo(identity: component.identity)
+            }
+        }
+        return nil
+    }
+
+    private static func flushMermaid(
+        _ pending: (identity: Int, source: String),
+        into result: NSMutableAttributedString,
+        theme: Theme,
+        images: [String: NSImage]
+    ) {
+        // Strip the trailing newline that Foundation includes in code-
+        // block content; preserving it would shove the attachment onto
+        // its own line below the diagram.
+        var source = pending.source
+        while source.hasSuffix("\n") { source.removeLast() }
+
+        if result.length > 0,
+           !result.string.hasSuffix("\n\n") {
+            result.append(NSAttributedString(
+                string: "\n\n", attributes: theme.bodyAttributes
+            ))
+        }
+
+        let attachment = NSTextAttachment()
+        let image = images[source] ?? mermaidPlaceholderImage()
+        attachment.image = image
+        attachment.bounds = NSRect(
+            x: 0, y: 0, width: image.size.width, height: image.size.height
+        )
+
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
+        para.paragraphSpacingBefore = 8
+        para.paragraphSpacing = 8
+
+        let attachmentString = NSMutableAttributedString(attachment: attachment)
+        let fullRange = NSRange(location: 0, length: attachmentString.length)
+        attachmentString.addAttributes(
+            [
+                .rheaMermaidSource: source,
+                .paragraphStyle: para,
+                .foregroundColor: NSColor.labelColor,
+            ],
+            range: fullRange
+        )
+        result.append(attachmentString)
+        // Trailing newline so the next block starts on its own line.
+        result.append(NSAttributedString(
+            string: "\n", attributes: theme.bodyAttributes
+        ))
+    }
+
+    /// Soft "Rendering diagram…" tile shown until the WKWebView
+    /// snapshot resolves. Sized so it occupies a clearly-visible band
+    /// of the column instead of a tiny inline glyph.
+    private static func mermaidPlaceholderImage() -> NSImage {
+        let size = NSSize(width: 520, height: 88)
+        let image = NSImage(size: size)
+        image.lockFocus()
+        defer { image.unlockFocus() }
+
+        let bg = NSColor.secondaryLabelColor.withAlphaComponent(0.08)
+        bg.setFill()
+        NSBezierPath(
+            roundedRect: NSRect(origin: .zero, size: size),
+            xRadius: 10, yRadius: 10
+        ).fill()
+
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+            .foregroundColor: NSColor.secondaryLabelColor,
+            .paragraphStyle: para,
+        ]
+        let text = "Rendering Mermaid diagram…" as NSString
+        let textHeight: CGFloat = 18
+        let textRect = NSRect(
+            x: 0,
+            y: (size.height - textHeight) / 2,
+            width: size.width,
+            height: textHeight
+        )
+        text.draw(in: textRect, withAttributes: attrs)
+        return image
     }
 
     // MARK: Table extraction
@@ -1176,5 +1385,335 @@ private func applySearchHighlightsRaw(
         DispatchQueue.main.async { [weak textView] in
             textView?.scrollRangeToVisible(current)
         }
+    }
+}
+
+// MARK: - Mermaid rendering
+
+/// Renders Mermaid source to a static `NSImage` via a hidden
+/// WKWebView. The web view loads `mermaid.min.js` from a public CDN,
+/// runs `mermaid.render(...)` to materialize SVG, and we snapshot the
+/// rendered DOM at its natural bounding box. The renderer is a
+/// singleton so we can fan out parallel renders (one webview each) and
+/// share the message handler plumbing across them.
+@MainActor
+final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
+    static let shared = MermaidWebRenderer()
+
+    private static let log = Logger(subsystem: "app.rhea.mac", category: "mermaid")
+
+    private struct Pending {
+        let continuation: CheckedContinuation<NSImage, Error>
+        /// We keep a reference to the host window so it survives until
+        /// the snapshot completes; releasing it earlier deallocates the
+        /// content view mid-flight and the snapshot returns nil.
+        let window: NSWindow
+        let webView: WKWebView
+    }
+
+    private var pending: [ObjectIdentifier: Pending] = [:]
+
+    enum MermaidError: Error, LocalizedError {
+        case renderFailed(String)
+        case snapshotFailed
+        case invalidPayload
+
+        var errorDescription: String? {
+            switch self {
+            case .renderFailed(let message): return "mermaid render error: \(message)"
+            case .snapshotFailed: return "mermaid snapshot failed"
+            case .invalidPayload: return "mermaid render returned an invalid payload"
+            }
+        }
+    }
+
+    func render(source: String) async throws -> NSImage {
+        try await withCheckedThrowingContinuation { continuation in
+            startRender(source: source, continuation: continuation)
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        Self.log.info("mermaid webview didFinish navigation")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        Self.log.error("mermaid webview didFail: \(error.localizedDescription, privacy: .public)")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        Self.log.error("mermaid webview provisional fail: \(error.localizedDescription, privacy: .public)")
+    }
+
+    private func startRender(
+        source: String,
+        continuation: CheckedContinuation<NSImage, Error>
+    ) {
+        let config = WKWebViewConfiguration()
+        let userContent = WKUserContentController()
+        userContent.add(self, name: "rheaMermaid")
+        userContent.add(self, name: "rheaMermaidLog")
+        config.userContentController = userContent
+        config.preferences.javaScriptCanOpenWindowsAutomatically = false
+
+        let initialFrame = NSRect(x: 0, y: 0, width: 1400, height: 1400)
+        let webView = WKWebView(frame: initialFrame, configuration: config)
+        webView.navigationDelegate = self
+
+        // The web view must live in a window for snapshotting to
+        // produce non-blank pixels on macOS. Position the host window
+        // far off-screen so it never flashes for the user.
+        let window = NSWindow(
+            contentRect: NSRect(x: -20_000, y: -20_000,
+                                width: initialFrame.width,
+                                height: initialFrame.height),
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: false
+        )
+        window.isReleasedWhenClosed = false
+        window.contentView = webView
+        window.orderBack(nil)
+
+        let id = ObjectIdentifier(webView)
+        pending[id] = Pending(
+            continuation: continuation, window: window, webView: webView
+        )
+
+        // Load the bundled mermaid.min.js as a data URL embedded
+        // inside the HTML so we don't depend on network reachability
+        // or App Sandbox network permissions at render time.
+        let mermaidJS = Self.loadBundledMermaidJS()
+        let html = Self.makeHTML(source: source, mermaidScript: mermaidJS)
+        // Use the bundle as base so any same-origin asset relative
+        // URLs can resolve (mermaid is self-contained, but the base
+        // URL also dictates the security origin for postMessage).
+        let baseURL = Bundle.main.resourceURL ?? URL(fileURLWithPath: "/")
+        webView.loadHTMLString(html, baseURL: baseURL)
+
+        // Hard timeout: if we don't hear back, fail the continuation
+        // with a clear error so the placeholder isn't stuck forever.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 15_000_000_000)
+            guard let self, let task = self.pending[id] else { return }
+            Self.log.error("mermaid render timed out for source of length \(source.count, privacy: .public)")
+            self.finish(
+                task: task, id: id,
+                result: .failure(MermaidError.renderFailed("timed out after 15s"))
+            )
+        }
+    }
+
+    private static func loadBundledMermaidJS() -> String {
+        guard let url = Bundle.main.url(
+            forResource: "mermaid.min", withExtension: "js"
+        ) else {
+            log.error("mermaid.min.js missing from bundle")
+            return ""
+        }
+        do {
+            return try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            log.error(
+                "failed to read mermaid.min.js: \(error.localizedDescription, privacy: .public)"
+            )
+            return ""
+        }
+    }
+
+    nonisolated func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceive message: WKScriptMessage
+    ) {
+        // WKWebView delivers script messages on the main thread but
+        // `WKScriptMessage`'s accessors are main-actor isolated, so we
+        // assume isolation to read them, then hand the plain values
+        // off to the actor-isolated handler.
+        MainActor.assumeIsolated {
+            let name = message.name
+            let body = message.body
+            let webView = message.webView
+            self.handleMessage(name: name, body: body, webView: webView)
+        }
+    }
+
+    private func handleMessage(
+        name: String,
+        body: Any,
+        webView: WKWebView?
+    ) {
+        // Forwarded log messages from the page just go to os_log so
+        // we can see what's happening inside the WKWebView.
+        if name == "rheaMermaidLog" {
+            let text = (body as? String) ?? String(describing: body)
+            Self.log.info("mermaid-page: \(text, privacy: .public)")
+            return
+        }
+        guard name == "rheaMermaid", let webView else { return }
+        let id = ObjectIdentifier(webView)
+        guard let task = pending[id] else { return }
+        guard let payload = body as? [String: Any] else {
+            finish(task: task, id: id, result: .failure(MermaidError.invalidPayload))
+            return
+        }
+
+        if (payload["ok"] as? Bool) != true {
+            let message = (payload["error"] as? String) ?? "unknown"
+            finish(task: task, id: id, result: .failure(MermaidError.renderFailed(message)))
+            return
+        }
+
+        let width = (payload["width"] as? CGFloat)
+            ?? (payload["width"] as? Double).map { CGFloat($0) }
+            ?? 600
+        let height = (payload["height"] as? CGFloat)
+            ?? (payload["height"] as? Double).map { CGFloat($0) }
+            ?? 200
+
+        let snapWidth = max(width, 16)
+        let snapHeight = max(height, 16)
+        webView.frame = NSRect(x: 0, y: 0, width: snapWidth, height: snapHeight)
+        task.window.setContentSize(NSSize(width: snapWidth, height: snapHeight))
+
+        // Give AppKit a tick to settle the resize before snapshotting,
+        // otherwise the captured image occasionally clips at the old
+        // (smaller) bounds.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 80_000_000)
+            let snapConfig = WKSnapshotConfiguration()
+            snapConfig.rect = NSRect(x: 0, y: 0, width: snapWidth, height: snapHeight)
+            webView.takeSnapshot(with: snapConfig) { image, error in
+                Task { @MainActor in
+                    if let image {
+                        self.finish(task: task, id: id, result: .success(image))
+                    } else {
+                        Self.log.error(
+                            "snapshot failed: \(error?.localizedDescription ?? "nil", privacy: .public)"
+                        )
+                        self.finish(
+                            task: task, id: id,
+                            result: .failure(MermaidError.snapshotFailed)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private func finish(
+        task: Pending,
+        id: ObjectIdentifier,
+        result: Result<NSImage, Error>
+    ) {
+        pending.removeValue(forKey: id)
+        task.window.contentView = nil
+        task.window.orderOut(nil)
+        switch result {
+        case .success(let image): task.continuation.resume(returning: image)
+        case .failure(let error): task.continuation.resume(throwing: error)
+        }
+    }
+
+    private static func makeHTML(source: String, mermaidScript: String) -> String {
+        let b64 = Data(source.utf8).base64EncodedString()
+        // The Mermaid source is base64-encoded so it survives the
+        // template substitution unchanged; the page decodes it with
+        // `atob` and hands it to mermaid.render. The mermaid library
+        // itself is also injected inline (read from the app bundle)
+        // so we never depend on network reachability at render time.
+        // We never inject mermaid output into the DOM via innerHTML —
+        // the SVG returned by Mermaid is parsed with DOMParser and
+        // appended as a node so there is no string concatenation into
+        // HTML at runtime.
+        return """
+        <!doctype html>
+        <html><head><meta charset="utf-8">
+        <style>
+        html, body { margin: 0; padding: 0; background: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        #wrapper { display: inline-block; padding: 16px; }
+        #diagram svg { display: block; max-width: 1200px; height: auto; }
+        #fallback { color: #b91c1c; padding: 16px; font: 13px ui-monospace, Menlo, monospace; white-space: pre-wrap; }
+        </style>
+        </head><body>
+        <div id="wrapper"><div id="diagram"></div></div>
+        <script>
+        (function(){
+          function bridgeLog(label){
+            return function(){
+              try {
+                var parts = [];
+                for (var i = 0; i < arguments.length; i++) {
+                  parts.push(String(arguments[i]));
+                }
+                window.webkit.messageHandlers.rheaMermaidLog.postMessage(label + ': ' + parts.join(' '));
+              } catch (e) {}
+            };
+          }
+          window.console = window.console || {};
+          var origError = console.error || function(){};
+          console.log = bridgeLog('log');
+          console.warn = bridgeLog('warn');
+          console.error = bridgeLog('error');
+          window.addEventListener('error', function(ev){
+            try { window.webkit.messageHandlers.rheaMermaidLog.postMessage('window-error: ' + (ev.message || '?') + ' @ ' + (ev.filename || '') + ':' + (ev.lineno || '0')); } catch (e) {}
+          });
+          window.addEventListener('unhandledrejection', function(ev){
+            try {
+              var r = ev.reason;
+              var msg = (r && r.message) ? r.message : String(r);
+              window.webkit.messageHandlers.rheaMermaidLog.postMessage('unhandled: ' + msg);
+            } catch (e) {}
+          });
+        })();
+        </script>
+        <script>
+        \(mermaidScript)
+        </script>
+        <script>
+        (async function(){
+          function post(payload){
+            try { window.webkit.messageHandlers.rheaMermaid.postMessage(payload); }
+            catch (e) { console.error('post failed', e); }
+          }
+          function appendSvg(svgString){
+            var parsed = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+            var node = parsed.documentElement;
+            var target = document.getElementById('diagram');
+            while (target.firstChild) target.removeChild(target.firstChild);
+            target.appendChild(document.importNode(node, true));
+          }
+          try {
+            if (typeof mermaid === 'undefined') {
+              throw new Error('mermaid script did not load');
+            }
+            console.log('mermaid loaded, initializing');
+            mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+            var src = atob('\(b64)');
+            console.log('rendering, source length=' + src.length);
+            var rendered = await mermaid.render('graphDiv', src);
+            console.log('mermaid render returned svg length=' + (rendered && rendered.svg ? rendered.svg.length : 0));
+            appendSvg(rendered.svg);
+            // Off-screen WKWebView windows are treated as hidden by the
+            // Page Visibility API, which suspends requestAnimationFrame.
+            // setTimeout still fires, so use it to let layout settle
+            // before measuring the bounding box.
+            await new Promise(function(r){ setTimeout(r, 50); });
+            var wrapper = document.getElementById('wrapper');
+            var rect = wrapper.getBoundingClientRect();
+            console.log('bbox ' + Math.ceil(rect.width) + 'x' + Math.ceil(rect.height));
+            post({ ok: true, width: Math.ceil(rect.width), height: Math.ceil(rect.height) });
+          } catch (e) {
+            var msg = (e && e.message) ? e.message : String(e);
+            console.error('render failed:', msg);
+            var fallback = document.createElement('pre');
+            fallback.id = 'fallback';
+            fallback.textContent = 'Mermaid render failed: ' + msg;
+            document.body.appendChild(fallback);
+            post({ ok: false, error: msg });
+          }
+        })();
+        </script>
+        </body></html>
+        """
     }
 }
