@@ -17,6 +17,9 @@ struct AppScene: Scene {
     static let speedSlowerNotification = Notification.Name("app.rhea.mac.speedSlower")
     static let saveNotification = Notification.Name("app.rhea.mac.save")
     static let findNotification = Notification.Name("app.rhea.mac.find")
+    static let increaseFontNotification = Notification.Name("app.rhea.mac.increaseFont")
+    static let decreaseFontNotification = Notification.Name("app.rhea.mac.decreaseFont")
+    static let resetFontNotification = Notification.Name("app.rhea.mac.resetFont")
 
     var body: some Scene {
         WindowGroup("Rhea") {
@@ -110,6 +113,33 @@ struct AppScene: Scene {
                     )
                 }
                 .keyboardShortcut("J", modifiers: [.command, .shift])
+            }
+
+            // View menu — font size adjustments for the non-PDF
+            // readers (Markdown, EPUB, Scratchpad). PDFs use PDFKit's
+            // own zoom and ignore these. Bound to the conventional
+            // browser/Notes shortcuts: ⌘+ grows, ⌘- shrinks, ⌘0 resets.
+            CommandGroup(after: .toolbar) {
+                Button("Increase Font Size") {
+                    NotificationCenter.default.post(
+                        name: AppScene.increaseFontNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("+", modifiers: [.command])
+
+                Button("Decrease Font Size") {
+                    NotificationCenter.default.post(
+                        name: AppScene.decreaseFontNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("-", modifiers: [.command])
+
+                Button("Reset Font Size") {
+                    NotificationCenter.default.post(
+                        name: AppScene.resetFontNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("0", modifiers: [.command])
             }
 
             CommandGroup(replacing: .help) {

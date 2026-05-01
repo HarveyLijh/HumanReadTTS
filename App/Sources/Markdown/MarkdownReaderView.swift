@@ -42,8 +42,19 @@ struct MarkdownReaderView: View {
     /// Sources we're currently rendering off-thread. Prevents kicking
     /// off duplicate WKWebView renders for the same diagram.
     @State private var inflightMermaid: Set<String> = []
+    /// Cache of resolved `![alt](url)` images keyed by their resolved
+    /// URL. Loaded asynchronously after the first render so a wide
+    /// column never blocks on disk I/O.
+    @State private var markdownImages: [URL: NSImage] = [:]
+    @State private var inflightImageURLs: Set<URL> = []
+    /// Session-only per-figure width store. Survives re-renders
+    /// (font scale change, mermaid/image resolve) so the user's resize
+    /// gestures aren't clobbered. Held in `@State` as a reference type
+    /// so width writes don't trigger SwiftUI updates.
+    @State private var figureWidths = FigureWidthCache()
 
     @Bindable private var store = MarkdownDocumentStore.shared
+    @Bindable private var readerSettings = ReaderSettings.shared
 
     enum ViewMode: String, CaseIterable, Identifiable {
         case preview = "Preview"
@@ -78,7 +89,8 @@ struct MarkdownReaderView: View {
                             EditableSourceTextView(
                                 url: url,
                                 searchMatches: searchMatches,
-                                currentMatchIndex: search.currentIndex
+                                currentMatchIndex: search.currentIndex,
+                                fontScale: readerSettings.fontScale
                             )
                         }
                     }
@@ -108,6 +120,13 @@ struct MarkdownReaderView: View {
             // The editor or an external save changed the buffer. Re-run
             // the active search so highlight ranges track edits.
             if search.isPresented { runSearch() }
+        }
+        .onChange(of: readerSettings.fontScale) { _, _ in
+            // User adjusted ⌘+ / ⌘- (or moved the header slider): re-
+            // render the preview with the fresh scale. Sentence offsets
+            // are character-position based, so playback alignment
+            // survives the resize.
+            rerenderAttributedFromCache()
         }
         .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
             presentSearch()
@@ -140,6 +159,8 @@ struct MarkdownReaderView: View {
             }
 
             Spacer()
+
+            FontSizeControl()
 
             Button {
                 presentSearch()
@@ -200,7 +221,14 @@ struct MarkdownReaderView: View {
     /// edits don't have to re-read the file from disk.
     private func renderAndSegment(from buffer: String, started: ContinuousClock.Instant) async {
         let parseStart = ContinuousClock.now
-        let attributed = MarkdownRenderer.render(buffer, mermaidImages: mermaidImages)
+        let attributed = MarkdownRenderer.render(
+            buffer,
+            mermaidImages: mermaidImages,
+            markdownImages: markdownImages,
+            widthCache: figureWidths,
+            fontScale: readerSettings.fontScale,
+            baseURL: url.deletingLastPathComponent()
+        )
         Self.log.info("rendered markdown in \(ContinuousClock.now - parseStart, privacy: .public)")
 
         rendered = attributed
@@ -219,6 +247,7 @@ struct MarkdownReaderView: View {
         Self.log.info("TOTAL md load \(ContinuousClock.now - started, privacy: .public)")
 
         kickOffMermaidRenders(in: attributed)
+        kickOffImageLoads(in: attributed)
     }
 
     /// Walks the rendered string for Mermaid placeholders and starts a
@@ -253,7 +282,60 @@ struct MarkdownReaderView: View {
     /// `sentences` array is still valid.
     private func rerenderAttributedFromCache() {
         guard let buffer = lastRenderedSource else { return }
-        rendered = MarkdownRenderer.render(buffer, mermaidImages: mermaidImages)
+        rendered = MarkdownRenderer.render(
+            buffer,
+            mermaidImages: mermaidImages,
+            markdownImages: markdownImages,
+            widthCache: figureWidths,
+            fontScale: readerSettings.fontScale,
+            baseURL: url.deletingLastPathComponent()
+        )
+    }
+
+    /// Walks the rendered string for markdown image placeholders and
+    /// loads the underlying file/URL into `markdownImages` if we haven't
+    /// already. On resolution we re-render so the placeholder swaps for
+    /// the real image and the attachment picks up its true aspect ratio.
+    private func kickOffImageLoads(in attributed: NSAttributedString) {
+        let urls = Self.uniqueMarkdownImageURLs(in: attributed)
+        for imageURL in urls where markdownImages[imageURL] == nil
+                                && !inflightImageURLs.contains(imageURL) {
+            inflightImageURLs.insert(imageURL)
+            Task { @MainActor in
+                defer { inflightImageURLs.remove(imageURL) }
+                if let image = await Self.loadMarkdownImage(at: imageURL) {
+                    markdownImages[imageURL] = image
+                    rerenderAttributedFromCache()
+                }
+            }
+        }
+    }
+
+    /// File URLs decode synchronously off the main thread; remote URLs
+    /// fetch via the shared `URLSession`. Returns `nil` on any failure
+    /// so the renderer keeps showing the placeholder rather than
+    /// flashing a missing-image glyph.
+    private static func loadMarkdownImage(at url: URL) async -> NSImage? {
+        if url.isFileURL {
+            return await Task.detached(priority: .utility) {
+                return NSImage(contentsOf: url)
+            }.value
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return NSImage(data: data)
+        } catch {
+            return nil
+        }
+    }
+
+    private static func uniqueMarkdownImageURLs(in attributed: NSAttributedString) -> Set<URL> {
+        var urls = Set<URL>()
+        let full = NSRange(location: 0, length: attributed.length)
+        attributed.enumerateAttribute(.rheaMarkdownImageURL, in: full, options: []) { value, _, _ in
+            if let u = value as? URL { urls.insert(u) }
+        }
+        return urls
     }
 
     private static func uniqueMermaidSources(in attributed: NSAttributedString) -> Set<String> {
@@ -422,6 +504,11 @@ extension NSAttributedString.Key {
     /// the image cache and to dispatch deferred renders for sources
     /// it hasn't seen yet.
     static let rheaMermaidSource = NSAttributedString.Key("rheaMermaidSource")
+
+    /// Resolved URL of a markdown `![alt](url)` image attached to its
+    /// `ResizableFigureAttachment`. The reader view enumerates these so
+    /// it knows which images still need to be loaded asynchronously.
+    static let rheaMarkdownImageURL = NSAttributedString.Key("rheaMarkdownImageURL")
 }
 
 // MARK: - Markdown rendering
@@ -443,12 +530,17 @@ extension NSAttributedString.Key {
 ///   as paragraphs whose `NSTextTableBlock` paragraph style places
 ///   them in the correct grid slot — with thin horizontal dividers
 ///   between rows (no vertical borders, matching our reading layout).
+@MainActor
 enum MarkdownRenderer {
     static func render(
         _ markdown: String,
-        mermaidImages: [String: NSImage] = [:]
+        mermaidImages: [String: NSImage] = [:],
+        markdownImages: [URL: NSImage] = [:],
+        widthCache: FigureWidthCache? = nil,
+        fontScale: Double = 1.0,
+        baseURL: URL? = nil
     ) -> NSAttributedString {
-        let theme = Theme()
+        let theme = Theme(scale: fontScale)
 
         let attributed: AttributedString
         do {
@@ -484,7 +576,8 @@ enum MarkdownRenderer {
             if let info = mermaidCodeBlockInfo(from: run.presentationIntent) {
                 if let pending = pendingMermaid, pending.identity != info.identity {
                     flushMermaid(
-                        pending, into: result, theme: theme, images: mermaidImages
+                        pending, into: result, theme: theme,
+                        images: mermaidImages, widthCache: widthCache
                     )
                     pendingMermaid = nil
                 }
@@ -505,10 +598,38 @@ enum MarkdownRenderer {
             // next run so the trailing `\n\n` separator lands first.
             if let pending = pendingMermaid {
                 flushMermaid(
-                    pending, into: result, theme: theme, images: mermaidImages
+                    pending, into: result, theme: theme,
+                    images: mermaidImages, widthCache: widthCache
                 )
                 pendingMermaid = nil
                 lastBlockKey = nil
+            }
+
+            // Inline markdown images (`![alt](url)`). Foundation tags the
+            // run with `imageURL`; we replace the alt-text run with a
+            // resizable figure attachment so the user can hover-drag a
+            // width handle the same way they can on mermaid diagrams.
+            // If we're mid-table, flush it first — placing an inline
+            // attachment inside an `NSTextTable` cell stack would land
+            // it on its own line outside the row.
+            if let imageURL = run.imageURL {
+                if let existing = pendingTable {
+                    flushTable(existing, into: result, theme: theme)
+                    pendingTable = nil
+                    result.append(NSAttributedString(
+                        string: "\n\n", attributes: theme.bodyAttributes
+                    ))
+                }
+                let resolved = resolveImageURL(imageURL, against: baseURL)
+                flushImage(
+                    resolved: resolved,
+                    into: result,
+                    theme: theme,
+                    images: markdownImages,
+                    widthCache: widthCache
+                )
+                lastBlockKey = nil
+                continue
             }
 
             let tableInfo = tableInfo(from: run.presentationIntent)
@@ -582,7 +703,10 @@ enum MarkdownRenderer {
             flushTable(existing, into: result, theme: theme)
         }
         if let pending = pendingMermaid {
-            flushMermaid(pending, into: result, theme: theme, images: mermaidImages)
+            flushMermaid(
+                pending, into: result, theme: theme,
+                images: mermaidImages, widthCache: widthCache
+            )
         }
 
         return result
@@ -615,7 +739,8 @@ enum MarkdownRenderer {
         _ pending: (identity: Int, source: String),
         into result: NSMutableAttributedString,
         theme: Theme,
-        images: [String: NSImage]
+        images: [String: NSImage],
+        widthCache: FigureWidthCache?
     ) {
         // Strip the trailing newline that Foundation includes in code-
         // block content; preserving it would shove the attachment onto
@@ -630,12 +755,25 @@ enum MarkdownRenderer {
             ))
         }
 
-        let attachment = NSTextAttachment()
-        let image = images[source] ?? mermaidPlaceholderImage()
-        attachment.image = image
-        attachment.bounds = NSRect(
-            x: 0, y: 0, width: image.size.width, height: image.size.height
-        )
+        let resolvedImage = images[source]
+        let placeholder = mermaidPlaceholderImage()
+        let displayImage = resolvedImage ?? placeholder
+        let aspect = max(0.1, displayImage.size.width / max(1, displayImage.size.height))
+        // Slightly narrower than the column so the resize handle has
+        // breathing room on the trailing edge.
+        let baseline = min(560, displayImage.size.width)
+
+        let figureID = "mermaid:" + stableHash(of: source)
+        let attachment = ResizableFigureAttachment(
+            figureID: figureID,
+            baselineWidth: baseline,
+            aspect: aspect,
+            widthCache: widthCache
+        ) {
+            // Resolved image takes precedence; placeholder is reused
+            // until the WKWebView snapshot lands.
+            return images[source] ?? placeholder
+        }
 
         let para = NSMutableParagraphStyle()
         para.alignment = .center
@@ -657,6 +795,118 @@ enum MarkdownRenderer {
         result.append(NSAttributedString(
             string: "\n", attributes: theme.bodyAttributes
         ))
+    }
+
+    /// Emits a `ResizableFigureAttachment` for a markdown `![alt](url)`
+    /// image. The actual image is loaded asynchronously by the reader
+    /// view; until then we paint a generic placeholder so layout still
+    /// claims the right vertical space.
+    private static func flushImage(
+        resolved: URL,
+        into result: NSMutableAttributedString,
+        theme: Theme,
+        images: [URL: NSImage],
+        widthCache: FigureWidthCache?
+    ) {
+        if result.length > 0,
+           !result.string.hasSuffix("\n\n") {
+            result.append(NSAttributedString(
+                string: "\n\n", attributes: theme.bodyAttributes
+            ))
+        }
+
+        let resolvedImage = images[resolved]
+        let placeholder = imagePlaceholder(for: resolved)
+        let displayImage = resolvedImage ?? placeholder
+        let aspect = max(0.1, displayImage.size.width / max(1, displayImage.size.height))
+        let baseline = min(560, max(240, displayImage.size.width))
+
+        let figureID = "img:" + resolved.absoluteString
+        let attachment = ResizableFigureAttachment(
+            figureID: figureID,
+            baselineWidth: baseline,
+            aspect: aspect,
+            widthCache: widthCache
+        ) {
+            return images[resolved] ?? placeholder
+        }
+
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
+        para.paragraphSpacingBefore = 8
+        para.paragraphSpacing = 8
+
+        let attachmentString = NSMutableAttributedString(attachment: attachment)
+        let fullRange = NSRange(location: 0, length: attachmentString.length)
+        attachmentString.addAttributes(
+            [
+                .rheaMarkdownImageURL: resolved,
+                .paragraphStyle: para,
+                .foregroundColor: NSColor.labelColor,
+            ],
+            range: fullRange
+        )
+        result.append(attachmentString)
+        result.append(NSAttributedString(
+            string: "\n", attributes: theme.bodyAttributes
+        ))
+    }
+
+    /// Resolves a markdown image URL — which may be a relative path
+    /// like `figures/screenshot.png` — against the markdown file's
+    /// directory. Returns the input unchanged for already-absolute URLs.
+    private static func resolveImageURL(_ url: URL, against baseURL: URL?) -> URL {
+        if url.scheme != nil { return url }
+        guard let baseURL else { return url }
+        // `URL(string:relativeTo:)` won't take an existing URL value;
+        // use the path components instead so we tolerate both relative
+        // strings parsed as URLs and bare paths.
+        let raw = url.relativePath.isEmpty ? url.path : url.relativePath
+        return URL(fileURLWithPath: raw, relativeTo: baseURL).standardized
+    }
+
+    /// Soft band shown until the markdown image loads. Mirrors the
+    /// mermaid placeholder dimensions so layout thrash is bounded when
+    /// the real image lands.
+    private static func imagePlaceholder(for url: URL) -> NSImage {
+        let size = NSSize(width: 520, height: 320)
+        let image = NSImage(size: size)
+        image.lockFocus()
+        defer { image.unlockFocus() }
+
+        NSColor.secondaryLabelColor.withAlphaComponent(0.06).setFill()
+        NSBezierPath(
+            roundedRect: NSRect(origin: .zero, size: size),
+            xRadius: 10, yRadius: 10
+        ).fill()
+
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .medium),
+            .foregroundColor: NSColor.tertiaryLabelColor,
+            .paragraphStyle: para,
+        ]
+        let label = url.lastPathComponent as NSString
+        let textHeight: CGFloat = 16
+        let textRect = NSRect(
+            x: 0, y: (size.height - textHeight) / 2,
+            width: size.width, height: textHeight
+        )
+        label.draw(in: textRect, withAttributes: attrs)
+        return image
+    }
+
+    /// Stable, version-independent hash usable as a figure id key.
+    /// `String.hashValue` is salted per-process and would re-key the
+    /// width cache on every launch; a small djb2 keeps the same source
+    /// mapped to the same id across sessions.
+    private static func stableHash(of input: String) -> String {
+        var hash: UInt64 = 5381
+        for byte in input.utf8 {
+            hash = (hash &* 33) &+ UInt64(byte)
+        }
+        return String(hash, radix: 16)
     }
 
     /// Soft "Rendering diagram…" tile shown until the WKWebView
@@ -900,20 +1150,21 @@ enum MarkdownRenderer {
 
         let bodyAttributes: [NSAttributedString.Key: Any]
 
-        init() {
-            let bodyBase = NSFont(name: "New York", size: 16) ?? NSFont.systemFont(ofSize: 16)
+        init(scale: Double = 1.0) {
+            let s = CGFloat(scale)
+            let bodyBase = NSFont(name: "New York", size: 16 * s) ?? NSFont.systemFont(ofSize: 16 * s)
             let manager = NSFontManager.shared
             self.body = bodyBase
             self.bodyBold = manager.convert(bodyBase, toHaveTrait: .boldFontMask)
             self.bodyItalic = manager.convert(bodyBase, toHaveTrait: .italicFontMask)
             self.bodyBoldItalic = manager.convert(bodyBold, toHaveTrait: .italicFontMask)
-            self.mono = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
-            self.monoBold = NSFont.monospacedSystemFont(ofSize: 13, weight: .bold)
+            self.mono = NSFont.monospacedSystemFont(ofSize: 13 * s, weight: .regular)
+            self.monoBold = NSFont.monospacedSystemFont(ofSize: 13 * s, weight: .bold)
 
-            let h1Base = NSFont(name: "New York", size: 28) ?? NSFont.systemFont(ofSize: 28)
-            let h2Base = NSFont(name: "New York", size: 22) ?? NSFont.systemFont(ofSize: 22)
-            let h3Base = NSFont(name: "New York", size: 18) ?? NSFont.systemFont(ofSize: 18)
-            let h4Base = NSFont(name: "New York", size: 16) ?? NSFont.systemFont(ofSize: 16)
+            let h1Base = NSFont(name: "New York", size: 28 * s) ?? NSFont.systemFont(ofSize: 28 * s)
+            let h2Base = NSFont(name: "New York", size: 22 * s) ?? NSFont.systemFont(ofSize: 22 * s)
+            let h3Base = NSFont(name: "New York", size: 18 * s) ?? NSFont.systemFont(ofSize: 18 * s)
+            let h4Base = NSFont(name: "New York", size: 16 * s) ?? NSFont.systemFont(ofSize: 16 * s)
             self.h1 = manager.convert(h1Base, toHaveTrait: .boldFontMask)
             self.h2 = manager.convert(h2Base, toHaveTrait: .boldFontMask)
             self.h3 = manager.convert(h3Base, toHaveTrait: .boldFontMask)
@@ -1088,6 +1339,7 @@ private struct EditableSourceTextView: NSViewRepresentable {
     let url: URL
     let searchMatches: [NSRange]
     let currentMatchIndex: Int
+    let fontScale: Double
 
     final class Coordinator: NSObject, NSTextViewDelegate {
         let url: URL
@@ -1141,7 +1393,9 @@ private struct EditableSourceTextView: NSViewRepresentable {
         tv.isSelectable = true
         tv.isRichText = false
         tv.allowsUndo = true
-        tv.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+        tv.font = NSFont.monospacedSystemFont(
+            ofSize: 13 * CGFloat(fontScale), weight: .regular
+        )
         tv.textColor = NSColor.labelColor
         tv.backgroundColor = NSColor(Color.rheaSurface)
         tv.drawsBackground = true
@@ -1174,6 +1428,25 @@ private struct EditableSourceTextView: NSViewRepresentable {
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let tv = nsView.documentView as? NSTextView,
               let storage = tv.textStorage else { return }
+
+        // Pick up font-scale changes from ⌘+ / ⌘- without rebuilding
+        // the view. Only reassign when the size actually drifted so
+        // typing-time work is still O(1).
+        let desiredSize = 13 * CGFloat(fontScale)
+        if let current = tv.font, current.pointSize != desiredSize {
+            let next = NSFont.monospacedSystemFont(
+                ofSize: desiredSize, weight: .regular
+            )
+            tv.font = next
+            tv.typingAttributes[.font] = next
+            // The whole storage shares one font; restyle in one pass.
+            storage.beginEditing()
+            storage.addAttribute(
+                .font, value: next,
+                range: NSRange(location: 0, length: storage.length)
+            )
+            storage.endEditing()
+        }
 
         // Pull the latest buffer from the store so external changes
         // (Cmd+Z deep into a snapshot, "Discard" from the close sheet,
@@ -1218,13 +1491,21 @@ private func makeReadOnlyTextScrollView(
     scroll.drawsBackground = true
     scroll.backgroundColor = NSColor(Color.rheaSurface)
 
+    // Make sure AppKit knows how to vend our custom view provider for
+    // attachments tagged with `kResizableFigureFileType`. Idempotent.
+    registerResizableFigureProvider()
+
+    // The canonical TextKit 2 opt-in (WWDC22 "What's new in TextKit").
+    // Plain `NSTextView()` defaults to TextKit 1 on macOS, which never
+    // instantiates `NSTextAttachmentViewProvider`. Subclasses inherit
+    // this convenience initializer.
     let textView: NSTextView
     if let onReadFromOffset {
-        let clickable = ClickableReaderTextView()
+        let clickable = ClickableReaderTextView(usingTextLayoutManager: true)
         clickable.onReadFromOffset = onReadFromOffset
         textView = clickable
     } else {
-        textView = NSTextView()
+        textView = NSTextView(usingTextLayoutManager: true)
     }
     textView.isEditable = false
     textView.isSelectable = true
@@ -1237,6 +1518,9 @@ private func makeReadOnlyTextScrollView(
     textView.textContainer?.containerSize = NSSize(
         width: 0, height: CGFloat.greatestFiniteMagnitude
     )
+
+    Logger(subsystem: "app.rhea.mac", category: "resizable-figure")
+        .debug("preview NSTextView using TK2 = \(textView.textLayoutManager != nil)")
 
     scroll.documentView = textView
     return scroll

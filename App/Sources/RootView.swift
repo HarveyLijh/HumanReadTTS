@@ -193,6 +193,21 @@ struct RootView: View {
             let current = SpeechSettings.shared.rate
             player.setRate(max(0.5, (current - 0.1).roundedToStep(0.05)))
         }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.increaseFontNotification)
+        ) { _ in
+            ReaderSettings.shared.increase()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.decreaseFontNotification)
+        ) { _ in
+            ReaderSettings.shared.decrease()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppScene.resetFontNotification)
+        ) { _ in
+            ReaderSettings.shared.reset()
+        }
         .animation(.easeOut(duration: 0.18), value: isTargeted)
         .animation(.easeOut(duration: 0.18), value: document)
         .background(WindowEditedFlag(isEdited: currentDocumentIsDirty))

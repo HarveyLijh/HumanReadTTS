@@ -32,6 +32,12 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 45
 
+    # `secrets` context isn't allowed inside step-level `if:` expressions,
+    # so we lift the existence check up to job-level env (where it is
+    # allowed) and gate signing steps on the resulting string.
+    env:
+      HAS_SIGNING_CERT: ${{ secrets.BUILD_CERTIFICATE_BASE64 != '' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,7 +86,7 @@ jobs:
       # isn't set — the package script will fall back to the
       # ad-hoc-signed DMG path and the release still goes out.
       - name: Import signing certificate
-        if: ${{ secrets.BUILD_CERTIFICATE_BASE64 != '' }}
+        if: env.HAS_SIGNING_CERT == 'true'
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
@@ -183,7 +189,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clean up keychain
-        if: ${{ always() && secrets.BUILD_CERTIFICATE_BASE64 != '' }}
+        if: ${{ always() && env.HAS_SIGNING_CERT == 'true' }}
         env:
           RUNNER_TEMP: ${{ runner.temp }}
         run: |

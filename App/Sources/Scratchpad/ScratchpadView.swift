@@ -25,6 +25,7 @@ struct ScratchpadView: View {
     }
 
     @State private var viewMode: ViewMode = .raw
+    @Bindable private var readerSettings = ReaderSettings.shared
 
     /// A snapshot of `text` at the last successful segment. When the
     /// user edits after playback has started, this drifts away from
@@ -74,6 +75,8 @@ struct ScratchpadView: View {
             .frame(width: 150)
             .help("Raw = editable Markdown source. Preview = rendered.")
 
+            FontSizeControl()
+
             Button {
                 saveAsMarkdown()
             } label: {
@@ -112,7 +115,7 @@ struct ScratchpadView: View {
     private var content: some View {
         switch viewMode {
         case .raw:
-            ScratchpadEditor(text: $text)
+            ScratchpadEditor(text: $text, fontScale: readerSettings.fontScale)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
                 .background(Color.rheaSurface)
@@ -121,6 +124,7 @@ struct ScratchpadView: View {
                 markdown: text,
                 activeSentence: activeSentence,
                 spokenSubRange: player.spokenSubRange,
+                fontScale: readerSettings.fontScale,
                 onReadFromOffset: handleReadFromOffset
             )
                 .padding(.horizontal, 24)
@@ -230,6 +234,7 @@ struct ScratchpadView: View {
 @MainActor
 private struct ScratchpadEditor: NSViewRepresentable {
     @Binding var text: String
+    let fontScale: Double
 
     func makeCoordinator() -> Coordinator { Coordinator(text: $text) }
 
@@ -246,7 +251,8 @@ private struct ScratchpadEditor: NSViewRepresentable {
         textView.isRichText = false
         textView.allowsUndo = true
         textView.delegate = context.coordinator
-        textView.font = NSFont(name: "New York", size: 16) ?? NSFont.systemFont(ofSize: 16)
+        let baseSize = 16 * CGFloat(fontScale)
+        textView.font = NSFont(name: "New York", size: baseSize) ?? NSFont.systemFont(ofSize: baseSize)
         textView.textColor = NSColor.labelColor
         textView.backgroundColor = .clear
         textView.drawsBackground = false
@@ -261,7 +267,7 @@ private struct ScratchpadEditor: NSViewRepresentable {
         para.lineHeightMultiple = 1.35
         textView.defaultParagraphStyle = para
         textView.typingAttributes = [
-            .font: textView.font ?? NSFont.systemFont(ofSize: 16),
+            .font: textView.font ?? NSFont.systemFont(ofSize: baseSize),
             .foregroundColor: NSColor.labelColor,
             .paragraphStyle: para,
         ]
@@ -272,6 +278,26 @@ private struct ScratchpadEditor: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let textView = nsView.documentView as? NSTextView else { return }
+
+        // Pick up font-scale changes (⌘+ / ⌘- or the slider). Reapply
+        // only when the size actually drifted so per-keystroke updates
+        // stay cheap.
+        let desired = 16 * CGFloat(fontScale)
+        if let current = textView.font, current.pointSize != desired {
+            let next = NSFont(name: "New York", size: desired)
+                ?? NSFont.systemFont(ofSize: desired)
+            textView.font = next
+            textView.typingAttributes[.font] = next
+            if let storage = textView.textStorage, storage.length > 0 {
+                storage.beginEditing()
+                storage.addAttribute(
+                    .font, value: next,
+                    range: NSRange(location: 0, length: storage.length)
+                )
+                storage.endEditing()
+            }
+        }
+
         // Only overwrite if the host's text diverged from the view —
         // avoids blowing away the user's in-flight typing because
         // SwiftUI re-rendered the parent.
@@ -300,6 +326,7 @@ private struct ScratchpadPreview: NSViewRepresentable {
     let markdown: String
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let fontScale: Double
     /// Double-click / "Read from here" callback. Kept optional so
     /// the scratchpad preview can be reused in contexts (screenshots,
     /// unit tests) that don't drive playback.
@@ -307,6 +334,7 @@ private struct ScratchpadPreview: NSViewRepresentable {
 
     final class Coordinator {
         var lastRenderedSource: String?
+        var lastRenderedScale: Double?
         var lastSentenceRange: NSRange?
         var lastSubRange: NSRange?
         var lastScrolledSentenceIndex: Int?
@@ -349,13 +377,15 @@ private struct ScratchpadPreview: NSViewRepresentable {
         // host (e.g. a different scratchpad instance sharing the
         // same NSView) points clicks at the right player.
         textView.onReadFromOffset = onReadFromOffset
-        // Only re-render when the source actually changed — walking
-        // the markdown parser on every view update is wasteful when
-        // the parent re-renders for unrelated reasons.
-        if context.coordinator.lastRenderedSource != markdown {
-            let rendered = MarkdownRenderer.render(markdown)
+        // Only re-render when the source or font scale actually
+        // changed — walking the markdown parser on every view update
+        // is wasteful when the parent re-renders for unrelated reasons.
+        if context.coordinator.lastRenderedSource != markdown
+            || context.coordinator.lastRenderedScale != fontScale {
+            let rendered = MarkdownRenderer.render(markdown, fontScale: fontScale)
             storage.setAttributedString(rendered)
             context.coordinator.lastRenderedSource = markdown
+            context.coordinator.lastRenderedScale = fontScale
             context.coordinator.lastSentenceRange = nil
             context.coordinator.lastSubRange = nil
             context.coordinator.lastScrolledSentenceIndex = nil

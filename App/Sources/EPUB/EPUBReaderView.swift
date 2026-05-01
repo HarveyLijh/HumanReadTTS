@@ -15,29 +15,57 @@ struct EPUBReaderView: View {
     @State private var loadFailed = false
     @State private var errorMessage: String = ""
 
+    @Bindable private var readerSettings = ReaderSettings.shared
+
     private static let log = Logger(subsystem: "app.rhea.mac", category: "epub")
 
     var body: some View {
-        Group {
-            if loadFailed {
-                errorState
-            } else if rendered.length == 0 {
-                ProgressView()
-                    .controlSize(.small)
-                    .tint(Color.rheaAccent)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                EPUBTextView(
-                    attributed: rendered,
-                    activeSentence: activeSentence,
-                    spokenSubRange: player.spokenSubRange,
-                    onReadFromOffset: handleReadFromOffset
-                )
+        VStack(spacing: 0) {
+            header
+            Divider()
+
+            Group {
+                if loadFailed {
+                    errorState
+                } else if rendered.length == 0 {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(Color.rheaAccent)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    EPUBTextView(
+                        attributed: rendered,
+                        activeSentence: activeSentence,
+                        spokenSubRange: player.spokenSubRange,
+                        fontScale: readerSettings.fontScale,
+                        onReadFromOffset: handleReadFromOffset
+                    )
+                }
             }
         }
         .task(id: url) {
             await load()
         }
+    }
+
+    private var header: some View {
+        HStack {
+            Image(systemName: "book.closed")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.secondary)
+            Text(url.deletingPathExtension().lastPathComponent)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+
+            Spacer()
+
+            FontSizeControl()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
     }
 
     private var activeSentence: Sentence? {
@@ -101,10 +129,12 @@ private struct EPUBTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let fontScale: Double
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
         var lastAttributedIdentity: ObjectIdentifier?
+        var lastAppliedFontScale: Double?
         var lastSentenceRange: NSRange?
         var lastSubRange: NSRange?
         var lastScrolledSentenceIndex: Int?
@@ -145,14 +175,57 @@ private struct EPUBTextView: NSViewRepresentable {
         tv.onReadFromOffset = onReadFromOffset
 
         let identity = ObjectIdentifier(attributed)
-        if context.coordinator.lastAttributedIdentity != identity {
+        let identityChanged = context.coordinator.lastAttributedIdentity != identity
+        if identityChanged {
             storage.setAttributedString(attributed)
             context.coordinator.lastAttributedIdentity = identity
+            context.coordinator.lastAppliedFontScale = nil
             context.coordinator.lastSentenceRange = nil
             context.coordinator.lastSubRange = nil
             context.coordinator.lastScrolledSentenceIndex = nil
         }
+
+        // Apply the user's font scale by walking every `.font` run and
+        // multiplying its point size. We track the last-applied scale
+        // so a no-op tick (e.g. a highlight repaint) doesn't restyle
+        // the storage. EPUB documents bring their own fonts per run,
+        // so scaling in-place preserves the publisher's intent (italic
+        // emphasis, monospace code, etc.) — only the size shifts.
+        let appliedScale = context.coordinator.lastAppliedFontScale ?? 1.0
+        if appliedScale != fontScale {
+            applyFontScale(
+                to: storage,
+                from: appliedScale,
+                to: fontScale
+            )
+            context.coordinator.lastAppliedFontScale = fontScale
+        }
+
         applyHighlight(to: tv, storage: storage, coordinator: context.coordinator)
+    }
+
+    /// Walks every `.font` run and rescales it by `target / current`.
+    /// Tracking the last-applied scale lets us multiply a delta
+    /// instead of re-deriving sizes from a base attributed string —
+    /// which we'd otherwise have to keep in memory in addition to
+    /// the live storage.
+    private func applyFontScale(
+        to storage: NSTextStorage,
+        from current: Double,
+        to target: Double
+    ) {
+        guard storage.length > 0, current > 0, target > 0 else { return }
+        let ratio = CGFloat(target / current)
+        let full = NSRange(location: 0, length: storage.length)
+        storage.beginEditing()
+        storage.enumerateAttribute(.font, in: full, options: []) { value, range, _ in
+            guard let font = value as? NSFont else { return }
+            let scaled = NSFontManager.shared.convert(
+                font, toSize: font.pointSize * ratio
+            )
+            storage.addAttribute(.font, value: scaled, range: range)
+        }
+        storage.endEditing()
     }
 
     /// Same incremental-highlight strategy as the Markdown reader:
