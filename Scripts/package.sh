@@ -83,8 +83,10 @@ xcodebuild \
     -scheme "$SCHEME" \
     -configuration "$CONFIG" \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
-    -destination 'platform=macOS' \
+    -destination 'platform=macOS,arch=arm64' \
     build \
+    ARCHS=arm64 \
+    ONLY_ACTIVE_ARCH=NO \
     CODE_SIGN_STYLE=Manual \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGNING_ALLOWED=NO \
