@@ -440,31 +440,50 @@ final class SpeechPlayer {
         Task { @MainActor [weak self] in
             guard let self else { return }
             await KokoroEngine.shared.loadIfNeeded()
+
+            // Streaming path: schedule each chunk's audio as it lands
+            // so the user starts hearing chunk 1 while chunks 2+ are
+            // still being synthesised. AVAudioPlayerNode plays
+            // scheduled buffers in order with no inter-buffer gap.
+            //
+            // We track end-of-stream via a trailing zero-frame
+            // sentinel buffer whose `dataPlayedBack` callback fires
+            // after the last real chunk has finished playing — that's
+            // what advances to the next sentence.
+            let stream = KokoroEngine.shared.synthesizeStream(
+                text: spokenText, voiceID: voiceID, speed: speed
+            )
+            let interChunkSilence = [Float](
+                repeating: 0, count: KokoroChunker.interChunkSilenceFrames
+            )
+            var collected: [Float] = []
+            var startedPlaying = false
+            var playbackStart = ContinuousClock.now
+            var sawAnyChunk = false
+
             do {
-                let samples = try await KokoroEngine.shared.synthesize(
-                    text: spokenText, voiceID: voiceID, speed: speed
-                )
-                // The user may have skipped, stopped, or switched voice
-                // while we were synthesising. Only play if we're still
-                // on the same sentence, still in playing state, and the
-                // voice the user now wants still matches what we just
-                // synthesized — otherwise we'd briefly emit the prior
-                // voice before the new one's synth lands.
-                guard self.state.sentenceIndex == myIndex,
-                      case .playing = self.state,
-                      SpeechSettings.shared.voiceIdentifier == expectedVoiceID else { return }
-                let start = ContinuousClock.now
-                self.pcm.play(samples: samples) { [weak self] in
-                    self?.didFinishCurrent()
+                for try await chunk in stream {
+                    // Re-check user state on every chunk: a skip/stop
+                    // or voice swap mid-stream means we should bail
+                    // before scheduling stale audio for playback.
+                    guard self.state.sentenceIndex == myIndex,
+                          case .playing = self.state,
+                          SpeechSettings.shared.voiceIdentifier == expectedVoiceID else {
+                        return
+                    }
+                    if !startedPlaying {
+                        playbackStart = ContinuousClock.now
+                        startedPlaying = true
+                    } else {
+                        // Slight silence between chunks so the vocoder
+                        // re-entry doesn't click and prosody phrasing
+                        // gets a natural pause at the seam.
+                        self.pcm.play(samples: interChunkSilence) { }
+                    }
+                    self.pcm.play(samples: chunk) { }
+                    collected.append(contentsOf: chunk)
+                    sawAnyChunk = true
                 }
-                self.startWordAlignment(
-                    samples: samples, text: sentence.text,
-                    sentenceIndex: myIndex,
-                    sampleRate: KokoroEngine.sampleRate,
-                    playbackStart: start
-                )
-                self.clearFallbackEventIfStale()
-                self.prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
             } catch {
                 Self.log.error("Kokoro synth failed: \(error.localizedDescription, privacy: .public). Falling back to system voice.")
                 self.lastSwitchEvent = SwitchEvent(
@@ -475,10 +494,34 @@ final class SpeechPlayer {
                     sentenceIndex: self.state.sentenceIndex ?? -1,
                     timestamp: Date()
                 )
-                // Fall back so the user still gets audio.
                 self.currentEngine = .system
                 self.speakWithSystem(sentence: sentence, settings: settings)
+                return
             }
+
+            guard sawAnyChunk else { return }
+            // Confirm we still own this sentence before scheduling
+            // the sentinel and starting alignment.
+            guard self.state.sentenceIndex == myIndex,
+                  case .playing = self.state,
+                  SpeechSettings.shared.voiceIdentifier == expectedVoiceID else { return }
+
+            // Sentinel: a tiny silent buffer scheduled AFTER the last
+            // real chunk. AVAudioPlayerNode plays it last, and its
+            // completion callback advances to the next sentence.
+            let sentinel = [Float](repeating: 0, count: 240) // 10 ms @ 24 kHz
+            self.pcm.play(samples: sentinel) { [weak self] in
+                self?.didFinishCurrent()
+            }
+
+            self.startWordAlignment(
+                samples: collected, text: sentence.text,
+                sentenceIndex: myIndex,
+                sampleRate: KokoroEngine.sampleRate,
+                playbackStart: playbackStart
+            )
+            self.clearFallbackEventIfStale()
+            self.prefetchKokoro(after: myIndex, voiceID: voiceID, settings: settings)
         }
     }
 

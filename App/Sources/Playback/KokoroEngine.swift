@@ -130,25 +130,87 @@ final class KokoroEngine {
     }
 
     /// Synthesize `text` with the given voice. Returns 24 kHz mono
-    /// PCM samples. Throws if the engine isn't loaded or the voice
-    /// is unknown.
+    /// PCM samples for the whole input as a single concatenated
+    /// buffer. Used by prefetch and any caller that needs the
+    /// complete audio in one piece.
+    ///
+    /// Long inputs are routed through `KokoroChunker` so that no
+    /// single call into the underlying StyleTTS2 model exceeds the
+    /// model's 510 phoneme-token ceiling (which would otherwise
+    /// crash through to the system voice). For latency-sensitive
+    /// foreground playback, prefer `synthesizeStream` — it yields
+    /// each chunk as soon as it's ready, so the caller can start
+    /// playing chunk 1 while chunk 2 is still being synthesised.
     func synthesize(text: String, voiceID: String, speed: Float = 1.0) async throws -> [Float] {
-        guard let tts else { throw EngineError.notReady }
-        let key = voiceID + ".npy"
-        guard let voiceArray = voiceArrays[key] else {
-            throw EngineError.unknownVoice(voiceID)
+        var combined: [Float] = []
+        var first = true
+        let interChunkSilence = [Float](repeating: 0, count: KokoroChunker.interChunkSilenceFrames)
+        for try await chunk in synthesizeStream(text: text, voiceID: voiceID, speed: speed) {
+            if first {
+                first = false
+            } else {
+                combined.append(contentsOf: interChunkSilence)
+            }
+            combined.append(contentsOf: chunk)
         }
+        return combined
+    }
 
-        let language: KokoroSwift.Language = voiceID.hasPrefix("a") ? .enUS : .enGB
+    /// Streaming variant: yields each chunk's PCM samples as soon
+    /// as it has been synthesised, so the caller can begin playback
+    /// without waiting for the whole sentence. Short inputs yield
+    /// exactly one chunk and finish; long inputs yield one chunk
+    /// per `KokoroChunker` segment, in order.
+    ///
+    /// Errors (engine not ready, unknown voice, model failure) are
+    /// surfaced through the stream's `finish(throwing:)` so the
+    /// caller's `for try await` rethrows as expected.
+    func synthesizeStream(
+        text: String, voiceID: String, speed: Float = 1.0
+    ) -> AsyncThrowingStream<[Float], Error> {
+        AsyncThrowingStream { continuation in
+            guard let tts else {
+                continuation.finish(throwing: EngineError.notReady)
+                return
+            }
+            let key = voiceID + ".npy"
+            guard let voiceArray = voiceArrays[key] else {
+                continuation.finish(throwing: EngineError.unknownVoice(voiceID))
+                return
+            }
 
-        return try await gate.run { [tts, voiceArray, language, text, speed] in
-            let (samples, _) = try tts.generateAudio(
-                voice: voiceArray,
-                language: language,
-                text: text,
-                speed: speed
-            )
-            return samples
+            let language: KokoroSwift.Language = voiceID.hasPrefix("a") ? .enUS : .enGB
+            let chunks = KokoroChunker.chunk(text)
+            let bodies = chunks.isEmpty ? [text] : chunks
+
+            if bodies.count > 1 {
+                Self.log.info("Kokoro streaming long input (\(text.count) chars → \(bodies.count) chunks)")
+            }
+
+            let gate = self.gate
+            let task = Task.detached(priority: .userInitiated) {
+                do {
+                    for chunkText in bodies {
+                        try Task.checkCancellation()
+                        let samples: [Float] = try await gate.run {
+                            [tts, voiceArray, language, chunkText, speed] in
+                            let (samples, _) = try tts.generateAudio(
+                                voice: voiceArray,
+                                language: language,
+                                text: chunkText,
+                                speed: speed
+                            )
+                            return samples
+                        }
+                        try Task.checkCancellation()
+                        continuation.yield(samples)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 

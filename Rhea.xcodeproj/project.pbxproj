@@ -31,6 +31,7 @@
 		2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0044 /* PCMAudioPlayer.swift */; };
 		2B00000000000000000A0045 /* QwenEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0045 /* QwenEngine.swift */; };
 		2B00000000000000000A0046 /* WhisperAligner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0046 /* WhisperAligner.swift */; };
+		2B00000000000000000A0047 /* KokoroChunker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0047 /* KokoroChunker.swift */; };
 		2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0081 /* MenuBarCommand.swift */; };
 		2B00000000000000000A0082 /* ServicesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0082 /* ServicesProvider.swift */; };
 		2B00000000000000000A0083 /* GlobalHotKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0083 /* GlobalHotKey.swift */; };
@@ -82,6 +83,7 @@
 		2B00000000000000000A0036 /* SkipRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0036 /* SkipRule.swift */; };
 		2B00000000000000000A0064 /* SkipRulesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0064 /* SkipRulesSettingsView.swift */; };
 		2B00000000000000000B000F /* SkipRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000F /* SkipRuleTests.swift */; };
+		2B00000000000000000B0010 /* KokoroChunkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0010 /* KokoroChunkerTests.swift */; };
 		2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B3 /* AudioExportFormat.swift */; };
 		2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B4 /* ExportQueueView.swift */; };
 		2B00000000000000000A00B5 /* ExportOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B5 /* ExportOverrides.swift */; };
@@ -134,6 +136,7 @@
 		2A00000000000000000A0044 /* PCMAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMAudioPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0045 /* QwenEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QwenEngine.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0046 /* WhisperAligner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperAligner.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0047 /* KokoroChunker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroChunker.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0081 /* MenuBarCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCommand.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0082 /* ServicesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesProvider.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0083 /* GlobalHotKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKey.swift; sourceTree = "<group>"; };
@@ -180,6 +183,7 @@
 		2A00000000000000000A0036 /* SkipRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRule.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0064 /* SkipRulesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRulesSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000B000F /* SkipRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRuleTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0010 /* KokoroChunkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroChunkerTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B3 /* AudioExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExportFormat.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B4 /* ExportQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportQueueView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B5 /* ExportOverrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportOverrides.swift; sourceTree = "<group>"; };
@@ -345,6 +349,7 @@
 				2A00000000000000000A0044 /* PCMAudioPlayer.swift */,
 				2A00000000000000000A0045 /* QwenEngine.swift */,
 				2A00000000000000000A0046 /* WhisperAligner.swift */,
+				2A00000000000000000A0047 /* KokoroChunker.swift */,
 			);
 			path = Playback;
 			sourceTree = "<group>";
@@ -481,6 +486,7 @@
 				2A00000000000000000B000D /* LibrarySidebarFormatterTests.swift */,
 				2A00000000000000000B000E /* ReaderHitTesterTests.swift */,
 				2A00000000000000000B000F /* SkipRuleTests.swift */,
+				2A00000000000000000B0010 /* KokoroChunkerTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -719,6 +725,7 @@
 				2B00000000000000000A0043 /* KokoroEngine.swift in Sources */,
 				2B00000000000000000A0045 /* QwenEngine.swift in Sources */,
 				2B00000000000000000A0046 /* WhisperAligner.swift in Sources */,
+				2B00000000000000000A0047 /* KokoroChunker.swift in Sources */,
 				2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */,
 				2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */,
 				2B00000000000000000A0082 /* ServicesProvider.swift in Sources */,
@@ -782,6 +789,7 @@
 				2B00000000000000000B000D /* LibrarySidebarFormatterTests.swift in Sources */,
 				2B00000000000000000B000E /* ReaderHitTesterTests.swift in Sources */,
 				2B00000000000000000B000F /* SkipRuleTests.swift in Sources */,
+				2B00000000000000000B0010 /* KokoroChunkerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
