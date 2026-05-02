@@ -76,6 +76,29 @@ fi
 
 mkdir -p "$DIST_DIR"
 
+# ── Resolve packages (so we can patch a known-broken upstream) ──
+# kokoro-ios 1.0.11's Package.swift imports `MLXFast` from KokoroSwift
+# but forgets to declare it as a target dependency. Local dev machines
+# don't notice because DerivedData has older cached objects; clean CI
+# fails with "Unable to find module dependency: 'MLXFast'". We resolve
+# the package graph first, patch the checked-out Package.swift, then
+# build with package resolution disabled so Xcode doesn't re-fetch.
+say "Resolving Swift packages"
+xcodebuild \
+    -project "$PROJECT_ROOT/Rhea.xcodeproj" \
+    -scheme "$SCHEME" \
+    -derivedDataPath "$BUILD_DIR/DerivedData" \
+    -resolvePackageDependencies \
+    >/dev/null
+
+KOKORO_PKG="$BUILD_DIR/DerivedData/SourcePackages/checkouts/kokoro-ios/Package.swift"
+if [[ -f "$KOKORO_PKG" ]] && ! grep -q '"MLXFast"' "$KOKORO_PKG"; then
+    note "Patching kokoro-ios Package.swift to declare MLXFast dep"
+    /usr/bin/sed -i '' \
+        $'s|.product(name: "MLXNN", package: "mlx-swift"),|.product(name: "MLXNN", package: "mlx-swift"),\\\n        .product(name: "MLXFast", package: "mlx-swift"),|' \
+        "$KOKORO_PKG"
+fi
+
 # ── Build Release ────────────────────────────────────────────────
 say "xcodebuild $CONFIG"
 xcodebuild \
@@ -84,6 +107,8 @@ xcodebuild \
     -configuration "$CONFIG" \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
     -destination 'platform=macOS,arch=arm64' \
+    -disableAutomaticPackageResolution \
+    -skipPackagePluginValidation \
     build \
     ARCHS=arm64 \
     ONLY_ACTIVE_ARCH=NO \
