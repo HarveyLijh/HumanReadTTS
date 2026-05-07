@@ -88,8 +88,7 @@ xcodebuild \
     -project "$PROJECT_ROOT/Rhea.xcodeproj" \
     -scheme "$SCHEME" \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
-    -resolvePackageDependencies \
-    >/dev/null
+    -resolvePackageDependencies
 
 KOKORO_PKG="$BUILD_DIR/DerivedData/SourcePackages/checkouts/kokoro-ios/Package.swift"
 if [[ -f "$KOKORO_PKG" ]] && ! grep -q '"MLXFast"' "$KOKORO_PKG"; then
@@ -114,8 +113,7 @@ xcodebuild \
     ONLY_ACTIVE_ARCH=NO \
     CODE_SIGN_STYLE=Manual \
     CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGNING_ALLOWED=NO \
-    >/dev/null
+    CODE_SIGNING_ALLOWED=NO
 ok "Release build complete"
 
 SRC_APP="$BUILD_DIR/DerivedData/Build/Products/$CONFIG/$APP_NAME.app"
