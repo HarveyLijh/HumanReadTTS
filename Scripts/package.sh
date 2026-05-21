@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build a Release Rhea.app, sign it, and pack it into a .dmg.
+# Build a Release ReadAloudTTS.app, sign it, and pack it into a .dmg.
 #
 # Signing / notarisation is optional: if DEVELOPER_ID_APPLICATION
 # is set we Developer-ID-sign + (optionally) notarise. Otherwise
@@ -29,8 +29,8 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$PROJECT_ROOT/build"
 DIST_DIR="$PROJECT_ROOT/dist"
-APP_NAME="Rhea"
-SCHEME="Rhea"
+APP_NAME="ReadAloudTTS"
+SCHEME="ReadAloudTTS"
 CONFIG="Release"
 
 c_reset=$'\033[0m'
@@ -45,7 +45,7 @@ note() { printf "  %s%s%s\n" "$c_dim" "$1" "$c_reset"; }
 
 usage() {
     cat <<EOF
-Build a signed Rhea.dmg.
+Build a signed ReadAloudTTS.dmg.
 
   --notarize    Submit to Apple notarytool and staple. Requires
                 NOTARY_APPLE_ID, NOTARY_TEAM_ID, NOTARY_PASSWORD.
@@ -85,7 +85,7 @@ mkdir -p "$DIST_DIR"
 # build with package resolution disabled so Xcode doesn't re-fetch.
 say "Resolving Swift packages"
 xcodebuild \
-    -project "$PROJECT_ROOT/Rhea.xcodeproj" \
+    -project "$PROJECT_ROOT/ReadAloudTTS.xcodeproj" \
     -scheme "$SCHEME" \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
     -resolvePackageDependencies
@@ -101,7 +101,7 @@ fi
 # ── Build Release ────────────────────────────────────────────────
 say "xcodebuild $CONFIG"
 xcodebuild \
-    -project "$PROJECT_ROOT/Rhea.xcodeproj" \
+    -project "$PROJECT_ROOT/ReadAloudTTS.xcodeproj" \
     -scheme "$SCHEME" \
     -configuration "$CONFIG" \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
@@ -211,13 +211,13 @@ if [[ -z "${DEVELOPER_ID_APPLICATION:-}" ]]; then
 ${c_dim}# Unsigned DMG — ship it as-is. Include this note with the download:
 #
 #   First-run instructions for users:
-#     1. Download and mount the DMG, drag Rhea to /Applications.
-#     2. First launch: right-click Rhea.app → Open → click "Open" in
+#     1. Download and mount the DMG, drag ReadAloudTTS to /Applications.
+#     2. First launch: right-click ReadAloudTTS.app → Open → click "Open" in
 #        the Gatekeeper dialog. (Double-clicking shows a blocked
 #        dialog with no "Open" button — that's macOS's quirk.)
 #     3. Works normally every time after that.
 #
 #   Or paste this one-liner in Terminal to remove the quarantine flag:
-#     xattr -dr com.apple.quarantine /Applications/Rhea.app${c_reset}
+#     xattr -dr com.apple.quarantine /Applications/ReadAloudTTS.app${c_reset}
 EOF
 fi

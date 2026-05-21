@@ -76,12 +76,12 @@ final class SpeechSettings {
     }
 
     private let defaults: UserDefaults
-    private let rateKey = "app.rhea.mac.speech.rate.v1"
-    private let pitchKey = "app.rhea.mac.speech.pitch.v1"
-    private let voiceKey = "app.rhea.mac.speech.voice.v1"
-    private let stripCitationsKey = "app.rhea.mac.speech.stripCitations.v1"
-    private let skipFigureCaptionsKey = "app.rhea.mac.speech.skipFigureCaptions.v1"
-    private let skipRulesKey = "app.rhea.mac.speech.skipRules.v1"
+    private let rateKey = "app.readaloudtts.mac.speech.rate.v1"
+    private let pitchKey = "app.readaloudtts.mac.speech.pitch.v1"
+    private let voiceKey = "app.readaloudtts.mac.speech.voice.v1"
+    private let stripCitationsKey = "app.readaloudtts.mac.speech.stripCitations.v1"
+    private let skipFigureCaptionsKey = "app.readaloudtts.mac.speech.skipFigureCaptions.v1"
+    private let skipRulesKey = "app.readaloudtts.mac.speech.skipRules.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

@@ -1,5 +1,5 @@
 import XCTest
-@testable import Rhea
+@testable import ReadAloudTTS
 
 @MainActor
 final class PronunciationDictionaryTests: XCTestCase {
@@ -49,7 +49,7 @@ final class PronunciationDictionaryTests: XCTestCase {
     // MARK: dictionary behaviour
 
     func test_apply_runsEachEntryInOrder() {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let dict = PronunciationDictionary(defaults: defaults)
@@ -62,20 +62,20 @@ final class PronunciationDictionaryTests: XCTestCase {
     }
 
     func test_add_thenReload_persists() {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
 
         let first = PronunciationDictionary(defaults: defaults)
-        first.add(term: "Rhea", phonetic: "Ree-uh")
+        first.add(term: "ReadAloudTTS", phonetic: "Ree-uh")
 
         let second = PronunciationDictionary(defaults: defaults)
         XCTAssertEqual(second.entries.count, 1)
-        XCTAssertEqual(second.entries.first?.term, "Rhea")
+        XCTAssertEqual(second.entries.first?.term, "ReadAloudTTS")
     }
 
     func test_add_rejectsEmptyInputs() {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let dict = PronunciationDictionary(defaults: defaults)
@@ -87,7 +87,7 @@ final class PronunciationDictionaryTests: XCTestCase {
     }
 
     func test_remove_dropsEntry() {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let dict = PronunciationDictionary(defaults: defaults)
@@ -99,7 +99,7 @@ final class PronunciationDictionaryTests: XCTestCase {
     }
 
     func test_apply_withEmptyDictionary_isNoOp() {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let dict = PronunciationDictionary(defaults: defaults)

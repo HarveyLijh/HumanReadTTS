@@ -8,21 +8,21 @@ struct DropTargetView: View {
         VStack(spacing: 16) {
             Image(systemName: "doc.text")
                 .font(.system(size: 48, weight: .light))
-                .foregroundStyle(Color.rheaAccent)
-            Text("Drop a PDF, Markdown, or EPUB file")
-                .font(RheaFont.serif(22))
+                .foregroundStyle(Color.readAloudTTSAccent)
+            Text("Drop a PDF, Markdown, EPUB, DOCX, or text file")
+                .font(ReadAloudTTSFont.serif(22))
                 .foregroundStyle(.primary)
             Text("We'll read it aloud.")
-                .font(RheaFont.ui(13))
+                .font(ReadAloudTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
     }
 }
 
-#if DEBUG && !RHEA_CLI_BUILD
+#if DEBUG && !READALOUDTTS_CLI_BUILD
 #Preview {
     DropTargetView()
         .frame(width: 800, height: 600)
-        .background(Color.rheaSurface)
+        .background(Color.readAloudTTSSurface)
 }
 #endif

@@ -21,7 +21,7 @@ struct PDFViewerView: View {
             case .loading:
                 ProgressView()
                     .controlSize(.small)
-                    .tint(Color.rheaAccent)
+                    .tint(Color.readAloudTTSAccent)
             case .loaded(let document):
                 ZStack(alignment: .topTrailing) {
                     PDFViewRepresentable(
@@ -200,12 +200,12 @@ struct PDFViewerView: View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 36, weight: .light))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
             Text("Couldn't open \(url.lastPathComponent).")
-                .font(RheaFont.serif(18))
+                .font(ReadAloudTTSFont.serif(18))
                 .foregroundStyle(.primary)
             Text("Drop another file to try again.")
-                .font(RheaFont.ui(13))
+                .font(ReadAloudTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
         .padding(32)
@@ -242,7 +242,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         view.onReadFromLocation = onReadFromLocation
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
-        view.backgroundColor = NSColor(Color.rheaSurface)
+        view.backgroundColor = NSColor(Color.readAloudTTSSurface)
         view.autoScales = true
         view.document = document
         view.unregisterDraggedTypes()
@@ -320,7 +320,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
 
             if let sentence = activeSentence,
                let sentenceSelection = selection(for: sentence) {
-                let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+                let soft = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.25)
                 for lineSelection in sentenceSelection.selectionsByLine() {
                     for page in lineSelection.pages {
                         let bounds = lineSelection.bounds(for: page)
@@ -347,7 +347,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
             if let sentence = activeSentence,
                let sub = spokenSubRange,
                let wordSelection = wordSelection(for: sentence, subRange: sub) {
-                let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+                let bright = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.55)
                 for lineSelection in wordSelection.selectionsByLine() {
                     for page in lineSelection.pages {
                         let bounds = lineSelection.bounds(for: page)
@@ -465,6 +465,7 @@ private final class ClickablePDFView: PDFView {
     private var scrollMonitor: Any?
     private var mouseMonitor: Any?
     private var keyMonitor: Any?
+    private var notificationObservers: [NSObjectProtocol] = []
     private static let zoomStep: CGFloat = 1.08
     private static let minZoomMultiplier: CGFloat = 0.25
     private static let maxZoomMultiplier: CGFloat = 6.0
@@ -512,12 +513,51 @@ private final class ClickablePDFView: PDFView {
             guard let self else { return event }
             return self.handleKey(event)
         }
+
+        // Keyboard ⌘+ / ⌘- / ⌘0 zoom. The View menu posts these
+        // notifications for the non-PDF readers (where they drive
+        // ReaderSettings.fontScale) — we also adopt them here so the
+        // same shortcut zooms the visible PDF. ReaderSettings still
+        // ticks in the background, but it's only consulted by the
+        // markdown/EPUB/text readers, so there's no cross-contamination.
+        let center = NotificationCenter.default
+        let queue = OperationQueue.main
+        notificationObservers.append(
+            center.addObserver(
+                forName: AppScene.increaseFontNotification,
+                object: nil, queue: queue
+            ) { [weak self] _ in self?.zoomFromKeyboard(factor: Self.zoomStep) }
+        )
+        notificationObservers.append(
+            center.addObserver(
+                forName: AppScene.decreaseFontNotification,
+                object: nil, queue: queue
+            ) { [weak self] _ in self?.zoomFromKeyboard(factor: 1.0 / Self.zoomStep) }
+        )
+        notificationObservers.append(
+            center.addObserver(
+                forName: AppScene.resetFontNotification,
+                object: nil, queue: queue
+            ) { [weak self] _ in self?.restoreDefaultLook() }
+        )
     }
 
     private func removeEventMonitors() {
         if let m = scrollMonitor { NSEvent.removeMonitor(m); scrollMonitor = nil }
         if let m = mouseMonitor { NSEvent.removeMonitor(m); mouseMonitor = nil }
         if let m = keyMonitor { NSEvent.removeMonitor(m); keyMonitor = nil }
+        for token in notificationObservers {
+            NotificationCenter.default.removeObserver(token)
+        }
+        notificationObservers.removeAll()
+    }
+
+    /// Keyboard-driven zoom. Pins the cursor anchor to the view's
+    /// center because there's no mouse position when the shortcut
+    /// fires; behaves like Preview.app's ⌘+ / ⌘-.
+    private func zoomFromKeyboard(factor: CGFloat) {
+        let anchor = NSPoint(x: bounds.midX, y: bounds.midY)
+        zoom(by: factor, around: anchor)
     }
 
     private func eventIsOverMe(_ event: NSEvent) -> Bool {

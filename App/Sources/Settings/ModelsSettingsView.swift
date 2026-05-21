@@ -63,9 +63,9 @@ struct ModelsSettingsView: View {
         case .notDownloaded:
             label("Not downloaded · \(entry.approximateSizeMB) MB", icon: "arrow.down.circle", color: .secondary)
         case .downloading(let completed, let total):
-            label("Downloading file \(completed + 1) of \(total)…", icon: "arrow.down.circle", color: Color.rheaAccent)
+            label("Downloading file \(completed + 1) of \(total)…", icon: "arrow.down.circle", color: Color.readAloudTTSAccent)
         case .ready(let bytes):
-            label("Installed · \(format(bytes: bytes))", icon: "checkmark.circle.fill", color: Color.rheaAccent)
+            label("Installed · \(format(bytes: bytes))", icon: "checkmark.circle.fill", color: Color.readAloudTTSAccent)
         case .failed(let message):
             label(message, icon: "exclamationmark.circle", color: .red)
         }

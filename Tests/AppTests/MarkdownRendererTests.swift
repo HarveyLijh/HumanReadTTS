@@ -1,6 +1,6 @@
 import XCTest
 import AppKit
-@testable import Rhea
+@testable import ReadAloudTTS
 
 final class MarkdownRendererTests: XCTestCase {
 
@@ -121,9 +121,9 @@ final class MarkdownRendererTests: XCTestCase {
         let claimRange = ns.range(of: "Claim it makes")      // same header row, next cell
         let failureRange = ns.range(of: "Failure/struggle")  // first data row
 
-        let triggerID = rendered.attribute(.rheaTableRowID, at: triggerRange.location, effectiveRange: nil) as? String
-        let claimID = rendered.attribute(.rheaTableRowID, at: claimRange.location, effectiveRange: nil) as? String
-        let failureID = rendered.attribute(.rheaTableRowID, at: failureRange.location, effectiveRange: nil) as? String
+        let triggerID = rendered.attribute(.readAloudTTSTableRowID, at: triggerRange.location, effectiveRange: nil) as? String
+        let claimID = rendered.attribute(.readAloudTTSTableRowID, at: claimRange.location, effectiveRange: nil) as? String
+        let failureID = rendered.attribute(.readAloudTTSTableRowID, at: failureRange.location, effectiveRange: nil) as? String
 
         XCTAssertNotNil(triggerID)
         XCTAssertNotNil(claimID)

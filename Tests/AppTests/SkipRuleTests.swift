@@ -1,5 +1,5 @@
 import XCTest
-@testable import Rhea
+@testable import ReadAloudTTS
 
 final class SkipRuleTests: XCTestCase {
     func test_builtIns_haveStableIDsAcrossCalls() {

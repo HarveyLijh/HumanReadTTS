@@ -212,7 +212,7 @@ struct ExportQueueView: View {
     private func iconTint(for state: ExportJob.State) -> Color {
         switch state {
         case .queued: return .secondary
-        case .running: return Color.rheaAccent
+        case .running: return Color.readAloudTTSAccent
         case .succeeded: return .green
         case .failed: return .orange
         }

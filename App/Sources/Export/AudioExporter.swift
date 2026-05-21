@@ -40,7 +40,7 @@ enum AudioExporter {
         }
     }
 
-    private static let log = Logger(subsystem: "app.rhea.mac", category: "export")
+    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "export")
 
     /// Export `sentences` to `destination` in `format`. `progress`
     /// is called on the main actor with fraction of sentences

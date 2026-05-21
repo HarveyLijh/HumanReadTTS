@@ -121,10 +121,10 @@ struct RootView: View {
             document = next
         }
         .onReceive(
-            NotificationCenter.default.publisher(for: .rheaOpenURL)
+            NotificationCenter.default.publisher(for: .readAloudTTSOpenURL)
         ) { note in
             // Routed via `AppDelegateShim.application(_:open:)` so
-            // `open -a Rhea file.pdf` and Finder double-clicks swap
+            // `open -a ReadAloudTTS file.pdf` and Finder double-clicks swap
             // the document in the existing window rather than
             // triggering `WindowGroup` to spawn a new scene. Also
             // used by the welcome tour to hand off its sample.
@@ -133,7 +133,7 @@ struct RootView: View {
             adopt(next)
         }
         .onReceive(
-            NotificationCenter.default.publisher(for: .rheaShowOnboarding)
+            NotificationCenter.default.publisher(for: .readAloudTTSShowOnboarding)
         ) { _ in
             presentOnboarding()
         }
@@ -226,7 +226,7 @@ struct RootView: View {
         ZStack {
             VisualEffectBackground(material: .underPageBackground)
                 .ignoresSafeArea()
-            Color.rheaSurface.ignoresSafeArea()
+            Color.readAloudTTSSurface.ignoresSafeArea()
 
             if scratchpadText != nil {
                 ScratchpadView(
@@ -265,12 +265,16 @@ struct RootView: View {
             MarkdownReaderView(url: document.url, player: player)
         case .epub:
             EPUBReaderView(url: document.url, player: player)
+        case .text:
+            TextReaderView(url: document.url, player: player)
+        case .docx:
+            DOCXReaderView(url: document.url, player: player)
         }
     }
 
     private var targetingHighlight: some View {
         RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .strokeBorder(Color.rheaAccent.opacity(isTargeted ? 0.65 : 0), lineWidth: 2)
+            .strokeBorder(Color.readAloudTTSAccent.opacity(isTargeted ? 0.65 : 0), lineWidth: 2)
             .padding(12)
             .allowsHitTesting(false)
     }
@@ -353,7 +357,7 @@ struct RootView: View {
             Image(systemName: "waveform.slash")
                 .foregroundStyle(.orange)
             Text(fallbackBannerText)
-                .font(RheaFont.ui(12))
+                .font(ReadAloudTTSFont.ui(12))
                 .foregroundStyle(.primary)
         }
         .padding(.horizontal, 12)
@@ -410,9 +414,9 @@ struct RootView: View {
     private var undoBanner: some View {
         HStack(spacing: 10) {
             Image(systemName: "arrow.triangle.2.circlepath")
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
             Text(undoBannerText)
-                .font(RheaFont.ui(12))
+                .font(ReadAloudTTSFont.ui(12))
                 .foregroundStyle(.primary)
             Button("Undo") {
                 undoDismissTask?.cancel()
@@ -423,8 +427,8 @@ struct RootView: View {
                 undoPrevious = nil
             }
             .buttonStyle(.plain)
-            .font(RheaFont.ui(12).weight(.semibold))
-            .foregroundStyle(Color.rheaAccent)
+            .font(ReadAloudTTSFont.ui(12).weight(.semibold))
+            .foregroundStyle(Color.readAloudTTSAccent)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -453,13 +457,13 @@ struct RootView: View {
     private func exportErrorBanner(message: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle")
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
             Text(message)
-                .font(RheaFont.ui(12))
+                .font(ReadAloudTTSFont.ui(12))
             Button("Dismiss") { exporter.dismissAlert() }
                 .buttonStyle(.plain)
-                .font(RheaFont.ui(12))
-                .foregroundStyle(Color.rheaAccent)
+                .font(ReadAloudTTSFont.ui(12))
+                .foregroundStyle(Color.readAloudTTSAccent)
         }
         .padding(10)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
@@ -476,17 +480,19 @@ struct RootView: View {
     /// Present NSOpenPanel for the File → Open File… menu (⌘O).
     private func promptForOpenFile() {
         let panel = NSOpenPanel()
-        panel.title = "Open a PDF, Markdown, or EPUB"
+        panel.title = "Open a document"
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
-        panel.allowedContentTypes = [.pdf, .epub]
-        // Also allow .md / .markdown — allowedContentTypes accepts UTType
-        if let md = UTType(filenameExtension: "md") {
-            panel.allowedContentTypes.append(md)
+        var types: [UTType] = [.pdf, .epub, .plainText, .text]
+        // Conditionally add extension-based types so unsupported UTType
+        // resolves don't crash the panel on machines with stripped
+        // LaunchServices caches.
+        for ext in ["md", "markdown", "docx", "txt", "log"] {
+            if let type = UTType(filenameExtension: ext) {
+                types.append(type)
+            }
         }
-        if let markdown = UTType(filenameExtension: "markdown") {
-            panel.allowedContentTypes.append(markdown)
-        }
+        panel.allowedContentTypes = Array(Set(types))
         if panel.runModal() == .OK,
            let url = panel.url,
            let next = DroppedDocument(url: url) {
@@ -497,7 +503,7 @@ struct RootView: View {
     /// Called from the File → Export Audiobook menu command.
     func startExport() {
         let sentences = currentSentences()
-        let suggestion = document?.url.deletingPathExtension().lastPathComponent ?? "Rhea Export"
+        let suggestion = document?.url.deletingPathExtension().lastPathComponent ?? "ReadAloudTTS Export"
         exporter.exportWithPrompt(sentences: sentences, suggestedName: suggestion)
     }
 

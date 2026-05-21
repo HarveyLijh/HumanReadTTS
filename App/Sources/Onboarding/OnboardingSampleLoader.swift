@@ -16,8 +16,8 @@ enum OnboardingSampleLoader {
     /// User-visible filename. Shown in the sidebar, the window
     /// title, and the resume position database, so we pick a
     /// name that reads well in those surfaces — "Welcome to
-    /// Rhea.md" rather than the internal bundle name.
-    static let filename = "Welcome to Rhea.md"
+    /// ReadAloudTTS.md" rather than the internal bundle name.
+    static let filename = "Welcome to ReadAloudTTS.md"
 
     enum LoadError: Error {
         case resourceMissing
@@ -48,14 +48,14 @@ enum OnboardingSampleLoader {
             appropriateFor: nil,
             create: true
         )
-        let rheaDir = supportDir.appendingPathComponent("Rhea", isDirectory: true)
-        if !FileManager.default.fileExists(atPath: rheaDir.path) {
+        let readAloudTTSDir = supportDir.appendingPathComponent("ReadAloudTTS", isDirectory: true)
+        if !FileManager.default.fileExists(atPath: readAloudTTSDir.path) {
             try FileManager.default.createDirectory(
-                at: rheaDir, withIntermediateDirectories: true
+                at: readAloudTTSDir, withIntermediateDirectories: true
             )
         }
 
-        let destination = rheaDir.appendingPathComponent(filename)
+        let destination = readAloudTTSDir.appendingPathComponent(filename)
         if FileManager.default.fileExists(atPath: destination.path) {
             if overwrite {
                 try FileManager.default.removeItem(at: destination)

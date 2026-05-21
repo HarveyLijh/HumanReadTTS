@@ -6,27 +6,27 @@ struct AppScene: Scene {
     /// invoke its flows. NotificationCenter keeps command→view
     /// plumbing decoupled so the command can originate from any
     /// window without threading bindings through the hierarchy.
-    static let exportNotification = Notification.Name("app.rhea.mac.export")
-    static let showExportsNotification = Notification.Name("app.rhea.mac.showExports")
-    static let playPauseNotification = Notification.Name("app.rhea.mac.playPause")
-    static let nextSentenceNotification = Notification.Name("app.rhea.mac.nextSentence")
-    static let prevSentenceNotification = Notification.Name("app.rhea.mac.prevSentence")
-    static let openFileNotification = Notification.Name("app.rhea.mac.openFile")
-    static let newScratchpadNotification = Notification.Name("app.rhea.mac.newScratchpad")
-    static let speedFasterNotification = Notification.Name("app.rhea.mac.speedFaster")
-    static let speedSlowerNotification = Notification.Name("app.rhea.mac.speedSlower")
-    static let saveNotification = Notification.Name("app.rhea.mac.save")
-    static let findNotification = Notification.Name("app.rhea.mac.find")
-    static let increaseFontNotification = Notification.Name("app.rhea.mac.increaseFont")
-    static let decreaseFontNotification = Notification.Name("app.rhea.mac.decreaseFont")
-    static let resetFontNotification = Notification.Name("app.rhea.mac.resetFont")
+    static let exportNotification = Notification.Name("app.readaloudtts.mac.export")
+    static let showExportsNotification = Notification.Name("app.readaloudtts.mac.showExports")
+    static let playPauseNotification = Notification.Name("app.readaloudtts.mac.playPause")
+    static let nextSentenceNotification = Notification.Name("app.readaloudtts.mac.nextSentence")
+    static let prevSentenceNotification = Notification.Name("app.readaloudtts.mac.prevSentence")
+    static let openFileNotification = Notification.Name("app.readaloudtts.mac.openFile")
+    static let newScratchpadNotification = Notification.Name("app.readaloudtts.mac.newScratchpad")
+    static let speedFasterNotification = Notification.Name("app.readaloudtts.mac.speedFaster")
+    static let speedSlowerNotification = Notification.Name("app.readaloudtts.mac.speedSlower")
+    static let saveNotification = Notification.Name("app.readaloudtts.mac.save")
+    static let findNotification = Notification.Name("app.readaloudtts.mac.find")
+    static let increaseFontNotification = Notification.Name("app.readaloudtts.mac.increaseFont")
+    static let decreaseFontNotification = Notification.Name("app.readaloudtts.mac.decreaseFont")
+    static let resetFontNotification = Notification.Name("app.readaloudtts.mac.resetFont")
 
     var body: some Scene {
-        WindowGroup("Rhea") {
+        WindowGroup("ReadAloudTTS") {
             RootView()
                 .frame(minWidth: 600, minHeight: 400)
                 .handlesExternalEvents(
-                    preferring: ["rhea-main"], allowing: ["rhea-main"]
+                    preferring: ["readaloudtts-main"], allowing: ["readaloudtts-main"]
                 )
                 .background(WindowAccessor { window in
                     // Let vibrancy and the content flow up under the
@@ -47,7 +47,7 @@ struct AppScene: Scene {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 800, height: 600)
-        .handlesExternalEvents(matching: ["rhea-main"])
+        .handlesExternalEvents(matching: ["readaloudtts-main"])
         .commands {
             // Replace the default ⌘N "New Window" (one reader window
             // per process is the mental model) with ⌘N "New
@@ -115,17 +115,29 @@ struct AppScene: Scene {
                 .keyboardShortcut("J", modifiers: [.command, .shift])
             }
 
-            // View menu — font size adjustments for the non-PDF
-            // readers (Markdown, EPUB, Scratchpad). PDFs use PDFKit's
-            // own zoom and ignore these. Bound to the conventional
-            // browser/Notes shortcuts: ⌘+ grows, ⌘- shrinks, ⌘0 resets.
+            // View menu — font size for the prose readers (Markdown,
+            // EPUB, plain-text, DOCX, Scratchpad) and zoom for the
+            // PDF viewer. Each format hooks the same notifications:
+            // text formats scale ReaderSettings.fontScale, while the
+            // PDF view re-drives its PDFKit scale around the page
+            // center.
+            //
+            // Note: SwiftUI's `keyboardShortcut("+", modifiers: [.command])`
+            // is unreliable on US keyboards because "+" requires
+            // shift, and the matcher rejects events whose modifiers
+            // don't match exactly. The actual key handling lives in
+            // `AppDelegateShim.installFontShortcutMonitor()` which
+            // catches every variant (⌘=, ⌘+, ⌘-, ⌘0) at the NSEvent
+            // layer and posts the notifications below. The menu items
+            // here exist purely for discoverability and the displayed
+            // shortcut hint.
             CommandGroup(after: .toolbar) {
                 Button("Increase Font Size") {
                     NotificationCenter.default.post(
                         name: AppScene.increaseFontNotification, object: nil
                     )
                 }
-                .keyboardShortcut("+", modifiers: [.command])
+                .keyboardShortcut("=", modifiers: [.command])
 
                 Button("Decrease Font Size") {
                     NotificationCenter.default.post(
@@ -145,7 +157,7 @@ struct AppScene: Scene {
             CommandGroup(replacing: .help) {
                 Button("Show Welcome Tour…") {
                     NotificationCenter.default.post(
-                        name: .rheaShowOnboarding, object: nil
+                        name: .readAloudTTSShowOnboarding, object: nil
                     )
                 }
             }

@@ -4,13 +4,14 @@ import Carbon.HIToolbox
 
 /// Bridges into `NSApplication` lifecycle to register bits that
 /// SwiftUI's `App` protocol doesn't expose: the Services provider
-/// (for the system "Read with Rhea" menu item) and a global
+/// (for the system "Read with ReadAloudTTS" menu item) and a global
 /// ⌘⇧S hotkey (reads the clipboard from anywhere).
 ///
-/// Wired via `@NSApplicationDelegateAdaptor` in `RheaApp`.
+/// Wired via `@NSApplicationDelegateAdaptor` in `ReadAloudTTSApp`.
 final class AppDelegateShim: NSObject, NSApplicationDelegate {
     private var servicesProvider: ServicesProvider?
     private var globalHotKey: GlobalHotKey?
+    private var fontShortcutMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let provider = ServicesProvider()
@@ -24,9 +25,77 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         ) {
             Task { @MainActor in MenuBarCommand.shared.readClipboard() }
         }
+
+        installFontShortcutMonitor()
     }
 
-    /// LaunchServices routes `open -a Rhea file.pdf` and Finder
+    /// Local keyDown monitor that fires zoom / font-size notifications
+    /// for every common ⌘+/⌘-/⌘0 variant. SwiftUI's
+    /// `.keyboardShortcut("+", modifiers: [.command])` is finicky on
+    /// US keyboards where "+" needs shift — the matcher demands exact
+    /// modifier flags, so `⌘⇧+` fails to fire a shortcut bound to
+    /// `[.command]` only. Catching at the NSEvent layer avoids the
+    /// guesswork and reliably handles ⌘= (no shift), ⌘+ (shift),
+    /// ⌘-, and ⌘0 from any window.
+    private func installFontShortcutMonitor() {
+        if let token = fontShortcutMonitor {
+            NSEvent.removeMonitor(token)
+        }
+        fontShortcutMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
+            event in
+            // Filter to events that look like font-zoom shortcuts.
+            // Ignore presses while the user is typing in a text-input
+            // field that isn't part of a reader (e.g. the Settings
+            // form fields), so the shortcut doesn't preempt
+            // normal text editing.
+            let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            guard mods.contains(.command) else { return event }
+            // The character WITH modifiers — so ⌘⇧= gives us "+",
+            // ⌘= gives us "=". Combined with `charactersIgnoringModifiers`
+            // we cover both shifted and unshifted variants reliably.
+            let withMods = event.characters ?? ""
+            let raw = event.charactersIgnoringModifiers ?? ""
+
+            let isPlus = withMods.contains("+") || raw == "=" || raw == "+"
+            let isMinus = withMods.contains("-") || raw == "-" || raw == "_"
+            let isZero = withMods == "0" || raw == "0"
+
+            // Don't steal events from any non-reader text editor. The
+            // markdown reader and scratchpad use NSTextView, but
+            // their shortcut handling tolerates this monitor running
+            // first — the notification simply re-rescales the storage.
+            // Settings sheets use SwiftUI TextField; those don't get
+            // intercepted because the keystrokes that matter there
+            // (⌘+/-/0) aren't normal text editing operations.
+            if isPlus {
+                NotificationCenter.default.post(
+                    name: AppScene.increaseFontNotification, object: nil
+                )
+                return nil
+            }
+            if isMinus {
+                NotificationCenter.default.post(
+                    name: AppScene.decreaseFontNotification, object: nil
+                )
+                return nil
+            }
+            if isZero {
+                NotificationCenter.default.post(
+                    name: AppScene.resetFontNotification, object: nil
+                )
+                return nil
+            }
+            return event
+        }
+    }
+
+    deinit {
+        if let token = fontShortcutMonitor {
+            NSEvent.removeMonitor(token)
+        }
+    }
+
+    /// LaunchServices routes `open -a ReadAloudTTS file.pdf` and Finder
     /// double-clicks here. Without this override, SwiftUI's
     /// `WindowGroup` spawns a new window per URL event — wrong for
     /// a reader that keeps one document visible at a time. We
@@ -41,7 +110,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
         for url in urls {
             NotificationCenter.default.post(
-                name: .rheaOpenURL, object: nil, userInfo: ["url": url]
+                name: .readAloudTTSOpenURL, object: nil, userInfo: ["url": url]
             )
         }
     }
@@ -62,7 +131,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         // The reader window carries the WindowGroup title. Settings
         // and auxiliary panels use other titles or aren't NSWindow
         // subclasses we care about here.
-        window.title == "Rhea"
+        window.title == "ReadAloudTTS"
     }
 
     /// Prevent the "dock-click-to-open-new-untitled-window" behavior
@@ -70,7 +139,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(
         _ sender: NSApplication, hasVisibleWindows flag: Bool
     ) -> Bool {
-        if !flag, let window = NSApp.windows.first(where: { $0.title == "Rhea" }) {
+        if !flag, let window = NSApp.windows.first(where: { $0.title == "ReadAloudTTS" }) {
             window.makeKeyAndOrderFront(nil)
             return false
         }
@@ -122,7 +191,7 @@ final class DirtyCloseGuard: NSObject, NSWindowDelegate {
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         // Auxiliary panels (Settings, Exports, Onboarding) don't own a
         // markdown buffer; let them close immediately.
-        guard sender.title == "Rhea" || sender.title.isEmpty else {
+        guard sender.title == "ReadAloudTTS" || sender.title.isEmpty else {
             return upstream?.windowShouldClose?(sender) ?? true
         }
         guard MarkdownSavePrompt.confirmAllDirty() else { return false }
@@ -214,11 +283,11 @@ enum MarkdownSavePrompt {
 extension Notification.Name {
     /// Posted by `AppDelegateShim.application(_:open:)` so the main
     /// SwiftUI scene can adopt the URL without spawning a new window.
-    static let rheaOpenURL = Notification.Name("app.rhea.mac.openURL")
+    static let readAloudTTSOpenURL = Notification.Name("app.readaloudtts.mac.openURL")
 
     /// Posted by the Settings "Show Welcome Tour" button and the
     /// Help menu entry so the RootView (which owns an
     /// `openWindow` environment handle) can raise the onboarding
     /// window without direct SwiftUI plumbing.
-    static let rheaShowOnboarding = Notification.Name("app.rhea.mac.showOnboarding")
+    static let readAloudTTSShowOnboarding = Notification.Name("app.readaloudtts.mac.showOnboarding")
 }

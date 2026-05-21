@@ -1,11 +1,11 @@
 import XCTest
-@testable import Rhea
+@testable import ReadAloudTTS
 
 @MainActor
 final class ReadingStatsTests: XCTestCase {
 
     private func freshStats() -> (ReadingStats, UserDefaults, String) {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         return (ReadingStats(defaults: defaults), defaults, suite)
     }
@@ -76,7 +76,7 @@ final class ReadingStatsTests: XCTestCase {
     // MARK: persistence
 
     func test_persistsAcrossInstances() {
-        let suite = "app.rhea.mac.tests.\(UUID().uuidString)"
+        let suite = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
 

@@ -1,7 +1,7 @@
 import AppKit
 
-/// Exposes Rhea to the system Services menu. When the user picks
-/// "Read with Rhea" from any app's Services submenu, macOS delivers
+/// Exposes ReadAloudTTS to the system Services menu. When the user picks
+/// "Read with ReadAloudTTS" from any app's Services submenu, macOS delivers
 /// the current selection on a pasteboard and calls `readSelection`,
 /// which hands the text off to the menubar player.
 ///
@@ -17,7 +17,7 @@ final class ServicesProvider: NSObject {
     ) {
         guard let text = pboard.string(forType: .string),
               !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            error.pointee = "Rhea couldn't read the selection." as NSString
+            error.pointee = "ReadAloudTTS couldn't read the selection." as NSString
             return
         }
         MenuBarCommand.shared.readText(text)

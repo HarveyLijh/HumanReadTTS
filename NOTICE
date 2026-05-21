@@ -1,13 +1,13 @@
-Rhea
-Copyright 2026 The Rhea Authors
+ReadAloudTTS
+Copyright 2026 The ReadAloudTTS Authors
 
-This product includes software developed by the Rhea Authors and
-contributors to the Rhea project.
+This product includes software developed by the ReadAloudTTS Authors and
+contributors to the ReadAloudTTS project.
 
 Licensed under the Apache License, Version 2.0 (the "License").
 See the LICENSE file at the root of this repository for the full text.
 
-Third-party components used by Rhea retain their own licenses. As of the
+Third-party components used by ReadAloudTTS retain their own licenses. As of the
 initial release the app target itself depends only on Apple frameworks
 that ship with macOS (PDFKit, SwiftUI, AppKit, AVFoundation,
 UniformTypeIdentifiers). Future dependencies and their licenses will be

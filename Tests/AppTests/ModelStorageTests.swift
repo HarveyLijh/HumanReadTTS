@@ -1,5 +1,5 @@
 import XCTest
-@testable import Rhea
+@testable import ReadAloudTTS
 
 /// Exercises `ModelStorage` against the real filesystem under a
 /// uniquely-namespaced test model id so the tests never collide

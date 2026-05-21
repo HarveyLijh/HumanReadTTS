@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct RheaApp: App {
+struct ReadAloudTTSApp: App {
     @NSApplicationDelegateAdaptor(AppDelegateShim.self) private var appDelegate
     @State private var menuBar = MenuBarCommand.shared
 
@@ -19,7 +19,7 @@ struct RheaApp: App {
             SettingsView()
         }
 
-        MenuBarExtra("Rhea", systemImage: "waveform") {
+        MenuBarExtra("ReadAloudTTS", systemImage: "waveform") {
             Button("Read Clipboard") {
                 menuBar.readClipboard()
             }
@@ -37,16 +37,16 @@ struct RheaApp: App {
 
             Divider()
 
-            Button("Open Rhea") {
+            Button("Open ReadAloudTTS") {
                 NSApp.activate(ignoringOtherApps: true)
-                if let window = NSApp.windows.first(where: { $0.title == "Rhea" }) {
+                if let window = NSApp.windows.first(where: { $0.title == "ReadAloudTTS" }) {
                     window.makeKeyAndOrderFront(nil)
                 }
             }
 
             Divider()
 
-            Button("Quit Rhea") {
+            Button("Quit ReadAloudTTS") {
                 NSApplication.shared.terminate(nil)
             }
             .keyboardShortcut("q")

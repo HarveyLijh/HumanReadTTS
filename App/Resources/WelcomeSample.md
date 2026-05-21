@@ -1,6 +1,6 @@
-# Welcome to Rhea
+# Welcome to ReadAloudTTS
 
-Rhea is a local-first bilingual text-to-speech reader for macOS.
+ReadAloudTTS is a local-first bilingual text-to-speech reader for macOS.
 Drop a PDF, Markdown, or EPUB file, and hear it read aloud with
 studio-quality on-device neural voices — in English, Chinese, or
 both. Your documents never leave your Mac.
@@ -13,7 +13,7 @@ view auto-scrolls to keep up. Use the left and right arrow keys
 to jump to the previous or next sentence.
 
 To change the voice mid-read, click the voice chip in the bottom
-transport bar. Rhea restarts the current sentence on the new
+transport bar. ReadAloudTTS restarts the current sentence on the new
 voice so you never lose your place. To change the speed, click
 the speed chip or press command left bracket and command right
 bracket. Most voices stay intelligible up to two point five times
@@ -21,15 +21,15 @@ normal speed.
 
 ## Opening Your Own Documents
 
-Drag any PDF, Markdown file, or EPUB book onto the Rhea window.
+Drag any PDF, Markdown file, or EPUB book onto the ReadAloudTTS window.
 You can also use command O to open a file, or simply double-click
-a document in Finder. Rhea remembers your reading position, so
+a document in Finder. ReadAloudTTS remembers your reading position, so
 closing and reopening a document resumes exactly where you left
 off.
 
 ## Three Voice Engines
 
-Rhea supports three kinds of voices. The system voices are every
+ReadAloudTTS supports three kinds of voices. The system voices are every
 speech synthesis voice available on your Mac, and work out of the
 box. Kokoro is an on-device neural engine with twenty-eight
 English voices that sound remarkably natural. Qwen3-TTS is a
@@ -39,7 +39,7 @@ can be downloaded from Settings, Models.
 
 ## Research Features
 
-When you open a PDF, Rhea can automatically skip inline citations
+When you open a PDF, ReadAloudTTS can automatically skip inline citations
 like bracketed numbers, author-year references, and LaTeX cite
 commands, so your listening experience stays focused on the
 prose. Figure and table captions can also be skipped. You can
@@ -49,7 +49,7 @@ Rules, with a live preview.
 ## Exporting to Audio
 
 To turn any document into an audiobook, press command shift E.
-Rhea renders the full document to an M4A or WAV file in the
+ReadAloudTTS renders the full document to an M4A or WAV file in the
 background, with a progress queue you can open with command shift
 J. You can keep reading, or even start another export, while the
 first one runs.

@@ -164,7 +164,7 @@ struct PlaybackTransportView: View {
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 36, height: 36)
-                .background(Color.rheaAccent, in: Circle())
+                .background(Color.readAloudTTSAccent, in: Circle())
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
         }
         .buttonStyle(.plain)
@@ -397,7 +397,7 @@ private struct SpeedPopover: View {
                             .background(
                                 Capsule().fill(
                                     abs(settings.rate - preset) < 0.01
-                                        ? Color.rheaAccent.opacity(0.25)
+                                        ? Color.readAloudTTSAccent.opacity(0.25)
                                         : Color.primary.opacity(0.06)
                                 )
                             )
@@ -608,7 +608,7 @@ private struct VoicePopover: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? Color.rheaAccent : .secondary)
+                    .foregroundStyle(isSelected ? Color.readAloudTTSAccent : .secondary)
                     .font(.system(size: 12))
                 Text(label)
                     .font(.system(size: 12))

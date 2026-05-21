@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum RheaFont {
+enum ReadAloudTTSFont {
     /// New York serif at the given point size. Falls back to the system
     /// serif if New York is unavailable on this machine, which never
     /// happens on macOS 15 but the API still requires the fallback.

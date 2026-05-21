@@ -8,7 +8,7 @@ import Carbon.HIToolbox
 /// Events API is deprecated-but-shipping on macOS 26 and remains
 /// the standard way to do this from a sandboxed app.
 ///
-/// One instance = one hotkey. Rhea binds ⌘⇧S to "read clipboard"
+/// One instance = one hotkey. ReadAloudTTS binds ⌘⇧S to "read clipboard"
 /// so the user can start listening without switching apps.
 final class GlobalHotKey {
     // Carbon pointer refs — single-owner, released on deinit.

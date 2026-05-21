@@ -8,6 +8,8 @@ import PDFKit
 /// - PDF: `PDFTextExtractor` → `SentenceSegmenter`
 /// - Markdown: `MarkdownRenderer` → plain text → `SentenceSegmenter`
 /// - EPUB: `EPUBLoader` → plain text → `SentenceSegmenter`
+/// - DOCX: `DOCXLoader` → plain text → `SentenceSegmenter`
+/// - Plain text: `String(contentsOf:)` → `SentenceSegmenter`
 ///
 /// Keeping the split here (instead of reaching into each reader
 /// view) means the sheet doesn't require a live SwiftUI subtree or
@@ -20,6 +22,8 @@ enum ExportSentenceLoader {
         case pdfOpenFailed
         case markdownReadFailed(String)
         case epubReadFailed(String)
+        case docxReadFailed(String)
+        case textReadFailed(String)
 
         var errorDescription: String? {
             switch self {
@@ -27,6 +31,8 @@ enum ExportSentenceLoader {
             case .pdfOpenFailed: return "Couldn't open the PDF."
             case .markdownReadFailed(let m): return "Couldn't read Markdown: \(m)"
             case .epubReadFailed(let m): return "Couldn't read EPUB: \(m)"
+            case .docxReadFailed(let m): return "Couldn't read DOCX: \(m)"
+            case .textReadFailed(let m): return "Couldn't read text file: \(m)"
             }
         }
     }
@@ -65,6 +71,32 @@ enum ExportSentenceLoader {
                 return await SentenceSegmenter.segment([block])
             } catch {
                 throw LoadError.epubReadFailed(error.localizedDescription)
+            }
+        case .docx:
+            do {
+                let attributed = try await DOCXLoader.load(url: url)
+                let block = DocumentBlock(
+                    text: attributed.string, pageIndex: 0, offsetInPage: 0
+                )
+                return await SentenceSegmenter.segment([block])
+            } catch {
+                throw LoadError.docxReadFailed(error.localizedDescription)
+            }
+        case .text:
+            do {
+                let raw: String
+                do {
+                    raw = try String(contentsOf: url, encoding: .utf8)
+                } catch {
+                    let data = try Data(contentsOf: url)
+                    raw = String(decoding: data, as: UTF8.self)
+                }
+                let block = DocumentBlock(
+                    text: raw, pageIndex: 0, offsetInPage: 0
+                )
+                return await SentenceSegmenter.segment([block])
+            } catch {
+                throw LoadError.textReadFailed(error.localizedDescription)
             }
         }
     }

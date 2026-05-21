@@ -1,5 +1,5 @@
 import XCTest
-@testable import Rhea
+@testable import ReadAloudTTS
 
 /// Real-network E2E check that every URL in `ModelCatalog.all` is
 /// reachable. HEAD request only — we don't download the bytes,
@@ -13,16 +13,16 @@ import XCTest
 /// process, so an env-var gate would always skip; `/tmp` is
 /// readable from inside the test bundle. Opt in with:
 ///
-///     touch /tmp/rhea-run-network-tests && Scripts/test.sh
+///     touch /tmp/readaloudtts-run-network-tests && Scripts/test.sh
 ///
 /// Or equivalently: `Scripts/test.sh --network`.
 final class ModelCatalogReachabilityTests: XCTestCase {
 
     override func setUp() async throws {
-        let sentinel = "/tmp/rhea-run-network-tests"
+        let sentinel = "/tmp/readaloudtts-run-network-tests"
         try XCTSkipUnless(
             FileManager.default.fileExists(atPath: sentinel),
-            "Network tests are opt-in. `touch /tmp/rhea-run-network-tests` and retry."
+            "Network tests are opt-in. `touch /tmp/readaloudtts-run-network-tests` and retry."
         )
     }
 

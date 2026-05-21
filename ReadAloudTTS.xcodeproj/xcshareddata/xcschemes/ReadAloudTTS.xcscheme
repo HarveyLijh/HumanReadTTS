@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A00000000000000000A0001"
-               BuildableName = "Rhea.app"
-               BlueprintName = "Rhea"
-               ReferencedContainer = "container:Rhea.xcodeproj">
+               BuildableName = "ReadAloudTTS.app"
+               BlueprintName = "ReadAloudTTS"
+               ReferencedContainer = "container:ReadAloudTTS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A00000000000000000B0001"
-               BuildableName = "RheaTests.xctest"
-               BlueprintName = "RheaTests"
-               ReferencedContainer = "container:Rhea.xcodeproj">
+               BuildableName = "ReadAloudTTSTests.xctest"
+               BlueprintName = "ReadAloudTTSTests"
+               ReferencedContainer = "container:ReadAloudTTS.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A00000000000000000A0001"
-            BuildableName = "Rhea.app"
-            BlueprintName = "Rhea"
-            ReferencedContainer = "container:Rhea.xcodeproj">
+            BuildableName = "ReadAloudTTS.app"
+            BlueprintName = "ReadAloudTTS"
+            ReferencedContainer = "container:ReadAloudTTS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A00000000000000000A0001"
-            BuildableName = "Rhea.app"
-            BlueprintName = "Rhea"
-            ReferencedContainer = "container:Rhea.xcodeproj">
+            BuildableName = "ReadAloudTTS.app"
+            BlueprintName = "ReadAloudTTS"
+            ReferencedContainer = "container:ReadAloudTTS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

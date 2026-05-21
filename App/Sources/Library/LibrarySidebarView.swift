@@ -78,7 +78,7 @@ struct LibrarySidebarView: View {
                     .font(.system(size: 12, weight: .medium))
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.rheaAccent)
+            .tint(Color.readAloudTTSAccent)
             .controlSize(.small)
             .help("Create a blank scratchpad · ⌘N")
 
@@ -93,7 +93,7 @@ struct LibrarySidebarView: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
-            .help("Open a PDF, Markdown, or EPUB · ⌘O")
+            .help("Open a PDF, Markdown, EPUB, DOCX, or text file · ⌘O")
 
             queueButton
 
@@ -165,7 +165,7 @@ struct LibrarySidebarView: View {
     }
 
     private var queueTint: Color {
-        if queueRunning > 0 || queueQueued > 0 { return Color.rheaAccent }
+        if queueRunning > 0 || queueQueued > 0 { return Color.readAloudTTSAccent }
         if queueFailedRecent { return .orange }
         return .secondary
     }
@@ -181,10 +181,10 @@ struct LibrarySidebarView: View {
     private var emptyRow: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("No documents yet")
-                .font(RheaFont.ui(13))
+                .font(ReadAloudTTSFont.ui(13))
                 .foregroundStyle(.secondary)
-            Text("Drop a PDF, Markdown, or EPUB file anywhere in the window.")
-                .font(RheaFont.ui(11))
+            Text("Drop a PDF, Markdown, EPUB, DOCX, or text file anywhere in the window.")
+                .font(ReadAloudTTSFont.ui(11))
                 .foregroundStyle(.tertiary)
         }
         .padding(.vertical, 4)
@@ -196,17 +196,17 @@ struct LibrarySidebarView: View {
             HStack(spacing: 4) {
                 if isDirty {
                     Circle()
-                        .fill(Color.rheaAccent)
+                        .fill(Color.readAloudTTSAccent)
                         .frame(width: 6, height: 6)
                         .help("Unsaved changes")
                 }
                 Text(entry.title)
-                    .font(RheaFont.ui(13))
+                    .font(ReadAloudTTSFont.ui(13))
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
             Text(Self.formatted(entry.lastOpened))
-                .font(RheaFont.ui(11))
+                .font(ReadAloudTTSFont.ui(11))
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)

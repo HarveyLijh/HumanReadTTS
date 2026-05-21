@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rhea — User Manual</title>
-<link rel="icon" type="image/png" href="assets/rhea-icon.png">
+<title>ReadAloudTTS — User Manual</title>
+<link rel="icon" type="image/png" href="assets/readaloudtts-icon.png">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -226,9 +226,9 @@
   <!-- ───────── Sidebar ───────── -->
   <nav class="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/rhea-icon.png" alt="Rhea">
+      <img src="assets/readaloudtts-icon.png" alt="ReadAloudTTS">
       <div>
-        <div class="tag">Rhea</div>
+        <div class="tag">ReadAloudTTS</div>
         <h1>User Manual</h1>
         <p>v0.7.1 · macOS 15 · Apple Silicon</p>
       </div>
@@ -267,9 +267,9 @@
   <!-- ───────── Main ───────── -->
   <main class="main">
 
-    <p class="eyebrow">Rhea · User Manual</p>
-    <h1 class="page-title">Welcome to Rhea.</h1>
-    <p class="page-subtitle">A step-by-step guide to reading papers, notes, and books with Rhea — macOS 15 and up, Apple Silicon, no account, no subscription, your documents never leave your Mac.</p>
+    <p class="eyebrow">ReadAloudTTS · User Manual</p>
+    <h1 class="page-title">Welcome to ReadAloudTTS.</h1>
+    <p class="page-subtitle">A step-by-step guide to reading papers, notes, and books with ReadAloudTTS — macOS 15 and up, Apple Silicon, no account, no subscription, your documents never leave your Mac.</p>
 
     <div class="toc-card">
       <h2>Contents</h2>
@@ -302,19 +302,19 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-title">Install Rhea.</div>
-          <p>Download the latest <code>.dmg</code> from <a href="https://github.com/HarveyLijh/Rhea/releases">Releases</a>, mount it, drag <strong>Rhea</strong> into <code>/Applications</code>.</p>
+          <div class="step-title">Install ReadAloudTTS.</div>
+          <p>Download the latest <code>.dmg</code> from <a href="https://github.com/HarveyLijh/ReadAloudTTS/releases">Releases</a>, mount it, drag <strong>ReadAloudTTS</strong> into <code>/Applications</code>.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
           <div class="step-title">Open a document.</div>
-          <p>Launch Rhea and drop any PDF, Markdown, or EPUB onto the window — or press <kbd>⌘O</kbd>. Rhea ships with a short sample document; the welcome tour offers to open it for you.</p>
+          <p>Launch ReadAloudTTS and drop any PDF, Markdown, or EPUB onto the window — or press <kbd>⌘O</kbd>. ReadAloudTTS ships with a short sample document; the welcome tour offers to open it for you.</p>
         </div>
       </div>
       <div class="screenshot">
-        <img src="assets/reader-window.png" alt="Rhea reader window with a sample PDF loaded, showing the library sidebar, the document, and the transport HUD at the bottom">
+        <img src="assets/reader-window.png" alt="ReadAloudTTS reader window with a sample PDF loaded, showing the library sidebar, the document, and the transport HUD at the bottom">
         <div class="caption">The reader window: library sidebar on the left, document in the middle, transport HUD docked at the bottom.</div>
       </div>
       <div class="step">
@@ -328,7 +328,7 @@
         <div class="step-num">4</div>
         <div class="step-body">
           <div class="step-title">Right-click any word.</div>
-          <p>Pick <strong>Read from here</strong> to jump playback. Close the window mid-read — Rhea restores the exact sentence on next launch.</p>
+          <p>Pick <strong>Read from here</strong> to jump playback. Close the window mid-read — ReadAloudTTS restores the exact sentence on next launch.</p>
         </div>
       </div>
     </div>
@@ -344,36 +344,36 @@
     <h2 class="section-heading" id="install">1. Install</h2>
 
     <h3 class="sub-heading">Using the DMG</h3>
-    <p>Grab the latest <code>.dmg</code> from the <a href="https://github.com/HarveyLijh/Rhea/releases">Releases page</a>, mount it, and drag <strong>Rhea</strong> into <code>/Applications</code>.</p>
+    <p>Grab the latest <code>.dmg</code> from the <a href="https://github.com/HarveyLijh/ReadAloudTTS/releases">Releases page</a>, mount it, and drag <strong>ReadAloudTTS</strong> into <code>/Applications</code>.</p>
 
     <div class="callout warn">
       <span class="callout-label">Gatekeeper</span>
-      <p>Rhea is unsigned until v0.8.x ships notarised builds. First launch: <strong>right-click the app → Open</strong>. macOS asks once; afterwards plain double-click works. Alternatively drop the quarantine flag from Terminal:<br><code>xattr -dr com.apple.quarantine /Applications/Rhea.app</code></p>
+      <p>ReadAloudTTS is unsigned until v0.8.x ships notarised builds. First launch: <strong>right-click the app → Open</strong>. macOS asks once; afterwards plain double-click works. Alternatively drop the quarantine flag from Terminal:<br><code>xattr -dr com.apple.quarantine /Applications/ReadAloudTTS.app</code></p>
     </div>
 
     <h3 class="sub-heading">Homebrew</h3>
-    <p>A Homebrew Cask (<code>brew install --cask rhea</code>) lands in v0.8.x once the release cadence stabilises.</p>
+    <p>A Homebrew Cask (<code>brew install --cask readaloudtts</code>) lands in v0.8.x once the release cadence stabilises.</p>
 
     <h3 class="sub-heading">Build from source</h3>
     <p>If you have Xcode 16 and the macOS 15 SDK:</p>
-    <p><code>git clone https://github.com/HarveyLijh/Rhea.git &amp;&amp; cd Rhea &amp;&amp; open Rhea.xcodeproj</code></p>
+    <p><code>git clone https://github.com/HarveyLijh/ReadAloudTTS.git &amp;&amp; cd ReadAloudTTS &amp;&amp; open ReadAloudTTS.xcodeproj</code></p>
     <p>No Tuist, no XcodeGen, no code-generation step — the <code>.xcodeproj</code> is hand-maintained. <code>Scripts/build.sh</code> also runs without Xcode if all you have is the Command Line Tools.</p>
 
     <!-- ───────── First Launch ───────── -->
     <h2 class="section-heading" id="first-launch">2. First Launch</h2>
-    <p>The first time you open Rhea, a brief welcome tour highlights the library sidebar, the transport HUD, and the drop target, and offers to load the bundled sample PDF. You can reopen the tour any time from <strong>Settings → Playback → Show Welcome Tour…</strong>.</p>
+    <p>The first time you open ReadAloudTTS, a brief welcome tour highlights the library sidebar, the transport HUD, and the drop target, and offers to load the bundled sample PDF. You can reopen the tour any time from <strong>Settings → Playback → Show Welcome Tour…</strong>.</p>
     <p>Neural voices — <strong>Kokoro</strong> for English and <strong>Qwen3-TTS</strong> for bilingual EN+ZH — are downloaded on demand from <strong>Settings → Models</strong>. The download happens once, directly from mirrors, and the files live in your sandboxed Application Support directory.</p>
 
     <div class="callout info">
       <span class="callout-label">Zero-cloud</span>
-      <p>After models are downloaded, Rhea never talks to the network again during normal use. You can verify with Little Snitch or the macOS Firewall.</p>
+      <p>After models are downloaded, ReadAloudTTS never talks to the network again during normal use. You can verify with Little Snitch or the macOS Firewall.</p>
     </div>
 
     <hr class="section-break">
 
     <!-- ───────── Open Docs ───────── -->
     <h2 class="section-heading" id="open-docs">3. Opening Documents</h2>
-    <p>Rhea reads three document families natively, with no preconfiguration:</p>
+    <p>ReadAloudTTS reads three document families natively, with no preconfiguration:</p>
 
     <table>
       <thead><tr><th style="width: 28%">Format</th><th>How it's parsed</th></tr></thead>
@@ -386,13 +386,13 @@
 
     <p>There are four ways to open a document:</p>
     <ol>
-      <li>Drag into the Rhea window or the Rhea icon in the Dock.</li>
+      <li>Drag into the ReadAloudTTS window or the ReadAloudTTS icon in the Dock.</li>
       <li><kbd>⌘O</kbd> → browse.</li>
-      <li>Finder → right-click → <em>Open With → Rhea</em> (or double-click if Rhea is the default handler for that type).</li>
-      <li>Command line: <code>open -a Rhea paper.pdf</code></li>
+      <li>Finder → right-click → <em>Open With → ReadAloudTTS</em> (or double-click if ReadAloudTTS is the default handler for that type).</li>
+      <li>Command line: <code>open -a ReadAloudTTS paper.pdf</code></li>
     </ol>
 
-    <p>Opening a new document while one is already loaded re-uses the existing window. Rhea never spawns duplicate reader windows.</p>
+    <p>Opening a new document while one is already loaded re-uses the existing window. ReadAloudTTS never spawns duplicate reader windows.</p>
 
     <!-- ───────── Transport HUD ───────── -->
     <h2 class="section-heading" id="transport">4. The Transport HUD</h2>
@@ -410,7 +410,7 @@
     <p>Press <kbd>⌘]</kbd> to speed up by 0.1× and <kbd>⌘[</kbd> to slow down. Range: 0.5× to 4.0×. Neural voices (Kokoro, Qwen3) apply rate via time-stretching so pitch stays natural.</p>
 
     <h3 class="sub-heading">Voice chip</h3>
-    <p>Click the voice label to swap voice or engine. Rhea restarts the current sentence on the new voice and flashes an undo toast with a 4-second timer.</p>
+    <p>Click the voice label to swap voice or engine. ReadAloudTTS restarts the current sentence on the new voice and flashes an undo toast with a 4-second timer.</p>
 
     <div class="callout tip">
       <span class="callout-label">Engine fallback</span>
@@ -425,18 +425,18 @@
       <li><strong>Active word</strong> — brighter block driven by <code>AVSpeechSynthesizer.willSpeakRange</code> for system voices, or by Whisper forced alignment for neural voices.</li>
     </ul>
 
-    <p><strong>Double-click</strong> any word in any viewer to jump playback there. <strong>Right-click</strong> opens a contextual menu with <em>Read from here</em> and <em>Read from here to end</em>. Manual scroll is respected — Rhea only auto-scrolls on sentence changes, never on word ticks.</p>
+    <p><strong>Double-click</strong> any word in any viewer to jump playback there. <strong>Right-click</strong> opens a contextual menu with <em>Read from here</em> and <em>Read from here to end</em>. Manual scroll is respected — ReadAloudTTS only auto-scrolls on sentence changes, never on word ticks.</p>
 
     <!-- ───────── Resume ───────── -->
     <h2 class="section-heading" id="resume">6. Resume Position</h2>
-    <p>Closing Rhea mid-read is safe. The paused cursor is stored per document; on next launch, reopening that document restores the exact sentence you stopped on. Press <kbd>Space</kbd> to continue.</p>
+    <p>Closing ReadAloudTTS mid-read is safe. The paused cursor is stored per document; on next launch, reopening that document restores the exact sentence you stopped on. Press <kbd>Space</kbd> to continue.</p>
     <p>Per-document voice and speed memory lands in v0.8.x — a dense paper will open at 1.0× while a novel opens at 1.6× without re-setting.</p>
 
     <hr class="section-break">
 
     <!-- ───────── Voices ───────── -->
     <h2 class="section-heading" id="voices">7. Voice Engines</h2>
-    <p>Rhea ships three engines. All run locally on your Mac.</p>
+    <p>ReadAloudTTS ships three engines. All run locally on your Mac.</p>
 
     <table>
       <thead><tr><th style="width: 20%">Engine</th><th>Voices</th><th>Download</th><th>Best for</th></tr></thead>
@@ -470,7 +470,7 @@
 
     <!-- ───────── Bilingual ───────── -->
     <h2 class="section-heading" id="bilingual">9. Bilingual Auto-Switch</h2>
-    <p>Bilingual auto-switch is on by default. Rhea runs <code>NLLanguageRecognizer</code> on every sentence and hands off between engines — an English paragraph followed by a Chinese one transitions seamlessly at the sentence boundary.</p>
+    <p>Bilingual auto-switch is on by default. ReadAloudTTS runs <code>NLLanguageRecognizer</code> on every sentence and hands off between engines — an English paragraph followed by a Chinese one transitions seamlessly at the sentence boundary.</p>
     <p>Toggle it in the Playback settings. When off, every sentence is read in the selected voice regardless of language; mispronunciations in the wrong language are common, so leave it on unless your document is monolingual and you want a specific engine.</p>
 
     <!-- ───────── Pronunciation ───────── -->
@@ -492,7 +492,7 @@
     <!-- ───────── Skip Rules ───────── -->
     <h2 class="section-heading" id="skip-rules">11. Skip Rules</h2>
     <p>Skip rules are regex patterns stripped from the text before the synthesizer speaks it. They are the single most powerful tool for making research papers listenable.</p>
-    <p>Rhea ships with four enabled-by-default built-ins:</p>
+    <p>ReadAloudTTS ships with four enabled-by-default built-ins:</p>
 
     <table>
       <thead><tr><th style="width: 30%">Rule</th><th>Matches</th></tr></thead>
@@ -506,7 +506,7 @@
 
     <div class="screenshot shot-panel">
       <img src="assets/settings-skip-rules.png" alt="Settings → Skip Rules: four built-in rules, each with a Name, Regex pattern, toggle, and an Add-rule form below">
-      <div class="caption">Each rule has a name, a regex, and a toggle. The <em>Try it on a sentence</em> box at the bottom shows what Rhea will actually say after stripping.</div>
+      <div class="caption">Each rule has a name, a regex, and a toggle. The <em>Try it on a sentence</em> box at the bottom shows what ReadAloudTTS will actually say after stripping.</div>
     </div>
 
     <p>Add your own with the <strong>Name</strong> / <strong>Regex pattern</strong> / <strong>Add</strong> row. Invalid regexes are silently ignored at speak time — they're flagged in the list but never crash playback. Toggling any rule mid-read takes effect at the next sentence boundary.</p>
@@ -538,23 +538,23 @@
 
     <!-- ───────── Services ───────── -->
     <h2 class="section-heading" id="services">13. Services &amp; Menubar</h2>
-    <p>Rhea integrates with macOS without needing the main window open.</p>
+    <p>ReadAloudTTS integrates with macOS without needing the main window open.</p>
 
     <div class="screenshot shot-narrow">
-      <img src="assets/menubar-dropdown.png" alt="Rhea menubar dropdown with Read Clipboard, Pause, Stop, Open Rhea, and Quit Rhea">
+      <img src="assets/menubar-dropdown.png" alt="ReadAloudTTS menubar dropdown with Read Clipboard, Pause, Stop, Open ReadAloudTTS, and Quit ReadAloudTTS">
       <div class="caption">The menubar dropdown carries transport controls, a global <em>Read Clipboard</em> entry, and direct access to the main window.</div>
     </div>
 
     <ul>
-      <li><strong>Menubar item</strong> — always available while Rhea is running. <em>Read Clipboard</em> reads whatever's currently on the clipboard; <em>Pause</em> and <em>Stop</em> act on the current reader.</li>
-      <li><strong>Global hotkey</strong> — <kbd>⌘⇧S</kbd> reads your clipboard from anywhere. No focus on Rhea required.</li>
-      <li><strong>Services menu</strong> — highlight text in any app, choose <em>Services → Read with Rhea</em>.</li>
-      <li><strong>URL handlers</strong> — <code>open -a Rhea paper.pdf</code> and Finder double-click both route to the existing reader window.</li>
+      <li><strong>Menubar item</strong> — always available while ReadAloudTTS is running. <em>Read Clipboard</em> reads whatever's currently on the clipboard; <em>Pause</em> and <em>Stop</em> act on the current reader.</li>
+      <li><strong>Global hotkey</strong> — <kbd>⌘⇧S</kbd> reads your clipboard from anywhere. No focus on ReadAloudTTS required.</li>
+      <li><strong>Services menu</strong> — highlight text in any app, choose <em>Services → Read with ReadAloudTTS</em>.</li>
+      <li><strong>URL handlers</strong> — <code>open -a ReadAloudTTS paper.pdf</code> and Finder double-click both route to the existing reader window.</li>
     </ul>
 
     <div class="callout info">
       <span class="callout-label">Enable the Service</span>
-      <p>If <em>Read with Rhea</em> isn't in the Services menu after install, open <strong>System Settings → Keyboard → Keyboard Shortcuts → Services → Text</strong> and tick the checkbox next to it.</p>
+      <p>If <em>Read with ReadAloudTTS</em> isn't in the Services menu after install, open <strong>System Settings → Keyboard → Keyboard Shortcuts → Services → Text</strong> and tick the checkbox next to it.</p>
     </div>
 
     <!-- ───────── Audiobook ───────── -->
@@ -583,8 +583,8 @@
     <h2 class="section-heading" id="faq">15. FAQ</h2>
 
     <div class="faq-item">
-      <div class="faq-q">Does Rhea upload my documents anywhere?</div>
-      <div class="faq-a">No. After the optional model downloads on first use, Rhea never talks to the network. Everything — text extraction, segmentation, synthesis, forced alignment — runs on-device.</div>
+      <div class="faq-q">Does ReadAloudTTS upload my documents anywhere?</div>
+      <div class="faq-a">No. After the optional model downloads on first use, ReadAloudTTS never talks to the network. Everything — text extraction, segmentation, synthesis, forced alignment — runs on-device.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Why is my first Kokoro sentence slow?</div>
@@ -603,31 +603,31 @@
       <div class="faq-a">Not currently. 4× is already at the edge of intelligibility for most neural voices; past that, stretch artefacts dominate. If you need faster, export to WAV and speed-shift in an external editor.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">Where are Rhea's files stored?</div>
-      <div class="faq-a">Settings, pronunciation dictionary, skip rules, and resume positions live in <code>~/Library/Containers/app.rhea.mac/Data/Library/Application Support/Rhea</code>. Model weights live under <code>models/</code> in the same container. Rhea never touches your source documents.</div>
+      <div class="faq-q">Where are ReadAloudTTS's files stored?</div>
+      <div class="faq-a">Settings, pronunciation dictionary, skip rules, and resume positions live in <code>~/Library/Containers/app.readaloudtts.mac/Data/Library/Application Support/ReadAloudTTS</code>. Model weights live under <code>models/</code> in the same container. ReadAloudTTS never touches your source documents.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">How do I reset everything?</div>
-      <div class="faq-a">Quit Rhea, then remove <code>~/Library/Containers/app.rhea.mac</code>. Next launch starts clean.</div>
+      <div class="faq-a">Quit ReadAloudTTS, then remove <code>~/Library/Containers/app.readaloudtts.mac</code>. Next launch starts clean.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">I'm on an Intel Mac. Does Rhea work?</div>
+      <div class="faq-q">I'm on an Intel Mac. Does ReadAloudTTS work?</div>
       <div class="faq-a">The System engine works. Kokoro and Qwen3-TTS require Apple Silicon — they run through MLX, which is Apple Silicon only.</div>
     </div>
 
     <!-- ───────── Privacy ───────── -->
     <h2 class="section-heading" id="privacy">16. Privacy</h2>
-    <p>Rhea is sandboxed and hardened. The entitlements file grants:</p>
+    <p>ReadAloudTTS is sandboxed and hardened. The entitlements file grants:</p>
     <ul>
       <li><strong>User-selected files</strong> — read-only, only while you have the file open.</li>
       <li><strong>Outgoing network</strong> — used <em>once per model</em> for the Kokoro, Qwen3-TTS, and Whisper downloads. Revoke in Little Snitch after first run if you like.</li>
       <li><strong>Downloads folder (read-write)</strong> — for saving audiobook exports.</li>
     </ul>
-    <p>Reading stats are local-only and feed the transport's time estimates. Opt out in <strong>Settings → Analytics</strong>; Rhea has no analytics endpoint to send them to even if you wanted.</p>
+    <p>Reading stats are local-only and feed the transport's time estimates. Opt out in <strong>Settings → Analytics</strong>; ReadAloudTTS has no analytics endpoint to send them to even if you wanted.</p>
 
     <footer>
-      <p>Rhea <strong>v0.7.1</strong> · Apache-2.0 · <a href="https://github.com/HarveyLijh/Rhea">GitHub</a> · <a href="https://github.com/HarveyLijh/Rhea/issues">Report an issue</a></p>
-      <p style="margin-top: 6px;">This manual is part of the Rhea source tree — edit <code>docs/manual/index.html</code> and send a pull request.</p>
+      <p>ReadAloudTTS <strong>v0.7.1</strong> · Apache-2.0 · <a href="https://github.com/HarveyLijh/ReadAloudTTS">GitHub</a> · <a href="https://github.com/HarveyLijh/ReadAloudTTS/issues">Report an issue</a></p>
+      <p style="margin-top: 6px;">This manual is part of the ReadAloudTTS source tree — edit <code>docs/manual/index.html</code> and send a pull request.</p>
     </footer>
 
   </main>

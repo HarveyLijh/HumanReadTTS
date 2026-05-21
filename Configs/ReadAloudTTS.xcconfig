@@ -1,4 +1,4 @@
-// Shared build settings for the Rhea project.
+// Shared build settings for the ReadAloudTTS project.
 // Per-machine overrides (DEVELOPMENT_TEAM, signing identity) live in
 // Configs/Local.xcconfig, which is gitignored. The `?` on the include
 // makes the local override optional so CI builds with no Local.xcconfig
@@ -25,7 +25,7 @@ ARCHS = arm64
 
 // --- Bundle ----------------------------------------------------------
 
-PRODUCT_BUNDLE_IDENTIFIER = app.rhea.mac
+PRODUCT_BUNDLE_IDENTIFIER = app.readaloudtts.mac
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 
 // --- Signing (overridden per-machine in Local.xcconfig) -------------
@@ -33,6 +33,6 @@ ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 DEVELOPMENT_TEAM =
 CODE_SIGN_STYLE = Automatic
 
-// --- Hardening (Release only — see Rhea.entitlements) ---------------
+// --- Hardening (Release only — see ReadAloudTTS.entitlements) ---------------
 
 ENABLE_HARDENED_RUNTIME = YES

@@ -38,7 +38,7 @@ struct ScratchpadView: View {
             Divider()
             content
         }
-        .background(Color.rheaSurface)
+        .background(Color.readAloudTTSSurface)
         .task(id: text) {
             // Debounce segmentation: wait for 400ms of quiet typing,
             // then push the fresh sentence queue into the player so
@@ -55,9 +55,9 @@ struct ScratchpadView: View {
         HStack(spacing: 10) {
             Image(systemName: "square.and.pencil")
                 .font(.system(size: 14))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
             Text("Scratchpad")
-                .font(RheaFont.serif(16))
+                .font(ReadAloudTTSFont.serif(16))
                 .foregroundStyle(.primary)
             Text(characterSummary)
                 .font(.system(size: 11))
@@ -118,7 +118,7 @@ struct ScratchpadView: View {
             ScratchpadEditor(text: $text, fontScale: readerSettings.fontScale)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
-                .background(Color.rheaSurface)
+                .background(Color.readAloudTTSSurface)
         case .preview:
             ScratchpadPreview(
                 markdown: text,
@@ -129,7 +129,7 @@ struct ScratchpadView: View {
             )
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
-                .background(Color.rheaSurface)
+                .background(Color.readAloudTTSSurface)
         }
     }
 
@@ -442,7 +442,7 @@ private func applyScratchpadHighlight(
         return
     }
 
-    let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+    let soft = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.25)
     storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
     coordinator.lastSentenceRange = sentenceRange
 
@@ -450,7 +450,7 @@ private func applyScratchpadHighlight(
         let subOrigin = sentence.offsetInBlock + sub.location
         let subRange = NSRange(location: subOrigin, length: sub.length)
         if NSMaxRange(subRange) <= storage.length {
-            let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+            let bright = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.55)
             storage.addAttribute(.backgroundColor, value: bright, range: subRange)
             coordinator.lastSubRange = subRange
         } else {

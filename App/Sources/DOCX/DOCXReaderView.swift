@@ -2,11 +2,12 @@ import SwiftUI
 import AppKit
 import os
 
-/// Renders an EPUB's concatenated NSAttributedString content in
-/// the same NSTextView host the Markdown reader uses (so the
-/// sentence-level highlight pipeline works unchanged). Playback
-/// reuses the shared SpeechPlayer via RootView.
-struct EPUBReaderView: View {
+/// Renders a `.docx` file's rich-text body as a single
+/// `NSAttributedString` in the same NSTextView host the EPUB reader
+/// uses. The Markdown reader's sentence-highlight pipeline works
+/// unchanged because the underlying storage is identical — a flat
+/// attributed string segmented into sentences by `SentenceSegmenter`.
+struct DOCXReaderView: View {
     let url: URL
     let player: SpeechPlayer
 
@@ -14,43 +15,65 @@ struct EPUBReaderView: View {
     @State private var sentences: [Sentence] = []
     @State private var loadFailed = false
     @State private var errorMessage: String = ""
+    @State private var search = SearchState()
+    @State private var searchMatches: [NSRange] = []
 
     @Bindable private var readerSettings = ReaderSettings.shared
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "epub")
+    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "docx")
 
     var body: some View {
         VStack(spacing: 0) {
             header
             Divider()
 
-            Group {
-                if loadFailed {
-                    errorState
-                } else if rendered.length == 0 {
-                    ProgressView()
-                        .controlSize(.small)
-                        .tint(Color.readAloudTTSAccent)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    EPUBTextView(
-                        attributed: rendered,
-                        activeSentence: activeSentence,
-                        spokenSubRange: player.spokenSubRange,
-                        fontScale: readerSettings.fontScale,
-                        onReadFromOffset: handleReadFromOffset
+            ZStack(alignment: .topTrailing) {
+                Group {
+                    if loadFailed {
+                        errorState
+                    } else if rendered.length == 0 {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(Color.readAloudTTSAccent)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        DOCXTextView(
+                            attributed: rendered,
+                            activeSentence: activeSentence,
+                            spokenSubRange: player.spokenSubRange,
+                            searchMatches: searchMatches,
+                            currentMatchIndex: search.currentIndex,
+                            fontScale: readerSettings.fontScale,
+                            onReadFromOffset: handleReadFromOffset
+                        )
+                    }
+                }
+
+                if search.isPresented {
+                    SearchBar(
+                        state: search,
+                        onSubmit: runSearch,
+                        onNext: { advanceMatch(by: 1) },
+                        onPrev: { advanceMatch(by: -1) },
+                        onDismiss: dismissSearch
                     )
+                    .padding(.top, 8)
+                    .padding(.trailing, 12)
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
         }
         .task(id: url) {
             await load()
         }
+        .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
+            presentSearch()
+        }
     }
 
     private var header: some View {
         HStack {
-            Image(systemName: "book.closed")
+            Image(systemName: "doc.richtext")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
             Text(url.deletingPathExtension().lastPathComponent)
@@ -62,6 +85,15 @@ struct EPUBReaderView: View {
             Spacer()
 
             FontSizeControl()
+
+            Button {
+                presentSearch()
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .buttonStyle(.borderless)
+            .help("Find in document (\u{2318}F)")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -84,7 +116,7 @@ struct EPUBReaderView: View {
     private func load() async {
         let started = ContinuousClock.now
         do {
-            let attributed = try await EPUBLoader.load(url: url)
+            let attributed = try await DOCXLoader.load(url: url)
             rendered = attributed
             loadFailed = false
 
@@ -94,9 +126,9 @@ struct EPUBReaderView: View {
             sentences = parsed
             player.load(parsed)
 
-            Self.log.info("TOTAL epub load \(ContinuousClock.now - started, privacy: .public) — \(parsed.count) sentences")
-        } catch let error as EPUBLoader.LoadError {
-            errorMessage = error.errorDescription ?? "Couldn't read EPUB."
+            Self.log.info("TOTAL docx load \(ContinuousClock.now - started, privacy: .public) — \(parsed.count) sentences")
+        } catch let error as DOCXLoader.LoadError {
+            errorMessage = error.errorDescription ?? "Couldn't read DOCX."
             loadFailed = true
             player.load([])
         } catch {
@@ -106,12 +138,49 @@ struct EPUBReaderView: View {
         }
     }
 
+    // MARK: - Search
+
+    private func presentSearch() {
+        if !search.isPresented {
+            withAnimation(.easeOut(duration: 0.15)) {
+                search.isPresented = true
+            }
+        }
+        runSearch()
+    }
+
+    private func dismissSearch() {
+        withAnimation(.easeOut(duration: 0.15)) {
+            search.isPresented = false
+        }
+        searchMatches = []
+        search.totalMatches = 0
+        search.currentIndex = -1
+    }
+
+    private func runSearch() {
+        let matches = TextSearcher.search(in: rendered.string, options: search)
+        searchMatches = matches
+        search.totalMatches = matches.count
+        if matches.isEmpty {
+            search.currentIndex = -1
+        } else if search.currentIndex < 0 || search.currentIndex >= matches.count {
+            search.currentIndex = 0
+        }
+    }
+
+    private func advanceMatch(by delta: Int) {
+        guard !searchMatches.isEmpty else { return }
+        let next = (search.currentIndex + delta + searchMatches.count) % searchMatches.count
+        search.currentIndex = next
+    }
+
     private var errorState: some View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(Color.readAloudTTSAccent)
-            Text(errorMessage.isEmpty ? "Couldn't read the EPUB." : errorMessage)
+            Text(errorMessage.isEmpty ? "Couldn't read the DOCX." : errorMessage)
                 .font(ReadAloudTTSFont.serif(18))
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
@@ -125,10 +194,12 @@ struct EPUBReaderView: View {
     }
 }
 
-private struct EPUBTextView: NSViewRepresentable {
+private struct DOCXTextView: NSViewRepresentable {
     let attributed: NSAttributedString
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
+    let searchMatches: [NSRange]
+    let currentMatchIndex: Int
     let fontScale: Double
     let onReadFromOffset: (Int) -> Void
 
@@ -138,6 +209,8 @@ private struct EPUBTextView: NSViewRepresentable {
         var lastSentenceRange: NSRange?
         var lastSubRange: NSRange?
         var lastScrolledSentenceIndex: Int?
+        var lastSearchRanges: [NSRange] = []
+        var lastCurrentSearchRange: NSRange?
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -183,32 +256,23 @@ private struct EPUBTextView: NSViewRepresentable {
             context.coordinator.lastSentenceRange = nil
             context.coordinator.lastSubRange = nil
             context.coordinator.lastScrolledSentenceIndex = nil
+            context.coordinator.lastSearchRanges = []
+            context.coordinator.lastCurrentSearchRange = nil
         }
 
-        // Apply the user's font scale by walking every `.font` run and
-        // multiplying its point size. We track the last-applied scale
-        // so a no-op tick (e.g. a highlight repaint) doesn't restyle
-        // the storage. EPUB documents bring their own fonts per run,
-        // so scaling in-place preserves the publisher's intent (italic
-        // emphasis, monospace code, etc.) — only the size shifts.
+        // Apply font scale by walking `.font` runs and rescaling. The
+        // DOCX loader emits per-run fonts (heading sizes, bold/italic
+        // variants) so we scale in-place to preserve those choices.
         let appliedScale = context.coordinator.lastAppliedFontScale ?? 1.0
         if appliedScale != fontScale {
-            applyFontScale(
-                to: storage,
-                from: appliedScale,
-                to: fontScale
-            )
+            applyFontScale(to: storage, from: appliedScale, to: fontScale)
             context.coordinator.lastAppliedFontScale = fontScale
         }
 
         applyHighlight(to: tv, storage: storage, coordinator: context.coordinator)
+        applySearchHighlights(storage: storage, textView: tv, coordinator: context.coordinator)
     }
 
-    /// Walks every `.font` run and rescales it by `target / current`.
-    /// Tracking the last-applied scale lets us multiply a delta
-    /// instead of re-deriving sizes from a base attributed string —
-    /// which we'd otherwise have to keep in memory in addition to
-    /// the live storage.
     private func applyFontScale(
         to storage: NSTextStorage,
         from current: Double,
@@ -228,11 +292,6 @@ private struct EPUBTextView: NSViewRepresentable {
         storage.endEditing()
     }
 
-    /// Same incremental-highlight strategy as the Markdown reader:
-    /// bounded clears + scroll-only-on-sentence-change, so the
-    /// Whisper aligner's word-level ticks stop thrashing the whole
-    /// text storage and the user's manual scrolling doesn't get
-    /// yanked back on every update.
     private func applyHighlight(
         to textView: NSTextView,
         storage: NSTextStorage,
@@ -291,6 +350,51 @@ private struct EPUBTextView: NSViewRepresentable {
         if coordinator.lastScrolledSentenceIndex != currentIndex {
             coordinator.lastScrolledSentenceIndex = currentIndex
             textView.scrollRangeToVisible(sentenceRange)
+        }
+    }
+
+    private func applySearchHighlights(
+        storage: NSTextStorage,
+        textView: NSTextView,
+        coordinator: Coordinator
+    ) {
+        let prev = coordinator.lastSearchRanges
+        let prevCurrent = coordinator.lastCurrentSearchRange
+        guard prev != searchMatches
+                || (currentMatchIndex >= 0 && currentMatchIndex < searchMatches.count
+                    && prevCurrent != searchMatches[currentMatchIndex]) else {
+            return
+        }
+
+        storage.beginEditing()
+        for range in prev where NSMaxRange(range) <= storage.length {
+            storage.removeAttribute(.underlineStyle, range: range)
+            storage.removeAttribute(.underlineColor, range: range)
+        }
+        if let current = prevCurrent, NSMaxRange(current) <= storage.length {
+            storage.removeAttribute(.backgroundColor, range: current)
+        }
+        let underline = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.7)
+        for range in searchMatches where NSMaxRange(range) <= storage.length {
+            storage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
+            storage.addAttribute(.underlineColor, value: underline, range: range)
+        }
+        var current: NSRange?
+        if currentMatchIndex >= 0, currentMatchIndex < searchMatches.count {
+            current = searchMatches[currentMatchIndex]
+            if let c = current, NSMaxRange(c) <= storage.length {
+                storage.addAttribute(
+                    .backgroundColor,
+                    value: NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.35),
+                    range: c
+                )
+            }
+        }
+        storage.endEditing()
+        coordinator.lastSearchRanges = searchMatches
+        coordinator.lastCurrentSearchRange = current
+        if let c = current {
+            textView.scrollRangeToVisible(c)
         }
     }
 }

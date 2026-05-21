@@ -42,7 +42,7 @@ final class WhisperAligner {
         let endSeconds: Double
     }
 
-    private static let log = Logger(subsystem: "app.rhea.mac", category: "whisper")
+    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "whisper")
 
     private init() {}
 

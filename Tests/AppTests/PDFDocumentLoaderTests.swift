@@ -1,6 +1,6 @@
 import XCTest
 import PDFKit
-@testable import Rhea
+@testable import ReadAloudTTS
 
 final class PDFDocumentLoaderTests: XCTestCase {
 
@@ -14,7 +14,7 @@ final class PDFDocumentLoaderTests: XCTestCase {
     }
 
     func test_returnsNilForNonexistentFile() async {
-        let url = URL(filePath: "/tmp/rhea-does-not-exist-\(UUID().uuidString).pdf")
+        let url = URL(filePath: "/tmp/readaloudtts-does-not-exist-\(UUID().uuidString).pdf")
         let document = await PDFDocumentLoader.load(url: url)
         XCTAssertNil(document)
     }

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Launch the latest dev build of Rhea from wherever Xcode stashed it.
+# Launch the latest dev build of ReadAloudTTS from wherever Xcode stashed it.
 #
 # Xcode's DerivedData path has a scheme-specific hash in it
-# (Rhea-<hash>/Build/Products/Debug/Rhea.app), which is tedious to
+# (ReadAloudTTS-<hash>/Build/Products/Debug/ReadAloudTTS.app), which is tedious to
 # type. This script asks xcodebuild for the canonical BUILT_PRODUCTS_DIR
 # and launches the .app from there.
 #
@@ -41,7 +41,7 @@ for arg in "$@"; do
 done
 
 if [ "$SHOULD_BUILD" -eq 1 ]; then
-    xcodebuild -project Rhea.xcodeproj -scheme Rhea \
+    xcodebuild -project ReadAloudTTS.xcodeproj -scheme ReadAloudTTS \
                -configuration "$CONFIG" \
                -destination 'platform=macOS' \
                build | tail -3
@@ -49,20 +49,20 @@ fi
 
 # Ask xcodebuild for the canonical build product path. -showBuildSettings
 # reports BUILT_PRODUCTS_DIR which includes the DerivedData hash.
-APP_PATH="$(xcodebuild -project Rhea.xcodeproj -scheme Rhea \
+APP_PATH="$(xcodebuild -project ReadAloudTTS.xcodeproj -scheme ReadAloudTTS \
                        -configuration "$CONFIG" \
                        -destination 'platform=macOS' \
                        -showBuildSettings 2>/dev/null \
-            | awk -F'= ' '/ BUILT_PRODUCTS_DIR /{print $2; exit}')/Rhea.app"
+            | awk -F'= ' '/ BUILT_PRODUCTS_DIR /{print $2; exit}')/ReadAloudTTS.app"
 
 if [ ! -d "$APP_PATH" ]; then
-    echo "Rhea.app not found at $APP_PATH — try --build first" >&2
+    echo "ReadAloudTTS.app not found at $APP_PATH — try --build first" >&2
     exit 1
 fi
 
 # Kill any running instance first so the freshly-built version launches
 # rather than re-fronting a stale one.
-pkill -9 -f "Rhea.app/Contents/MacOS/Rhea" 2>/dev/null || true
+pkill -9 -f "ReadAloudTTS.app/Contents/MacOS/ReadAloudTTS" 2>/dev/null || true
 sleep 0.3
 echo "Opening $APP_PATH"
 open "$APP_PATH"

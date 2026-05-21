@@ -27,7 +27,7 @@ enum ExportEstimator {
         "system": 0.012,
     ]
 
-    private static let storageKey = "app.rhea.mac.export.secPerChar.v1"
+    private static let storageKey = "app.readaloudtts.mac.export.secPerChar.v1"
     /// Weight of a fresh observation when blending into the rolling
     /// average. Low enough that a one-off slow export (swap pressure,
     /// another app hogging the Neural Engine) doesn't poison the

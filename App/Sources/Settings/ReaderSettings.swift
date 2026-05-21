@@ -31,7 +31,7 @@ final class ReaderSettings {
     static let step: Double = 0.1
 
     private let defaults: UserDefaults
-    private let fontScaleKey = "app.rhea.mac.reader.fontScale.v1"
+    private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

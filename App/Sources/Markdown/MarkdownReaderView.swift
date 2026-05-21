@@ -62,7 +62,7 @@ struct MarkdownReaderView: View {
         var id: Self { self }
     }
 
-    private static let log = Logger(subsystem: "app.rhea.mac", category: "markdown")
+    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "markdown")
 
     var body: some View {
         VStack(spacing: 0) {
@@ -332,7 +332,7 @@ struct MarkdownReaderView: View {
     private static func uniqueMarkdownImageURLs(in attributed: NSAttributedString) -> Set<URL> {
         var urls = Set<URL>()
         let full = NSRange(location: 0, length: attributed.length)
-        attributed.enumerateAttribute(.rheaMarkdownImageURL, in: full, options: []) { value, _, _ in
+        attributed.enumerateAttribute(.readAloudTTSMarkdownImageURL, in: full, options: []) { value, _, _ in
             if let u = value as? URL { urls.insert(u) }
         }
         return urls
@@ -341,7 +341,7 @@ struct MarkdownReaderView: View {
     private static func uniqueMermaidSources(in attributed: NSAttributedString) -> Set<String> {
         var sources = Set<String>()
         let full = NSRange(location: 0, length: attributed.length)
-        attributed.enumerateAttribute(.rheaMermaidSource, in: full, options: []) { value, _, _ in
+        attributed.enumerateAttribute(.readAloudTTSMermaidSource, in: full, options: []) { value, _, _ in
             if let s = value as? String { sources.insert(s) }
         }
         return sources
@@ -417,7 +417,7 @@ struct MarkdownReaderView: View {
 
     /// Collapse sentences that fall inside the same rendered table row
     /// into a single sentence. The renderer tags every character in a
-    /// row with `.rheaTableRowID`; we walk the segmentation output,
+    /// row with `.readAloudTTSTableRowID`; we walk the segmentation output,
     /// and any adjacent sentences whose starting character shares a
     /// row id get merged into one. The merged sentence's range spans
     /// all the cells so highlighting covers the whole row, and its
@@ -434,7 +434,7 @@ struct MarkdownReaderView: View {
             let first = sentences[i]
             guard first.offsetInBlock < rendered.length,
                   let rowID = rendered.attribute(
-                    .rheaTableRowID,
+                    .readAloudTTSTableRowID,
                     at: first.offsetInBlock,
                     effectiveRange: nil
                   ) as? String
@@ -451,7 +451,7 @@ struct MarkdownReaderView: View {
                 let next = sentences[j]
                 guard next.offsetInBlock < rendered.length,
                       let nextID = rendered.attribute(
-                        .rheaTableRowID,
+                        .readAloudTTSTableRowID,
                         at: next.offsetInBlock,
                         effectiveRange: nil
                       ) as? String,
@@ -478,12 +478,12 @@ struct MarkdownReaderView: View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 36, weight: .light))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
             Text("Couldn't read \(url.lastPathComponent).")
-                .font(RheaFont.serif(18))
+                .font(ReadAloudTTSFont.serif(18))
                 .foregroundStyle(.primary)
             Text("Drop another file to try again.")
-                .font(RheaFont.ui(13))
+                .font(ReadAloudTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
         .padding(32)
@@ -497,18 +497,18 @@ extension NSAttributedString.Key {
     /// table row. `MarkdownReaderView.coalesceTableRows` uses it to
     /// merge sentence-tokenized cells back into one row-level sentence
     /// so TTS reads tables left-to-right a row at a time.
-    static let rheaTableRowID = NSAttributedString.Key("rheaTableRowID")
+    static let readAloudTTSTableRowID = NSAttributedString.Key("readAloudTTSTableRowID")
 
     /// Raw Mermaid source attached to each placeholder attachment. The
     /// reader view uses it to look up a freshly-rendered diagram in
     /// the image cache and to dispatch deferred renders for sources
     /// it hasn't seen yet.
-    static let rheaMermaidSource = NSAttributedString.Key("rheaMermaidSource")
+    static let readAloudTTSMermaidSource = NSAttributedString.Key("readAloudTTSMermaidSource")
 
     /// Resolved URL of a markdown `![alt](url)` image attached to its
     /// `ResizableFigureAttachment`. The reader view enumerates these so
     /// it knows which images still need to be loaded asynchronously.
-    static let rheaMarkdownImageURL = NSAttributedString.Key("rheaMarkdownImageURL")
+    static let readAloudTTSMarkdownImageURL = NSAttributedString.Key("readAloudTTSMarkdownImageURL")
 }
 
 // MARK: - Markdown rendering
@@ -784,7 +784,7 @@ enum MarkdownRenderer {
         let fullRange = NSRange(location: 0, length: attachmentString.length)
         attachmentString.addAttributes(
             [
-                .rheaMermaidSource: source,
+                .readAloudTTSMermaidSource: source,
                 .paragraphStyle: para,
                 .foregroundColor: NSColor.labelColor,
             ],
@@ -840,7 +840,7 @@ enum MarkdownRenderer {
         let fullRange = NSRange(location: 0, length: attachmentString.length)
         attachmentString.addAttributes(
             [
-                .rheaMarkdownImageURL: resolved,
+                .readAloudTTSMarkdownImageURL: resolved,
                 .paragraphStyle: para,
                 .foregroundColor: NSColor.labelColor,
             ],
@@ -1102,7 +1102,7 @@ enum MarkdownRenderer {
                     .paragraphStyle, value: cellParagraph, range: fullRange
                 )
                 cellContent.addAttribute(
-                    .rheaTableRowID, value: rowID, range: fullRange
+                    .readAloudTTSTableRowID, value: rowID, range: fullRange
                 )
                 // Backfill font/color on the terminator or on any
                 // empty cell placeholder so NSTextView has concrete
@@ -1386,7 +1386,7 @@ private struct EditableSourceTextView: NSViewRepresentable {
         scroll.hasHorizontalScroller = false
         scroll.borderType = .noBorder
         scroll.drawsBackground = true
-        scroll.backgroundColor = NSColor(Color.rheaSurface)
+        scroll.backgroundColor = NSColor(Color.readAloudTTSSurface)
 
         let tv = NSTextView()
         tv.isEditable = true
@@ -1397,7 +1397,7 @@ private struct EditableSourceTextView: NSViewRepresentable {
             ofSize: 13 * CGFloat(fontScale), weight: .regular
         )
         tv.textColor = NSColor.labelColor
-        tv.backgroundColor = NSColor(Color.rheaSurface)
+        tv.backgroundColor = NSColor(Color.readAloudTTSSurface)
         tv.drawsBackground = true
         tv.textContainerInset = NSSize(width: 32, height: 24)
         tv.autoresizingMask = [.width]
@@ -1489,7 +1489,7 @@ private func makeReadOnlyTextScrollView(
     scroll.hasHorizontalScroller = false
     scroll.borderType = .noBorder
     scroll.drawsBackground = true
-    scroll.backgroundColor = NSColor(Color.rheaSurface)
+    scroll.backgroundColor = NSColor(Color.readAloudTTSSurface)
 
     // Make sure AppKit knows how to vend our custom view provider for
     // attachments tagged with `kResizableFigureFileType`. Idempotent.
@@ -1510,7 +1510,7 @@ private func makeReadOnlyTextScrollView(
     textView.isEditable = false
     textView.isSelectable = true
     textView.isRichText = true
-    textView.backgroundColor = NSColor(Color.rheaSurface)
+    textView.backgroundColor = NSColor(Color.readAloudTTSSurface)
     textView.drawsBackground = true
     textView.textContainerInset = NSSize(width: 32, height: 24)
     textView.autoresizingMask = [.width]
@@ -1519,7 +1519,7 @@ private func makeReadOnlyTextScrollView(
         width: 0, height: CGFloat.greatestFiniteMagnitude
     )
 
-    Logger(subsystem: "app.rhea.mac", category: "resizable-figure")
+    Logger(subsystem: "app.readaloudtts.mac", category: "resizable-figure")
         .debug("preview NSTextView using TK2 = \(textView.textLayoutManager != nil)")
 
     scroll.documentView = textView
@@ -1578,7 +1578,7 @@ private func applyHighlightIncremental(
         return
     }
 
-    let soft = NSColor(Color.rheaAccent).withAlphaComponent(0.25)
+    let soft = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.25)
     storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
     coordinator.lastSentenceRange = sentenceRange
 
@@ -1586,7 +1586,7 @@ private func applyHighlightIncremental(
         let subOrigin = sentence.offsetInBlock + sub.location
         let subRange = NSRange(location: subOrigin, length: sub.length)
         if NSMaxRange(subRange) <= storage.length {
-            let bright = NSColor(Color.rheaAccent).withAlphaComponent(0.55)
+            let bright = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.55)
             storage.addAttribute(.backgroundColor, value: bright, range: subRange)
             coordinator.lastSubRange = subRange
         } else {
@@ -1699,7 +1699,7 @@ private func applySearchHighlightsRaw(
 final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
     static let shared = MermaidWebRenderer()
 
-    private static let log = Logger(subsystem: "app.rhea.mac", category: "mermaid")
+    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "mermaid")
 
     private struct Pending {
         let continuation: CheckedContinuation<NSImage, Error>
@@ -1750,8 +1750,8 @@ final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageH
     ) {
         let config = WKWebViewConfiguration()
         let userContent = WKUserContentController()
-        userContent.add(self, name: "rheaMermaid")
-        userContent.add(self, name: "rheaMermaidLog")
+        userContent.add(self, name: "readAloudTTSMermaid")
+        userContent.add(self, name: "readAloudTTSMermaidLog")
         config.userContentController = userContent
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
 
@@ -1843,12 +1843,12 @@ final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageH
     ) {
         // Forwarded log messages from the page just go to os_log so
         // we can see what's happening inside the WKWebView.
-        if name == "rheaMermaidLog" {
+        if name == "readAloudTTSMermaidLog" {
             let text = (body as? String) ?? String(describing: body)
             Self.log.info("mermaid-page: \(text, privacy: .public)")
             return
         }
-        guard name == "rheaMermaid", let webView else { return }
+        guard name == "readAloudTTSMermaid", let webView else { return }
         let id = ObjectIdentifier(webView)
         guard let task = pending[id] else { return }
         guard let payload = body as? [String: Any] else {
@@ -1944,7 +1944,7 @@ final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageH
                 for (var i = 0; i < arguments.length; i++) {
                   parts.push(String(arguments[i]));
                 }
-                window.webkit.messageHandlers.rheaMermaidLog.postMessage(label + ': ' + parts.join(' '));
+                window.webkit.messageHandlers.readAloudTTSMermaidLog.postMessage(label + ': ' + parts.join(' '));
               } catch (e) {}
             };
           }
@@ -1954,13 +1954,13 @@ final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageH
           console.warn = bridgeLog('warn');
           console.error = bridgeLog('error');
           window.addEventListener('error', function(ev){
-            try { window.webkit.messageHandlers.rheaMermaidLog.postMessage('window-error: ' + (ev.message || '?') + ' @ ' + (ev.filename || '') + ':' + (ev.lineno || '0')); } catch (e) {}
+            try { window.webkit.messageHandlers.readAloudTTSMermaidLog.postMessage('window-error: ' + (ev.message || '?') + ' @ ' + (ev.filename || '') + ':' + (ev.lineno || '0')); } catch (e) {}
           });
           window.addEventListener('unhandledrejection', function(ev){
             try {
               var r = ev.reason;
               var msg = (r && r.message) ? r.message : String(r);
-              window.webkit.messageHandlers.rheaMermaidLog.postMessage('unhandled: ' + msg);
+              window.webkit.messageHandlers.readAloudTTSMermaidLog.postMessage('unhandled: ' + msg);
             } catch (e) {}
           });
         })();
@@ -1971,7 +1971,7 @@ final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageH
         <script>
         (async function(){
           function post(payload){
-            try { window.webkit.messageHandlers.rheaMermaid.postMessage(payload); }
+            try { window.webkit.messageHandlers.readAloudTTSMermaid.postMessage(payload); }
             catch (e) { console.error('post failed', e); }
           }
           function appendSvg(svgString){

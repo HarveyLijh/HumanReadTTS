@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2B00000000000000000A0001 /* RheaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0001 /* RheaApp.swift */; };
+		2B00000000000000000A0001 /* ReadAloudTTSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0001 /* ReadAloudTTSApp.swift */; };
 		2B00000000000000000A0002 /* AppScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0002 /* AppScene.swift */; };
 		2B00000000000000000A0003 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0003 /* Colors.swift */; };
 		2B00000000000000000A0A00 /* VisualEffectBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0A00 /* VisualEffectBackground.swift */; };
@@ -98,6 +98,9 @@
 		2B00000000000000000A0D02 /* OnboardingSampleLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D02 /* OnboardingSampleLoader.swift */; };
 		2B00000000000000000A0D03 /* WelcomeSample.md in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D03 /* WelcomeSample.md */; };
 		2B00000000000000000A0D04 /* mermaid.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D04 /* mermaid.min.js */; };
+		2B00000000000000000A00D1 /* DOCXLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00D1 /* DOCXLoader.swift */; };
+		2B00000000000000000A00D2 /* DOCXReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00D2 /* DOCXReaderView.swift */; };
+		2B00000000000000000A00D3 /* TextReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00D3 /* TextReaderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,12 +109,12 @@
 			containerPortal = 1A00000000000000000A0001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4A00000000000000000A0001;
-			remoteInfo = Rhea;
+			remoteInfo = ReadAloudTTS;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2A00000000000000000A0001 /* RheaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RheaApp.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0001 /* ReadAloudTTSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadAloudTTSApp.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0002 /* AppScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppScene.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0003 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0A00 /* VisualEffectBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBackground.swift; sourceTree = "<group>"; };
@@ -119,7 +122,7 @@
 		2A00000000000000000A0005 /* DropTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropTargetView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0006 /* DroppedDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroppedDocument.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0007 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		2A00000000000000000A0010 /* Rhea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rhea.entitlements; sourceTree = "<group>"; };
+		2A00000000000000000A0010 /* ReadAloudTTS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ReadAloudTTS.entitlements; sourceTree = "<group>"; };
 		2A00000000000000000A0011 /* PDFViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFViewerView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0012 /* PDFDocumentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoader.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0021 /* MarkdownReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownReaderView.swift; sourceTree = "<group>"; };
@@ -198,10 +201,13 @@
 		2A00000000000000000A0D02 /* OnboardingSampleLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSampleLoader.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D03 /* WelcomeSample.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = WelcomeSample.md; sourceTree = "<group>"; };
 		2A00000000000000000A0D04 /* mermaid.min.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = mermaid.min.js; sourceTree = "<group>"; };
-		2A00000000000000000C0001 /* Rhea.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Rhea.xcconfig; sourceTree = "<group>"; };
+		2A00000000000000000A00D1 /* DOCXLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DOCXLoader.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00D2 /* DOCXReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DOCXReaderView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00D3 /* TextReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextReaderView.swift; sourceTree = "<group>"; };
+		2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ReadAloudTTS.xcconfig; sourceTree = "<group>"; };
 		2A00000000000000000C0002 /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Local.xcconfig.example; sourceTree = "<group>"; };
-		2A00000000000000000FFFF1 /* Rhea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhea.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		2A00000000000000000FFFF2 /* RheaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RheaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A00000000000000000FFFF1 /* ReadAloudTTS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadAloudTTS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A00000000000000000FFFF2 /* ReadAloudTTSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReadAloudTTSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -243,7 +249,7 @@
 			children = (
 				1B00000000000000000A0003 /* Sources */,
 				1B00000000000000000A0015 /* Resources */,
-				2A00000000000000000A0010 /* Rhea.entitlements */,
+				2A00000000000000000A0010 /* ReadAloudTTS.entitlements */,
 				2A00000000000000000A0085 /* Info.plist */,
 			);
 			path = App;
@@ -263,7 +269,7 @@
 		1B00000000000000000A0003 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				2A00000000000000000A0001 /* RheaApp.swift */,
+				2A00000000000000000A0001 /* ReadAloudTTSApp.swift */,
 				2A00000000000000000A0002 /* AppScene.swift */,
 				2A00000000000000000A0007 /* RootView.swift */,
 				2A00000000000000000A0003 /* Colors.swift */,
@@ -285,6 +291,8 @@
 				1B00000000000000000A0014 /* Reader */,
 				1B00000000000000000A0016 /* Scratchpad */,
 				1B00000000000000000A0017 /* Onboarding */,
+				1B00000000000000000A0018 /* DOCX */,
+				1B00000000000000000A0019 /* Text */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -441,6 +449,23 @@
 			path = EPUB;
 			sourceTree = "<group>";
 		};
+		1B00000000000000000A0018 /* DOCX */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A00D1 /* DOCXLoader.swift */,
+				2A00000000000000000A00D2 /* DOCXReaderView.swift */,
+			);
+			path = DOCX;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A0019 /* Text */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A00D3 /* TextReaderView.swift */,
+			);
+			path = Text;
+			sourceTree = "<group>";
+		};
 		1B00000000000000000A0014 /* Reader */ = {
 			isa = PBXGroup;
 			children = (
@@ -494,7 +519,7 @@
 		1B00000000000000000A0007 /* Configs */ = {
 			isa = PBXGroup;
 			children = (
-				2A00000000000000000C0001 /* Rhea.xcconfig */,
+				2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */,
 				2A00000000000000000C0002 /* Local.xcconfig.example */,
 			);
 			path = Configs;
@@ -503,8 +528,8 @@
 		1B00000000000000000A00FF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2A00000000000000000FFFF1 /* Rhea.app */,
-				2A00000000000000000FFFF2 /* RheaTests.xctest */,
+				2A00000000000000000FFFF1 /* ReadAloudTTS.app */,
+				2A00000000000000000FFFF2 /* ReadAloudTTSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -512,9 +537,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4A00000000000000000A0001 /* Rhea */ = {
+		4A00000000000000000A0001 /* ReadAloudTTS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5A00000000000000000A0002 /* Build configuration list for PBXNativeTarget "Rhea" */;
+			buildConfigurationList = 5A00000000000000000A0002 /* Build configuration list for PBXNativeTarget "ReadAloudTTS" */;
 			buildPhases = (
 				3A00000000000000000A0001 /* Sources */,
 				3A00000000000000000A0002 /* Frameworks */,
@@ -524,7 +549,7 @@
 			);
 			dependencies = (
 			);
-			name = Rhea;
+			name = ReadAloudTTS;
 			packageProductDependencies = (
 				7B00000000000000000A0001 /* KokoroSwift */,
 				7B00000000000000000A0002 /* MLX */,
@@ -533,13 +558,13 @@
 				7B00000000000000000A0005 /* WhisperKit */,
 				7B00000000000000000A0006 /* TTSKit */,
 			);
-			productName = Rhea;
-			productReference = 2A00000000000000000FFFF1 /* Rhea.app */;
+			productName = ReadAloudTTS;
+			productReference = 2A00000000000000000FFFF1 /* ReadAloudTTS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4A00000000000000000B0001 /* RheaTests */ = {
+		4A00000000000000000B0001 /* ReadAloudTTSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5A00000000000000000A0003 /* Build configuration list for PBXNativeTarget "RheaTests" */;
+			buildConfigurationList = 5A00000000000000000A0003 /* Build configuration list for PBXNativeTarget "ReadAloudTTSTests" */;
 			buildPhases = (
 				3A00000000000000000B0001 /* Sources */,
 				3A00000000000000000B0002 /* Frameworks */,
@@ -550,9 +575,9 @@
 			dependencies = (
 				6A00000000000000000A0001 /* PBXTargetDependency */,
 			);
-			name = RheaTests;
-			productName = RheaTests;
-			productReference = 2A00000000000000000FFFF2 /* RheaTests.xctest */;
+			name = ReadAloudTTSTests;
+			productName = ReadAloudTTSTests;
+			productReference = 2A00000000000000000FFFF2 /* ReadAloudTTSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -574,7 +599,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5A00000000000000000A0001 /* Build configuration list for PBXProject "Rhea" */;
+			buildConfigurationList = 5A00000000000000000A0001 /* Build configuration list for PBXProject "ReadAloudTTS" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -594,8 +619,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4A00000000000000000A0001 /* Rhea */,
-				4A00000000000000000B0001 /* RheaTests */,
+				4A00000000000000000A0001 /* ReadAloudTTS */,
+				4A00000000000000000B0001 /* ReadAloudTTSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -702,7 +727,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B00000000000000000A0001 /* RheaApp.swift in Sources */,
+				2B00000000000000000A0001 /* ReadAloudTTSApp.swift in Sources */,
 				2B00000000000000000A0002 /* AppScene.swift in Sources */,
 				2B00000000000000000A0007 /* RootView.swift in Sources */,
 				2B00000000000000000A0003 /* Colors.swift in Sources */,
@@ -767,6 +792,9 @@
 				2B00000000000000000A0D00 /* OnboardingState.swift in Sources */,
 				2B00000000000000000A0D01 /* OnboardingView.swift in Sources */,
 				2B00000000000000000A0D02 /* OnboardingSampleLoader.swift in Sources */,
+				2B00000000000000000A00D1 /* DOCXLoader.swift in Sources */,
+				2B00000000000000000A00D2 /* DOCXReaderView.swift in Sources */,
+				2B00000000000000000A00D3 /* TextReaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -798,7 +826,7 @@
 /* Begin PBXTargetDependency section */
 		6A00000000000000000A0001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4A00000000000000000A0001 /* Rhea */;
+			target = 4A00000000000000000A0001 /* ReadAloudTTS */;
 			targetProxy = 6B00000000000000000A0001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -806,7 +834,7 @@
 /* Begin XCBuildConfiguration section */
 		5B00000000000000000A0001 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			baseConfigurationReference = 2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -869,7 +897,7 @@
 		};
 		5B00000000000000000A0002 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			baseConfigurationReference = 2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -924,7 +952,7 @@
 		};
 		5B00000000000000000A0003 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			baseConfigurationReference = 2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -934,29 +962,29 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Rhea;
+				INFOPLIST_KEY_CFBundleDisplayName = ReadAloudTTS;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 The Rhea Authors";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 The ReadAloudTTS Authors";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Rhea needs access to your Documents folder to open PDFs and Markdown files you've added to the library.";
-				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Rhea needs access to your Downloads folder to open PDFs and Markdown files you've downloaded.";
-				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Rhea needs access to your Desktop to open PDFs and Markdown files stored there.";
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "ReadAloudTTS needs access to your Documents folder to open PDFs and Markdown files you've added to the library.";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "ReadAloudTTS needs access to your Downloads folder to open PDFs and Markdown files you've downloaded.";
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "ReadAloudTTS needs access to your Desktop to open PDFs and Markdown files stored there.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = Rhea;
+				PRODUCT_NAME = ReadAloudTTS;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
 		};
 		5B00000000000000000A0004 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			baseConfigurationReference = 2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = App/Rhea.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/ReadAloudTTS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
@@ -964,60 +992,60 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Rhea;
+				INFOPLIST_KEY_CFBundleDisplayName = ReadAloudTTS;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 The Rhea Authors";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 The ReadAloudTTS Authors";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Rhea needs access to your Documents folder to open PDFs and Markdown files you've added to the library.";
-				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Rhea needs access to your Downloads folder to open PDFs and Markdown files you've downloaded.";
-				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Rhea needs access to your Desktop to open PDFs and Markdown files stored there.";
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "ReadAloudTTS needs access to your Documents folder to open PDFs and Markdown files you've added to the library.";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "ReadAloudTTS needs access to your Downloads folder to open PDFs and Markdown files you've downloaded.";
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "ReadAloudTTS needs access to your Desktop to open PDFs and Markdown files stored there.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = Rhea;
+				PRODUCT_NAME = ReadAloudTTS;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};
 		5B00000000000000000B0003 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			baseConfigurationReference = 2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
-				PRODUCT_BUNDLE_IDENTIFIER = "app.rhea.mac.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "app.readaloudtts.mac.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rhea.app/Contents/MacOS/Rhea";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReadAloudTTS.app/Contents/MacOS/ReadAloudTTS";
 			};
 			name = Debug;
 		};
 		5B00000000000000000B0004 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A00000000000000000C0001 /* Rhea.xcconfig */;
+			baseConfigurationReference = 2A00000000000000000C0001 /* ReadAloudTTS.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
-				PRODUCT_BUNDLE_IDENTIFIER = "app.rhea.mac.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "app.readaloudtts.mac.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rhea.app/Contents/MacOS/Rhea";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReadAloudTTS.app/Contents/MacOS/ReadAloudTTS";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5A00000000000000000A0001 /* Build configuration list for PBXProject "Rhea" */ = {
+		5A00000000000000000A0001 /* Build configuration list for PBXProject "ReadAloudTTS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5B00000000000000000A0001 /* Debug */,
@@ -1026,7 +1054,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5A00000000000000000A0002 /* Build configuration list for PBXNativeTarget "Rhea" */ = {
+		5A00000000000000000A0002 /* Build configuration list for PBXNativeTarget "ReadAloudTTS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5B00000000000000000A0003 /* Debug */,
@@ -1035,7 +1063,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5A00000000000000000A0003 /* Build configuration list for PBXNativeTarget "RheaTests" */ = {
+		5A00000000000000000A0003 /* Build configuration list for PBXNativeTarget "ReadAloudTTSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5B00000000000000000B0003 /* Debug */,

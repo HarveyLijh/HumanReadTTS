@@ -92,7 +92,7 @@ struct ExportOptionsSheet: View {
         VStack(spacing: 10) {
             ProgressView()
                 .controlSize(.small)
-                .tint(Color.rheaAccent)
+                .tint(Color.readAloudTTSAccent)
             Text("Preparing document…")
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
@@ -244,7 +244,7 @@ struct ExportOptionsSheet: View {
         )
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             Image(systemName: "timer")
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Estimated generation time: \(ExportEstimator.formatted(eta))")
                     .font(.system(size: 12, weight: .medium))
@@ -257,7 +257,7 @@ struct ExportOptionsSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.rheaAccent.opacity(0.08))
+                .fill(Color.readAloudTTSAccent.opacity(0.08))
         )
     }
 
@@ -268,7 +268,7 @@ struct ExportOptionsSheet: View {
                 .keyboardShortcut(.cancelAction)
             Button("Export…") { confirmAndEnqueue() }
                 .buttonStyle(.borderedProminent)
-                .tint(Color.rheaAccent)
+                .tint(Color.readAloudTTSAccent)
                 .keyboardShortcut(.defaultAction)
                 .disabled(loadState != .ready || sentences.isEmpty)
         }
@@ -301,7 +301,7 @@ struct ExportOptionsSheet: View {
                     .foregroundStyle(.secondary)
             }
             Slider(value: value, in: range, step: step)
-                .tint(Color.rheaAccent)
+                .tint(Color.readAloudTTSAccent)
         }
     }
 
@@ -351,7 +351,7 @@ struct ExportOptionsSheet: View {
         return "Based on measured performance from previous exports on this Mac."
     }
 
-    private var autoKey: String { "__rhea.auto" }
+    private var autoKey: String { "__readaloudtts.auto" }
 
     private var systemVoices: [AVSpeechSynthesisVoice] {
         AVSpeechSynthesisVoice.speechVoices()

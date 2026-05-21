@@ -8,12 +8,12 @@
             <key>NSMenuItem</key>
             <dict>
                 <key>default</key>
-                <string>Read with Rhea</string>
+                <string>Read with ReadAloudTTS</string>
             </dict>
             <key>NSMessage</key>
             <string>readSelection</string>
             <key>NSPortName</key>
-            <string>Rhea</string>
+            <string>ReadAloudTTS</string>
             <key>NSSendTypes</key>
             <array>
                 <string>NSStringPboardType</string>

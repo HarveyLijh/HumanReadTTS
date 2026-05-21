@@ -3,7 +3,7 @@ import AppKit
 import AVFoundation
 
 /// Five-step welcome tour shown on first launch and re-openable
-/// from Settings. Lives in its own `Window` scene (see RheaApp)
+/// from Settings. Lives in its own `Window` scene (see ReadAloudTTSApp)
 /// rather than a sheet so it can present before any document is
 /// loaded and survive resizing the main window.
 ///
@@ -24,7 +24,7 @@ struct OnboardingView: View {
         ZStack {
             VisualEffectBackground(material: .underWindowBackground)
                 .ignoresSafeArea()
-            Color.rheaSurface.ignoresSafeArea()
+            Color.readAloudTTSSurface.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
@@ -59,12 +59,12 @@ struct OnboardingView: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 18, height: 18)
             Text("Getting Started")
-                .font(RheaFont.ui(12, weight: .medium))
+                .font(ReadAloudTTSFont.ui(12, weight: .medium))
                 .foregroundStyle(.secondary)
             Spacer()
             Button("Skip") { skip() }
                 .buttonStyle(.plain)
-                .font(RheaFont.ui(12))
+                .font(ReadAloudTTSFont.ui(12))
                 .foregroundStyle(.secondary)
                 .help("Skip the tour (Esc). You can revisit it from Settings.")
         }
@@ -102,7 +102,7 @@ struct OnboardingView: View {
                 ForEach(0..<state.totalSteps, id: \.self) { i in
                     Circle()
                         .fill(i == state.step
-                              ? Color.rheaAccent
+                              ? Color.readAloudTTSAccent
                               : Color.secondary.opacity(0.25))
                         .frame(width: 6, height: 6)
                         .animation(.easeOut(duration: 0.18), value: state.step)
@@ -118,7 +118,7 @@ struct OnboardingView: View {
                 }
                 Button(primaryLabel) { advance() }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color.rheaAccent)
+                    .tint(Color.readAloudTTSAccent)
                     .keyboardShortcut(.defaultAction)
             }
         }
@@ -154,15 +154,15 @@ struct OnboardingView: View {
     }
 
     /// Materialises the bundled README sample, routes it to the
-    /// main window via `.rheaOpenURL` (the same notification
-    /// AppDelegateShim posts for `open -a Rhea file.pdf`), then
+    /// main window via `.readAloudTTSOpenURL` (the same notification
+    /// AppDelegateShim posts for `open -a ReadAloudTTS file.pdf`), then
     /// dismisses the welcome window. If the sample copy fails we
     /// still dismiss — the tour shouldn't block on disk errors.
     private func finish(loadSample: Bool = true) {
         if loadSample {
             if let url = try? OnboardingSampleLoader.prepareSampleURL() {
                 NotificationCenter.default.post(
-                    name: .rheaOpenURL,
+                    name: .readAloudTTSOpenURL,
                     object: nil,
                     userInfo: ["url": url]
                 )
@@ -172,7 +172,7 @@ struct OnboardingView: View {
         // hands off to the document instead of leaving the user
         // staring at an empty desktop after the welcome window
         // closes.
-        if let main = NSApp.windows.first(where: { $0.title == "Rhea" }) {
+        if let main = NSApp.windows.first(where: { $0.title == "ReadAloudTTS" }) {
             main.makeKeyAndOrderFront(nil)
         }
         dismissWindow(id: OnboardingScene.windowID)
@@ -193,10 +193,10 @@ private struct WelcomeStep: View {
                 .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
 
             VStack(spacing: 8) {
-                Text("Welcome to Rhea")
-                    .font(RheaFont.serif(34, weight: .bold))
+                Text("Welcome to ReadAloudTTS")
+                    .font(ReadAloudTTSFont.serif(34, weight: .bold))
                 Text("The local-first reader that speaks your documents aloud.")
-                    .font(RheaFont.ui(15))
+                    .font(ReadAloudTTSFont.ui(15))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 440)
@@ -233,7 +233,7 @@ private struct VoiceStep: View {
             StepTitle(
                 icon: "speaker.wave.2",
                 title: "Pick a voice",
-                subtitle: "Rhea ships with your system voices out of the box. Neural voices (Kokoro, Qwen3-TTS) can be downloaded later from Settings → Models."
+                subtitle: "ReadAloudTTS ships with your system voices out of the box. Neural voices (Kokoro, Qwen3-TTS) can be downloaded later from Settings → Models."
             )
 
             VStack(alignment: .leading, spacing: 12) {
@@ -264,7 +264,7 @@ private struct VoiceStep: View {
                     .buttonStyle(.bordered)
 
                     Text("You can change the voice any time from the transport chip or Settings.")
-                        .font(RheaFont.ui(11))
+                        .font(ReadAloudTTSFont.ui(11))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -323,7 +323,7 @@ private struct ModelsStep: View {
             .frame(maxWidth: 540)
 
             Text("Downloads continue in the background — feel free to keep going.")
-                .font(RheaFont.ui(11))
+                .font(ReadAloudTTSFont.ui(11))
                 .foregroundStyle(.secondary)
         }
     }
@@ -360,21 +360,21 @@ private struct ModelDownloadRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.displayName)
-                    .font(RheaFont.ui(13, weight: .semibold))
+                    .font(ReadAloudTTSFont.ui(13, weight: .semibold))
                 HStack(spacing: 6) {
                     Text(tagline)
-                        .font(RheaFont.ui(11))
+                        .font(ReadAloudTTSFont.ui(11))
                         .foregroundStyle(.secondary)
                     Text("·")
-                        .font(RheaFont.ui(11))
+                        .font(ReadAloudTTSFont.ui(11))
                         .foregroundStyle(.secondary)
                     Text(sizeLabel)
-                        .font(RheaFont.ui(11))
+                        .font(ReadAloudTTSFont.ui(11))
                         .foregroundStyle(.secondary)
                 }
                 if case .failed(let message) = status {
                     Text(message)
-                        .font(RheaFont.ui(10))
+                        .font(ReadAloudTTSFont.ui(10))
                         .foregroundStyle(.red)
                         .lineLimit(2)
                 }
@@ -401,7 +401,7 @@ private struct ModelDownloadRow: View {
         case .notDownloaded:
             Button("Download", action: onAction)
                 .buttonStyle(.borderedProminent)
-                .tint(Color.rheaAccent)
+                .tint(Color.readAloudTTSAccent)
                 .controlSize(.small)
         case .downloading(let completed, let total):
             HStack(spacing: 8) {
@@ -412,8 +412,8 @@ private struct ModelDownloadRow: View {
             }
         case .ready:
             Label("Installed", systemImage: "checkmark.circle.fill")
-                .font(RheaFont.ui(12, weight: .medium))
-                .foregroundStyle(Color.rheaAccent)
+                .font(ReadAloudTTSFont.ui(12, weight: .medium))
+                .foregroundStyle(Color.readAloudTTSAccent)
                 .labelStyle(.titleAndIcon)
         case .failed:
             Button("Retry", action: onAction)
@@ -433,7 +433,7 @@ private struct ModelDownloadRow: View {
 
     private var iconColor: Color {
         switch status {
-        case .ready: return Color.rheaAccent
+        case .ready: return Color.readAloudTTSAccent
         case .failed: return .orange
         default: return .secondary
         }
@@ -452,14 +452,14 @@ private struct IntegrationsStep: View {
             StepTitle(
                 icon: "gearshape.2",
                 title: "macOS integrations",
-                subtitle: "Rhea runs in the sandbox with no Accessibility or Microphone access needed. Two optional one-time setup steps make it feel native."
+                subtitle: "ReadAloudTTS runs in the sandbox with no Accessibility or Microphone access needed. Two optional one-time setup steps make it feel native."
             )
 
             VStack(spacing: 10) {
                 IntegrationRow(
                     icon: "keyboard",
-                    title: "Enable the \u{201c}Read with Rhea\u{201d} Service",
-                    caption: "Highlight text in any app → Services → Read with Rhea. macOS hides new services until you enable them once.",
+                    title: "Enable the \u{201c}Read with ReadAloudTTS\u{201d} Service",
+                    caption: "Highlight text in any app → Services → Read with ReadAloudTTS. macOS hides new services until you enable them once.",
                     buttonLabel: "Open Keyboard Settings",
                     action: openServicesSettings
                 )
@@ -467,7 +467,7 @@ private struct IntegrationsStep: View {
                 IntegrationRow(
                     icon: "lock.open",
                     title: "First-launch Gatekeeper (you're past it)",
-                    caption: "If you ever move Rhea between Macs, right-click → Open the first time to clear the quarantine flag. Later launches are plain double-click.",
+                    caption: "If you ever move ReadAloudTTS between Macs, right-click → Open the first time to clear the quarantine flag. Later launches are plain double-click.",
                     buttonLabel: nil,
                     action: {}
                 )
@@ -475,7 +475,7 @@ private struct IntegrationsStep: View {
             .frame(maxWidth: 560)
 
             Text("Everything else — TTS, file drop, audio export — works out of the box.")
-                .font(RheaFont.ui(11))
+                .font(ReadAloudTTSFont.ui(11))
                 .foregroundStyle(.secondary)
         }
     }
@@ -502,14 +502,14 @@ private struct IntegrationRow: View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .light))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(RheaFont.ui(13, weight: .semibold))
+                    .font(ReadAloudTTSFont.ui(13, weight: .semibold))
                 Text(caption)
-                    .font(RheaFont.ui(11))
+                    .font(ReadAloudTTSFont.ui(11))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -563,7 +563,7 @@ private struct ShortcutsStep: View {
                             .foregroundStyle(.primary)
                             .frame(minWidth: 120, alignment: .leading)
                         Text(entry.action)
-                            .font(RheaFont.ui(12))
+                            .font(ReadAloudTTSFont.ui(12))
                             .foregroundStyle(.secondary)
                         Spacer()
                     }
@@ -592,18 +592,18 @@ private struct ReadyStep: View {
         VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(Color.rheaAccent.opacity(0.14))
+                    .fill(Color.readAloudTTSAccent.opacity(0.14))
                     .frame(width: 72, height: 72)
                 Image(systemName: "checkmark")
                     .font(.system(size: 30, weight: .semibold))
-                    .foregroundStyle(Color.rheaAccent)
+                    .foregroundStyle(Color.readAloudTTSAccent)
             }
 
             VStack(spacing: 8) {
                 Text("You're all set")
-                    .font(RheaFont.serif(28, weight: .bold))
-                Text("Press Start Reading to open Rhea's README as a sample. When you're done, drag any PDF, Markdown, or EPUB onto the window to read your own.")
-                    .font(RheaFont.ui(14))
+                    .font(ReadAloudTTSFont.serif(28, weight: .bold))
+                Text("Press Start Reading to open ReadAloudTTS's README as a sample. When you're done, drag any PDF, Markdown, or EPUB onto the window to read your own.")
+                    .font(ReadAloudTTSFont.ui(14))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 460)
@@ -629,7 +629,7 @@ private struct ReadyStep: View {
             )
 
             Text("Want to see this tour again? Settings → Playback → Show Welcome Tour.")
-                .font(RheaFont.ui(11))
+                .font(ReadAloudTTSFont.ui(11))
                 .foregroundStyle(.secondary)
         }
     }
@@ -646,12 +646,12 @@ private struct StepTitle: View {
         VStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 28, weight: .light))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
                 .frame(height: 36)
             Text(title)
-                .font(RheaFont.serif(26, weight: .bold))
+                .font(ReadAloudTTSFont.serif(26, weight: .bold))
             Text(subtitle)
-                .font(RheaFont.ui(13))
+                .font(ReadAloudTTSFont.ui(13))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 520)
@@ -668,12 +668,12 @@ private struct BulletFeature: View {
         VStack(spacing: 6) {
             Image(systemName: systemImage)
                 .font(.system(size: 20, weight: .light))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
                 .frame(height: 24)
             Text(title)
-                .font(RheaFont.ui(12, weight: .semibold))
+                .font(ReadAloudTTSFont.ui(12, weight: .semibold))
             Text(caption)
-                .font(RheaFont.ui(11))
+                .font(ReadAloudTTSFont.ui(11))
                 .foregroundStyle(.secondary)
         }
         .frame(width: 110)
@@ -688,10 +688,10 @@ private struct FeatureRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(Color.rheaAccent)
+                .foregroundStyle(Color.readAloudTTSAccent)
                 .frame(width: 20)
             Text(text)
-                .font(RheaFont.ui(13))
+                .font(ReadAloudTTSFont.ui(13))
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -774,7 +774,7 @@ struct OnboardingScene: Scene {
     static let windowID = "welcome"
 
     var body: some Scene {
-        Window("Welcome to Rhea", id: Self.windowID) {
+        Window("Welcome to ReadAloudTTS", id: Self.windowID) {
             OnboardingView()
                 .background(WindowAccessor { window in
                     window.titlebarAppearsTransparent = true

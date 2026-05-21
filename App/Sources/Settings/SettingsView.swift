@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 
 /// Standard macOS Settings window. Opens with ⌘, for free because
-/// it lives in the `Settings` scene declared in `RheaApp`.
+/// it lives in the `Settings` scene declared in `ReadAloudTTSApp`.
 ///
 /// Per-voice memory (remembering speed/pitch separately for each
 /// voice) is deferred — most users want one global pace that
@@ -130,7 +130,7 @@ struct SettingsView: View {
                 LabeledContent {
                     Button("Show Welcome Tour…") {
                         NotificationCenter.default.post(
-                            name: .rheaShowOnboarding, object: nil
+                            name: .readAloudTTSShowOnboarding, object: nil
                         )
                     }
                 } label: {

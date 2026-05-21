@@ -39,7 +39,7 @@ research/PhD audience the project is aimed at.
 
 ### Decision
 
-Rhea is licensed under **Apache 2.0**, distributed as a **notarized
+ReadAloudTTS is licensed under **Apache 2.0**, distributed as a **notarized
 Developer-ID `.dmg`** via GitHub Releases and (later) a Homebrew Cask.
 Funding, if any, comes from GitHub Sponsors. There is no MAS build, no
 Pro tier, no subscription, and no in-app purchase infrastructure.
@@ -59,7 +59,7 @@ Pro tier, no subscription, and no in-app purchase infrastructure.
 
 ---
 
-## ADR-002 — Hand-maintained `Rhea.xcodeproj` + SwiftPM `Packages/`, not Tuist
+## ADR-002 — Hand-maintained `ReadAloudTTS.xcodeproj` + SwiftPM `Packages/`, not Tuist
 
 **Date:** 2026-04-17
 **Status:** Accepted
@@ -76,7 +76,7 @@ Xcode + SwiftPM, and consistency across the two apps matters more than
 theoretical wins.
 
 OSS contributor friction is the deciding factor. "Clone and open
-`Rhea.xcodeproj`" is a zero-step onboarding. "Install Tuist, run
+`ReadAloudTTS.xcodeproj`" is a zero-step onboarding. "Install Tuist, run
 `tuist generate`, then open" is the kind of step where contributors
 bounce. Every dependency we plan to pull in (WhisperKit, MLX-Swift,
 mlalma/kokoro-ios, AtomGradient/swift-qwen3-tts, swift-markdown) ships
@@ -84,13 +84,13 @@ as a SwiftPM package, so the SwiftPM path is friction-free.
 
 ### Decision
 
-A single `Rhea.xcodeproj` lives at the repo root, hand-maintained and
+A single `ReadAloudTTS.xcodeproj` lives at the repo root, hand-maintained and
 committed. Extractable logic goes into local SwiftPM packages under
 `Packages/`. Packages are referenced from the Xcode project as local
 package dependencies (added milestone-by-milestone, not ahead of need).
 
 Per-machine settings (developer team ID) live in `Configs/Local.xcconfig`,
-which is gitignored. `Configs/Rhea.xcconfig` is the committed shared
+which is gitignored. `Configs/ReadAloudTTS.xcconfig` is the committed shared
 base and `#include?`s the local override.
 
 ### Consequences
@@ -124,7 +124,7 @@ authenticate the developer signature.
 
 - **Debug**: `CODE_SIGN_ENTITLEMENTS` is empty. The app runs without
   the sandbox.
-- **Release**: `CODE_SIGN_ENTITLEMENTS = App/Rhea.entitlements`, which
+- **Release**: `CODE_SIGN_ENTITLEMENTS = App/ReadAloudTTS.entitlements`, which
   enables the sandbox plus user-selected file read access. Hardened
   runtime is on. This config is what gets notarized for the .dmg.
 
@@ -149,7 +149,7 @@ already in place to make that transition cheaper.
 
 Marker is the planned structured-PDF parser. It is a Python package
 roughly 300 MB unpacked, plus model weights. Two reasons against
-bundling it inside `Rhea.app`:
+bundling it inside `ReadAloudTTS.app`:
 
 1. **Bundle size**: a 300 MB+ application download for a launch where
    the user has not yet decided to keep the app is bad UX.
@@ -160,9 +160,9 @@ bundling it inside `Rhea.app`:
 
 ### Decision
 
-Rhea ships with **PDFKit's built-in text extraction** as the day-one
+ReadAloudTTS ships with **PDFKit's built-in text extraction** as the day-one
 default. Marker is offered as an opt-in enhancer, downloaded on demand
-into `~/Library/Application Support/Rhea/helpers/` when the user opens
+into `~/Library/Application Support/ReadAloudTTS/helpers/` when the user opens
 their first PDF (or via Settings → Document Parsing). The download is
 visible, cancellable, and cached.
 
@@ -171,7 +171,7 @@ Qwen3-TTS, optional CosyVoice) per MILESTONES §2.
 
 ### Consequences
 
-- `Rhea.app` itself is small (single-digit MB at launch).
+- `ReadAloudTTS.app` itself is small (single-digit MB at launch).
 - The first-PDF flow needs a graceful "downloading parser…" state that
   doesn't block the rest of the UI. This is a Month 3 design item, not
   a Month 1 item.
@@ -196,7 +196,7 @@ heavy and benefits from the compiler enforcing isolation up front.
 ### Decision
 
 `SWIFT_STRICT_CONCURRENCY = complete` is set in
-`Configs/Rhea.xcconfig`. All targets inherit it.
+`Configs/ReadAloudTTS.xcconfig`. All targets inherit it.
 
 ### Consequences
 
