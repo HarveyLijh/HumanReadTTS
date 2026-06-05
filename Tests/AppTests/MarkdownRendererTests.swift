@@ -2,6 +2,7 @@ import XCTest
 import AppKit
 @testable import ReadAloudTTS
 
+@MainActor
 final class MarkdownRendererTests: XCTestCase {
 
     // MARK: block separators
