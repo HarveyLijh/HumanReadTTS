@@ -19,6 +19,10 @@ struct SettingsView: View {
                 .tabItem { Label("Playback", systemImage: "play.circle") }
                 .tag(0)
 
+            ShortcutsSettingsView()
+                .tabItem { Label("Shortcuts", systemImage: "command") }
+                .tag(5)
+
             ModelsSettingsView()
                 .tabItem { Label("Models", systemImage: "cube.box") }
                 .tag(1)

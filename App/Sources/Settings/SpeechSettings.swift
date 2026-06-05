@@ -75,6 +75,13 @@ final class SpeechSettings {
         didSet { persistSkipRules() }
     }
 
+    /// When true (default), the global "read selection from anywhere"
+    /// hotkey restores the user's previous clipboard after briefly
+    /// copying their selection to read it. See `SelectionReader`.
+    var restoreClipboardAfterReading: Bool = true {
+        didSet { defaults.set(restoreClipboardAfterReading, forKey: restoreClipboardKey) }
+    }
+
     private let defaults: UserDefaults
     private let rateKey = "app.readaloudtts.mac.speech.rate.v1"
     private let pitchKey = "app.readaloudtts.mac.speech.pitch.v1"
@@ -82,9 +89,13 @@ final class SpeechSettings {
     private let stripCitationsKey = "app.readaloudtts.mac.speech.stripCitations.v1"
     private let skipFigureCaptionsKey = "app.readaloudtts.mac.speech.skipFigureCaptions.v1"
     private let skipRulesKey = "app.readaloudtts.mac.speech.skipRules.v1"
+    private let restoreClipboardKey = "app.readaloudtts.mac.shortcuts.restoreClipboard.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        if defaults.object(forKey: restoreClipboardKey) != nil {
+            restoreClipboardAfterReading = defaults.bool(forKey: restoreClipboardKey)
+        }
         if defaults.object(forKey: rateKey) != nil {
             rate = defaults.double(forKey: rateKey)
         }
@@ -104,6 +115,7 @@ final class SpeechSettings {
         stripCitations = false
         skipFigureCaptions = false
         skipRules = SkipRule.builtIns
+        restoreClipboardAfterReading = true
     }
 
     private func persistSkipRules() {

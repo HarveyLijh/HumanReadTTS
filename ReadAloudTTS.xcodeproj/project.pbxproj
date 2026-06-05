@@ -34,8 +34,9 @@
 		2B00000000000000000A0047 /* KokoroChunker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0047 /* KokoroChunker.swift */; };
 		2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0081 /* MenuBarCommand.swift */; };
 		2B00000000000000000A0082 /* ServicesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0082 /* ServicesProvider.swift */; };
-		2B00000000000000000A0083 /* GlobalHotKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0083 /* GlobalHotKey.swift */; };
 		2B00000000000000000A0084 /* AppDelegateShim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0084 /* AppDelegateShim.swift */; };
+		2B00000000000000000A0086 /* SelectionReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0086 /* SelectionReader.swift */; };
+		2B00000000000000000A0087 /* ReadHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0087 /* ReadHUD.swift */; };
 		2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0091 /* PronunciationDictionary.swift */; };
 		2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0092 /* PronunciationSettingsView.swift */; };
 		2B00000000000000000A00A1 /* ReadingStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00A1 /* ReadingStats.swift */; };
@@ -49,6 +50,7 @@
 		2B00000000000000000A0066 /* ReaderSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0066 /* ReaderSettings.swift */; };
 		2B00000000000000000A00E4 /* FontSizeControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E4 /* FontSizeControl.swift */; };
 		2B00000000000000000A0062 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0062 /* SettingsView.swift */; };
+		2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0065 /* ShortcutsSettingsView.swift */; };
 		2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0063 /* ModelsSettingsView.swift */; };
 		2B00000000000000000A0071 /* ModelEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0071 /* ModelEntry.swift */; };
 		2B00000000000000000A0072 /* ModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0072 /* ModelCatalog.swift */; };
@@ -61,6 +63,7 @@
 		2B00000000000000000F0004 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0004 /* ZIPFoundation */; };
 		2B00000000000000000F0005 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0005 /* WhisperKit */; };
 		2B00000000000000000F0006 /* TTSKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0006 /* TTSKit */; };
+		2B00000000000000000F0007 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 7B00000000000000000A0007 /* KeyboardShortcuts */; };
 		2B00000000000000000A00C1 /* EPUBLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00C1 /* EPUBLoader.swift */; };
 		2B00000000000000000A00C2 /* EPUBReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00C2 /* EPUBReaderView.swift */; };
 		2B00000000000000000B0001 /* DropTargetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0001 /* DropTargetTests.swift */; };
@@ -84,6 +87,7 @@
 		2B00000000000000000A0064 /* SkipRulesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0064 /* SkipRulesSettingsView.swift */; };
 		2B00000000000000000B000F /* SkipRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000F /* SkipRuleTests.swift */; };
 		2B00000000000000000B0010 /* KokoroChunkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0010 /* KokoroChunkerTests.swift */; };
+		2B00000000000000000B0011 /* SelectionReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0011 /* SelectionReaderTests.swift */; };
 		2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B3 /* AudioExportFormat.swift */; };
 		2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B4 /* ExportQueueView.swift */; };
 		2B00000000000000000A00B5 /* ExportOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B5 /* ExportOverrides.swift */; };
@@ -142,8 +146,9 @@
 		2A00000000000000000A0047 /* KokoroChunker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroChunker.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0081 /* MenuBarCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCommand.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0082 /* ServicesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesProvider.swift; sourceTree = "<group>"; };
-		2A00000000000000000A0083 /* GlobalHotKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKey.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0084 /* AppDelegateShim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateShim.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0086 /* SelectionReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionReader.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0087 /* ReadHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadHUD.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0085 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A00000000000000000A0091 /* PronunciationDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionary.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0092 /* PronunciationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationSettingsView.swift; sourceTree = "<group>"; };
@@ -160,6 +165,7 @@
 		2A00000000000000000A0066 /* ReaderSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderSettings.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E4 /* FontSizeControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSizeControl.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0062 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0065 /* ShortcutsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0063 /* ModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0071 /* ModelEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0072 /* ModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalog.swift; sourceTree = "<group>"; };
@@ -187,6 +193,7 @@
 		2A00000000000000000A0064 /* SkipRulesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRulesSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000B000F /* SkipRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRuleTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0010 /* KokoroChunkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroChunkerTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0011 /* SelectionReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionReaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B3 /* AudioExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExportFormat.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B4 /* ExportQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportQueueView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B5 /* ExportOverrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportOverrides.swift; sourceTree = "<group>"; };
@@ -221,6 +228,7 @@
 				2B00000000000000000F0004 /* ZIPFoundation in Frameworks */,
 				2B00000000000000000F0005 /* WhisperKit in Frameworks */,
 				2B00000000000000000F0006 /* TTSKit in Frameworks */,
+				2B00000000000000000F0007 /* KeyboardShortcuts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,6 +390,7 @@
 				2A00000000000000000A0064 /* SkipRulesSettingsView.swift */,
 				2A00000000000000000A0092 /* PronunciationSettingsView.swift */,
 				2A00000000000000000A00A2 /* AnalyticsSettingsView.swift */,
+				2A00000000000000000A0065 /* ShortcutsSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -403,8 +412,9 @@
 			children = (
 				2A00000000000000000A0081 /* MenuBarCommand.swift */,
 				2A00000000000000000A0082 /* ServicesProvider.swift */,
-				2A00000000000000000A0083 /* GlobalHotKey.swift */,
 				2A00000000000000000A0084 /* AppDelegateShim.swift */,
+				2A00000000000000000A0086 /* SelectionReader.swift */,
+				2A00000000000000000A0087 /* ReadHUD.swift */,
 			);
 			path = MenuBar;
 			sourceTree = "<group>";
@@ -512,6 +522,7 @@
 				2A00000000000000000B000E /* ReaderHitTesterTests.swift */,
 				2A00000000000000000B000F /* SkipRuleTests.swift */,
 				2A00000000000000000B0010 /* KokoroChunkerTests.swift */,
+				2A00000000000000000B0011 /* SelectionReaderTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -557,6 +568,7 @@
 				7B00000000000000000A0004 /* ZIPFoundation */,
 				7B00000000000000000A0005 /* WhisperKit */,
 				7B00000000000000000A0006 /* TTSKit */,
+				7B00000000000000000A0007 /* KeyboardShortcuts */,
 			);
 			productName = ReadAloudTTS;
 			productReference = 2A00000000000000000FFFF1 /* ReadAloudTTS.app */;
@@ -614,6 +626,7 @@
 				7A00000000000000000A0003 /* XCRemoteSwiftPackageReference "MLXUtilsLibrary" */,
 				7A00000000000000000A0004 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				7A00000000000000000A0005 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				7A00000000000000000A0006 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 			);
 			productRefGroup = 1B00000000000000000A00FF /* Products */;
 			projectDirPath = "";
@@ -666,6 +679,14 @@
 				minimumVersion = 0.18.0;
 			};
 		};
+		7A00000000000000000A0006 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -698,6 +719,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A00000000000000000A0005 /* XCRemoteSwiftPackageReference "WhisperKit" */;
 			productName = TTSKit;
+		};
+		7B00000000000000000A0007 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A00000000000000000A0006 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
 		};
 /* End XCSwiftPackageProductDependency section */
 
@@ -754,8 +780,9 @@
 				2B00000000000000000A0044 /* PCMAudioPlayer.swift in Sources */,
 				2B00000000000000000A0081 /* MenuBarCommand.swift in Sources */,
 				2B00000000000000000A0082 /* ServicesProvider.swift in Sources */,
-				2B00000000000000000A0083 /* GlobalHotKey.swift in Sources */,
 				2B00000000000000000A0084 /* AppDelegateShim.swift in Sources */,
+				2B00000000000000000A0086 /* SelectionReader.swift in Sources */,
+				2B00000000000000000A0087 /* ReadHUD.swift in Sources */,
 				2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */,
 				2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */,
 				2B00000000000000000A00A1 /* ReadingStats.swift in Sources */,
@@ -770,6 +797,7 @@
 				2B00000000000000000A0061 /* SpeechSettings.swift in Sources */,
 				2B00000000000000000A0066 /* ReaderSettings.swift in Sources */,
 				2B00000000000000000A0062 /* SettingsView.swift in Sources */,
+				2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */,
 				2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */,
 				2B00000000000000000A0071 /* ModelEntry.swift in Sources */,
 				2B00000000000000000A0072 /* ModelCatalog.swift in Sources */,
@@ -818,6 +846,7 @@
 				2B00000000000000000B000E /* ReaderHitTesterTests.swift in Sources */,
 				2B00000000000000000B000F /* SkipRuleTests.swift in Sources */,
 				2B00000000000000000B0010 /* KokoroChunkerTests.swift in Sources */,
+				2B00000000000000000B0011 /* SelectionReaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

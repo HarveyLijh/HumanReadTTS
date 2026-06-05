@@ -1,16 +1,16 @@
 import AppKit
 import SwiftUI
-import Carbon.HIToolbox
+import KeyboardShortcuts
 
 /// Bridges into `NSApplication` lifecycle to register bits that
 /// SwiftUI's `App` protocol doesn't expose: the Services provider
-/// (for the system "Read with ReadAloudTTS" menu item) and a global
-/// ⌘⇧S hotkey (reads the clipboard from anywhere).
+/// (for the system "Read with ReadAloudTTS" menu item) and the global
+/// "read selection from anywhere" hotkey (default ⌘⇧E, rebindable in
+/// Settings → Shortcuts).
 ///
 /// Wired via `@NSApplicationDelegateAdaptor` in `ReadAloudTTSApp`.
 final class AppDelegateShim: NSObject, NSApplicationDelegate {
     private var servicesProvider: ServicesProvider?
-    private var globalHotKey: GlobalHotKey?
     private var fontShortcutMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -19,11 +19,11 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         servicesProvider = provider
         NSUpdateDynamicServices()
 
-        globalHotKey = GlobalHotKey(
-            keyCode: UInt32(kVK_ANSI_S),
-            modifiers: UInt32(cmdKey | shiftKey)
-        ) {
-            Task { @MainActor in MenuBarCommand.shared.readClipboard() }
+        // System-wide read trigger. `KeyboardShortcuts` keeps the
+        // binding in UserDefaults and seeds the ⌘⇧E default, so the
+        // hotkey is live from first launch and rebindable in Settings.
+        KeyboardShortcuts.onKeyUp(for: .readSelection) {
+            Task { @MainActor in MenuBarCommand.shared.readSelectionOrClipboard() }
         }
 
         installFontShortcutMonitor()

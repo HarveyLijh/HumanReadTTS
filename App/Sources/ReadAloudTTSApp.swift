@@ -19,11 +19,10 @@ struct ReadAloudTTSApp: App {
             SettingsView()
         }
 
-        MenuBarExtra("ReadAloudTTS", systemImage: "waveform") {
-            Button("Read Clipboard") {
-                menuBar.readClipboard()
+        MenuBarExtra {
+            Button("Read Selection") {
+                menuBar.readSelectionOrClipboard()
             }
-            .keyboardShortcut("r", modifiers: [.command, .shift])
 
             Button(menuBar.playPauseLabel) {
                 menuBar.player.togglePlayPause()
@@ -50,6 +49,9 @@ struct ReadAloudTTSApp: App {
                 NSApplication.shared.terminate(nil)
             }
             .keyboardShortcut("q")
+        } label: {
+            Image(systemName: menuBar.isSpeaking ? "waveform.circle.fill" : "waveform")
+                .symbolRenderingMode(.hierarchical)
         }
     }
 }
