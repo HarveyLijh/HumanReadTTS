@@ -93,6 +93,23 @@ final class ReaderSettings {
         didSet { defaults.set(readingTheme.rawValue, forKey: readingThemeKey) }
     }
 
+    /// Reading ruler: dim the page outside a pointer-following band.
+    var lineFocusEnabled: Bool = false {
+        didSet { defaults.set(lineFocusEnabled, forKey: lineFocusEnabledKey) }
+    }
+
+    /// Height of the focus band in points. Clamped to a usable range.
+    var lineFocusHeight: Double = 52 {
+        didSet {
+            let clamped = min(140, max(32, lineFocusHeight))
+            if clamped != lineFocusHeight {
+                lineFocusHeight = clamped
+                return
+            }
+            defaults.set(lineFocusHeight, forKey: lineFocusHeightKey)
+        }
+    }
+
     private let defaults: UserDefaults
     private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
     private let highlightPaletteKey = "app.readaloudtts.mac.reader.highlightPalette.v1"
@@ -102,6 +119,8 @@ final class ReaderSettings {
     private let letterSpacingKey = "app.readaloudtts.mac.reader.letterSpacing.v1"
     private let leadingBoldKey = "app.readaloudtts.mac.reader.leadingBold.v1"
     private let readingThemeKey = "app.readaloudtts.mac.reader.readingTheme.v1"
+    private let lineFocusEnabledKey = "app.readaloudtts.mac.reader.lineFocusEnabled.v1"
+    private let lineFocusHeightKey = "app.readaloudtts.mac.reader.lineFocusHeight.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -136,6 +155,12 @@ final class ReaderSettings {
            let theme = ReadingTheme(rawValue: raw) {
             readingTheme = theme
         }
+        if defaults.object(forKey: lineFocusEnabledKey) != nil {
+            lineFocusEnabled = defaults.bool(forKey: lineFocusEnabledKey)
+        }
+        if defaults.object(forKey: lineFocusHeightKey) != nil {
+            lineFocusHeight = min(140, max(32, defaults.double(forKey: lineFocusHeightKey)))
+        }
     }
 
     func increase() {
@@ -155,6 +180,8 @@ final class ReaderSettings {
         letterSpacing = 0
         leadingBoldEnabled = false
         readingTheme = .system
+        lineFocusEnabled = false
+        lineFocusHeight = 52
     }
 }
 

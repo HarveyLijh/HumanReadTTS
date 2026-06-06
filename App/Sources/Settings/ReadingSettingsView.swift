@@ -16,6 +16,7 @@ struct ReadingSettingsView: View {
         Form {
             bodyTextSection
             themeSection
+            lineFocusSection
             highlightSection
             attributionSection
 
@@ -118,6 +119,24 @@ struct ReadingSettingsView: View {
             .background(theme.swatchColor, in: RoundedRectangle(cornerRadius: 8))
             .environment(\.colorScheme, theme == .night ? .dark : .light)
             .accessibilityLabel("Live preview of the \(theme.displayName) reading surface")
+    }
+
+    // MARK: - Line focus
+
+    private var lineFocusSection: some View {
+        Section {
+            Toggle("Reading ruler", isOn: $reader.lineFocusEnabled)
+                .help("Dims the page except a band that follows the pointer.")
+
+            slider("Band height", value: $reader.lineFocusHeight,
+                   range: 32...140, step: 4, format: "%.0f pt")
+                .disabled(!reader.lineFocusEnabled)
+        } header: {
+            Text("Line Focus")
+        } footer: {
+            Text("Keeps a single line lit while the rest of the page dims under the pointer. Clicking, selecting, and scrolling work as usual underneath.")
+                .foregroundStyle(.secondary)
+        }
     }
 
     // MARK: - Highlight

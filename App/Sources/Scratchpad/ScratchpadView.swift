@@ -132,6 +132,8 @@ struct ScratchpadView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
                 .background(readerSettings.readingTheme.swatchColor)
+                .lineFocus(enabled: readerSettings.lineFocusEnabled,
+                           bandHeight: readerSettings.lineFocusHeight)
         }
     }
 

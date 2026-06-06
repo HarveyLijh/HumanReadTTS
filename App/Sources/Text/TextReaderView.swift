@@ -52,6 +52,8 @@ struct TextReaderView: View {
                         )
                     }
                 }
+                .lineFocus(enabled: readerSettings.lineFocusEnabled,
+                           bandHeight: readerSettings.lineFocusHeight)
 
                 if search.isPresented {
                     SearchBar(
