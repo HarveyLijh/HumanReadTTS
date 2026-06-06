@@ -43,21 +43,38 @@ To capture the live screenshots once the display is awake, see
 | 1 — Highlight seam | `HighlightStyle` + palette/opacity, all 5 readers routed | ok | ok | `HighlightStyleTests` (5) | pending display |
 | 2 — Typography | `ReaderTypography`, bundled OpenDyslexic + Atkinson Hyperlegible, Markdown/Text/Scratchpad threaded, launch registration | ok | ok (`/tmp/verify_typography.swift`, all pass) | `ReaderTypographyTests` (16) | pending display |
 | 4a — Reading tab | Settings → Reading: font, size, spacing, highlight, live previews, OFL attribution | ok | n/a (binds tested `ReaderSettings`) | — | pending display |
-| 3 — Line focus + leading bold | reading ruler + bionic emphasis | todo | | | |
-| 4b — Reading themes | sepia/dark reading surface | todo | | | |
+| 3a — Leading bold | `BionicReading` bold-prefix pass, off by default, Reading-tab toggle | ok | ok (`/tmp/verify_bionic.swift`) | `BionicReadingTests` (4) | pending display |
+| 3b — Line focus | reading ruler overlay | todo (needs display to verify) | | | |
+| 4b — Reading themes | sepia/dark reading surface | todo (needs display to verify) | | | |
 
-### Now Playing + media keys + sleep timer + queue
+### Now Playing + media keys + sleep timer + queue — COMPLETE (code)
 
 | PR | Scope | Build | Logic | XCTest written | Live |
 | --- | --- | --- | --- | --- | --- |
 | 1 — Now Playing | `NowPlayingController`, Control Center + media keys | ok | ok | `NowPlayingMappingTests` (5) | pending hardware |
 | 3 — Sleep timer | `SleepTimer`, minute presets + end-of-sentence, menu | ok | ok | `SleepTimerTests` (8) | pending hardware |
+| 4 — Reading queue | `ReadingQueue`, `SpeechPlayer.onReachedEnd`, `showInNowPlaying`, Playback Controls tab | ok | ok (`/tmp/verify_queue.swift`) | `ReadingQueueTests` (8) | pending display/hardware |
 | 2 — media/AirPods hardening | on-device only | n/a | | | handed to user |
-| 4 — Reading queue | `ReadingQueue`, `onReachedEnd`, Playback Controls tab | todo | | | |
 
-### Bilingual & Language-Learning — not started
+### Bilingual & Language-Learning
 
-### On-device OCR — not started
+| PR | Scope | Build | Logic | XCTest written | Live |
+| --- | --- | --- | --- | --- | --- |
+| 1 — Sentence language | `Sentence.language` + `SentenceSegmenter` NLLanguageRecognizer, zero behavior change | ok | ok (`/tmp/verify_lang.swift`) | `SentenceLanguageTests` (6) | n/a |
+| 2 — Translation popover | `TranslationCoordinator`, `WordRangeResolver`, popover | todo (Translation framework — device only) | | | |
+| 3 — Vocabulary store | persist saved words | todo (testable core pending) | | | |
+| 4 — Dual language view | L1 under each block | todo (device only) | | | |
+| 5 — Anki export + pronunciation | `AnkiCSVExporter`, `PronunciationDrill` | todo (CSV core testable) | | | |
+
+### On-device OCR
+
+| PR | Scope | Build | Logic | XCTest written | Live |
+| --- | --- | --- | --- | --- | --- |
+| 1 — Reading order | `ReadingOrder` recursive XY-cut | ok | ok (`/tmp/verify_readingorder.swift`, 4 layouts) | `ReadingOrderTests` (6) | n/a |
+| 1 — OCRService | Vision recognition | todo (Vision — runtime only) | | | |
+| 2 — Image/scanned-PDF reader | UTType routing + fallback | todo | | | |
+| 3 — Region capture | ScreenCaptureKit marquee | todo (TCC + display only) | | | |
+| 4 — Hotkey + OCR tab | ⌘⇧2 capture-and-read | todo | | | |
 
 ## On-device checklist (must be run by a human)
 
