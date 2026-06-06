@@ -38,6 +38,10 @@ struct SettingsView: View {
             AnalyticsSettingsView()
                 .tabItem { Label("Analytics", systemImage: "chart.bar") }
                 .tag(4)
+
+            ReadingSettingsView()
+                .tabItem { Label("Reading", systemImage: "textformat") }
+                .tag(6)
         }
         .frame(width: 620, height: 540)
     }

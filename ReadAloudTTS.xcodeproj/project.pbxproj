@@ -54,6 +54,7 @@
 		2B00000000000000000A00E4 /* FontSizeControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E4 /* FontSizeControl.swift */; };
 		2B00000000000000000A0062 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0062 /* SettingsView.swift */; };
 		2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0065 /* ShortcutsSettingsView.swift */; };
+		2B00000000000000000A0067 /* ReadingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0067 /* ReadingSettingsView.swift */; };
 		2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0063 /* ModelsSettingsView.swift */; };
 		2B00000000000000000A0071 /* ModelEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0071 /* ModelEntry.swift */; };
 		2B00000000000000000A0072 /* ModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0072 /* ModelCatalog.swift */; };
@@ -191,6 +192,7 @@
 		2A00000000000000000A00E4 /* FontSizeControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSizeControl.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0062 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0065 /* ShortcutsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsSettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0067 /* ReadingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0063 /* ModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0071 /* ModelEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0072 /* ModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalog.swift; sourceTree = "<group>"; };
@@ -443,6 +445,7 @@
 				2A00000000000000000A0092 /* PronunciationSettingsView.swift */,
 				2A00000000000000000A00A2 /* AnalyticsSettingsView.swift */,
 				2A00000000000000000A0065 /* ShortcutsSettingsView.swift */,
+				2A00000000000000000A0067 /* ReadingSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -866,6 +869,7 @@
 				2B00000000000000000A0066 /* ReaderSettings.swift in Sources */,
 				2B00000000000000000A0062 /* SettingsView.swift in Sources */,
 				2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */,
+				2B00000000000000000A0067 /* ReadingSettingsView.swift in Sources */,
 				2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */,
 				2B00000000000000000A0071 /* ModelEntry.swift in Sources */,
 				2B00000000000000000A0072 /* ModelCatalog.swift in Sources */,
