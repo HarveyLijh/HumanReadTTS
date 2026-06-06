@@ -34,6 +34,17 @@ To capture the live screenshots once the display is awake, see
 `defaults write app.readaloudtts.mac app.readaloudtts.mac.reader.fontFace.v1 -string openDyslexic`,
 `open <built app> <sample.md>`, capture the reader window, then delete the key.
 
+### Current standing (held)
+
+All work that can be verified without an awake display or a healthy test
+runner is landed and committed. The remaining features — line-focus
+overlay, reading themes, the Translation-framework popover / dual-language
+/ pronunciation, and Vision OCR + ScreenCaptureKit capture — are framework
+and UI that cannot be exercised here. Per direction, they are **on hold**
+until the environment is cleared (wake/unlock the display; reboot or run
+`Product > Test` once in Xcode), after which each remaining PR is verified
+live (full suite + screenshots) as it lands.
+
 ## Status by feature
 
 ### Accessibility & Readability Aids
@@ -61,10 +72,12 @@ To capture the live screenshots once the display is awake, see
 | PR | Scope | Build | Logic | XCTest written | Live |
 | --- | --- | --- | --- | --- | --- |
 | 1 — Sentence language | `Sentence.language` + `SentenceSegmenter` NLLanguageRecognizer, zero behavior change | ok | ok (`/tmp/verify_lang.swift`) | `SentenceLanguageTests` (6) | n/a |
-| 2 — Translation popover | `TranslationCoordinator`, `WordRangeResolver`, popover | todo (Translation framework — device only) | | | |
-| 3 — Vocabulary store | persist saved words | todo (testable core pending) | | | |
-| 4 — Dual language view | L1 under each block | todo (device only) | | | |
-| 5 — Anki export + pronunciation | `AnkiCSVExporter`, `PronunciationDrill` | todo (CSV core testable) | | | |
+| 2 — Word resolver | `WordRangeResolver` (tap-to-translate word lookup, CJK-aware) | ok | ok (`/tmp/verify_wordrange.swift`) | `WordRangeResolverTests` (7) | n/a |
+| 2 — Translation popover | `TranslationCoordinator`, popover, Opt-double-click | held (Translation framework — device only) | | | |
+| 3 — Vocabulary store | `VocabularyStore` JSON persistence + dedup | ok | n/a | `VocabularyStoreTests` (7) | pending |
+| 4 — Dual language view | L1 under each block | held (device only) | | | |
+| 5 — Anki export | `AnkiCSVExporter` (RFC-4180, CJK, tags) | ok | ok (`/tmp/verify_anki.swift`) | `AnkiCSVExporterTests` (9) | n/a |
+| 5 — Pronunciation drill | `PronunciationDrill`, voice routing | held (device only) | | | |
 
 ### On-device OCR
 
