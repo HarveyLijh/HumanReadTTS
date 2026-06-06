@@ -25,6 +25,10 @@ struct ReadAloudTTSApp: App {
                 menuBar.readSelectionOrClipboard()
             }
 
+            Button("Read Screenshot Text") {
+                menuBar.readClipboardImage()
+            }
+
             Button(menuBar.playPauseLabel) {
                 menuBar.player.togglePlayPause()
             }

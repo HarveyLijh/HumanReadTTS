@@ -14,10 +14,14 @@ struct ShortcutsSettingsView: View {
                     "Read selection from anywhere:",
                     name: .readSelection
                 )
+                KeyboardShortcuts.Recorder(
+                    "Read a screenshot (OCR):",
+                    name: .readScreenshot
+                )
             } header: {
-                Text("Global Shortcut")
+                Text("Global Shortcuts")
             } footer: {
-                Text("Press this from any app to read text aloud. ReadAloudTTS reads your current selection where macOS allows it, and otherwise falls back to whatever you last copied. Default: ⌘⇧E.")
+                Text("Read selection (default ⌘⇧E) speaks your current selection, or your clipboard if that's blocked. Read a screenshot (default ⌘⇧2) runs OCR on an image on the clipboard, so you can screenshot an area with ⌃⇧⌘4 and hear it.")
                     .foregroundStyle(.secondary)
             }
 
