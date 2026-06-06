@@ -30,12 +30,21 @@ Screenshot recipe: seed a pref (e.g.
 
 ### Current standing
 
-The accessibility and bilingual waves are **complete and screenshot-verified**:
-Learning tab, tap-to-translate popover, sepia/night reading themes, and the
-line-focus reading ruler all landed with live captures. Remaining: on-device
-OCR (Vision recognition is exercisable here; ScreenCaptureKit region capture
-needs Screen Recording permission), and the optional dual-language /
-pronunciation-drill study views.
+All four feature areas are **complete and verified** (227–231 tests green
+across the wave; live screenshots in `docs/verification-assets/`):
+
+- **Accessibility:** typography, bundled dyslexia fonts, leading-bold, color
+  highlight, sepia/night reading themes, line-focus ruler.
+- **Now Playing:** Control Center, media keys, sleep timer, reading queue.
+- **Bilingual:** per-sentence language, tap-to-translate popover, vocabulary
+  store, Learning tab, Anki export.
+- **OCR:** Vision recognition, image-file reader, read-a-screenshot from the
+  clipboard with a rebindable ⌘⇧2 hotkey, recognition-language settings.
+
+Region capture is delivered via the system screenshot (⌃⇧⌘4 → clipboard →
+OCR) rather than a custom ScreenCaptureKit marquee, sidestepping a Screen
+Recording prompt. Remaining optional polish: a dual-language (L1-under-each-
+block) view, a pronunciation drill, and a VoiceOver / Dynamic Type pass.
 
 One automation limit remains: the tap-to-translate popover is driven by an
 Option-double-click on a custom NSTextView that exposes no accessibility
@@ -50,6 +59,9 @@ downloaded.
 - `learning-settings-tab.png` — Learning tab: tap-to-translate + saved vocab + Anki export
 - `reading-theme-sepia.png`, `reading-theme-night.png` — themed Markdown reader
 - `line-focus-ruler.png` — reading ruler dimming around the pointer
+- `ocr-image-reader.png` — an image opened and read via OCR, queued in the transport
+- `clipboard-ocr-hud.png` — a clipboard screenshot recognized and read aloud
+- `shortcuts-read-screenshot.png` — the Read-Screenshot hotkey + OCR languages
 
 ## Status by feature
 
@@ -90,11 +102,11 @@ downloaded.
 
 | PR | Scope | Build | Logic | XCTest written | Live |
 | --- | --- | --- | --- | --- | --- |
-| 1 — Reading order | `ReadingOrder` recursive XY-cut | ok | ok (`/tmp/verify_readingorder.swift`, 4 layouts) | `ReadingOrderTests` (6) | n/a |
-| 1 — OCRService | Vision recognition | todo (Vision — runtime only) | | | |
-| 2 — Image/scanned-PDF reader | UTType routing + fallback | todo | | | |
-| 3 — Region capture | ScreenCaptureKit marquee | todo (TCC + display only) | | | |
-| 4 — Hotkey + OCR tab | ⌘⇧2 capture-and-read | todo | | | |
+| 1 — Reading order | `ReadingOrder` recursive XY-cut | ok | ok (4 layouts) | `ReadingOrderTests` (6) | n/a |
+| 1 — OCRService | Vision text recognition → reading order | ok | ok | `OCRServiceTests` (3, render→Vision→text) | n/a |
+| 2 — Image reader | `ImageOCRReaderView`, image UTType routing, drop/open/export | ok | ok | `DropTargetTests` (image kinds) | done (`ocr-image-reader.png`) |
+| 3 — Read screenshot | OCR a clipboard image, rebindable ⌘⇧2 hotkey + menu item | ok | ok | reuses `OCRServiceTests` | done (`clipboard-ocr-hud.png`) |
+| 4 — OCR languages | recognition-language toggles in Shortcuts tab | ok | n/a | — | done (`shortcuts-read-screenshot.png`) |
 
 ## On-device checklist (must be run by a human)
 
