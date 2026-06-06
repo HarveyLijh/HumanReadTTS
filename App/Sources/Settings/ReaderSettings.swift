@@ -82,6 +82,11 @@ final class ReaderSettings {
         }
     }
 
+    /// "Bionic"/leading-bold reading: bold the start of each word.
+    var leadingBoldEnabled: Bool = false {
+        didSet { defaults.set(leadingBoldEnabled, forKey: leadingBoldKey) }
+    }
+
     private let defaults: UserDefaults
     private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
     private let highlightPaletteKey = "app.readaloudtts.mac.reader.highlightPalette.v1"
@@ -89,6 +94,7 @@ final class ReaderSettings {
     private let fontFaceKey = "app.readaloudtts.mac.reader.fontFace.v1"
     private let lineSpacingMultipleKey = "app.readaloudtts.mac.reader.lineSpacingMultiple.v1"
     private let letterSpacingKey = "app.readaloudtts.mac.reader.letterSpacing.v1"
+    private let leadingBoldKey = "app.readaloudtts.mac.reader.leadingBold.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -116,6 +122,9 @@ final class ReaderSettings {
             let stored = defaults.double(forKey: letterSpacingKey)
             letterSpacing = min(2.5, max(0, stored))
         }
+        if defaults.object(forKey: leadingBoldKey) != nil {
+            leadingBoldEnabled = defaults.bool(forKey: leadingBoldKey)
+        }
     }
 
     func increase() {
@@ -133,6 +142,7 @@ final class ReaderSettings {
         fontFace = .serif
         lineSpacingMultiple = 1.25
         letterSpacing = 0
+        leadingBoldEnabled = false
     }
 }
 

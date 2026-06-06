@@ -719,6 +719,10 @@ enum MarkdownRenderer {
             )
         }
 
+        if typography.leadingBold {
+            BionicReading.emphasize(result)
+        }
+
         return result
     }
 

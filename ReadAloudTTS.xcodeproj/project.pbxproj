@@ -96,7 +96,9 @@
 		2B00000000000000000B0014 /* NowPlayingMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0014 /* NowPlayingMappingTests.swift */; };
 		2B00000000000000000B0015 /* SleepTimerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0015 /* SleepTimerTests.swift */; };
 		2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E7 /* ReaderTypography.swift */; };
+		2B00000000000000000A00E9 /* BionicReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E9 /* BionicReading.swift */; };
 		2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0013 /* ReaderTypographyTests.swift */; };
+		2B00000000000000000B001C /* BionicReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001C /* BionicReadingTests.swift */; };
 		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
 		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
 		2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */; };
@@ -168,7 +170,9 @@
 		2A00000000000000000A0049 /* SleepTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepTimer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E5 /* HighlightStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStyle.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E7 /* ReaderTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypography.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00E9 /* BionicReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BionicReading.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0013 /* ReaderTypographyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypographyTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B001C /* BionicReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BionicReadingTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Regular.otf"; sourceTree = "<group>"; };
@@ -540,6 +544,7 @@
 				2A00000000000000000A00E4 /* FontSizeControl.swift */,
 				2A00000000000000000A00E5 /* HighlightStyle.swift */,
 				2A00000000000000000A00E7 /* ReaderTypography.swift */,
+				2A00000000000000000A00E9 /* BionicReading.swift */,
 			);
 			path = Reader;
 			sourceTree = "<group>";
@@ -584,6 +589,7 @@
 				2A00000000000000000B0014 /* NowPlayingMappingTests.swift */,
 				2A00000000000000000B0015 /* SleepTimerTests.swift */,
 				2A00000000000000000B0013 /* ReaderTypographyTests.swift */,
+				2A00000000000000000B001C /* BionicReadingTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -854,6 +860,7 @@
 				2B00000000000000000A0049 /* SleepTimer.swift in Sources */,
 				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
 				2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */,
+				2B00000000000000000A00E9 /* BionicReading.swift in Sources */,
 				2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */,
 				2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */,
 				2B00000000000000000A00A1 /* ReadingStats.swift in Sources */,
@@ -923,6 +930,7 @@
 				2B00000000000000000B0014 /* NowPlayingMappingTests.swift in Sources */,
 				2B00000000000000000B0015 /* SleepTimerTests.swift in Sources */,
 				2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */,
+				2B00000000000000000B001C /* BionicReadingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

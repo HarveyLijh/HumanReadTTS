@@ -52,6 +52,9 @@ struct ReadingSettingsView: View {
             slider("Letter spacing", value: $reader.letterSpacing,
                    range: 0...2.5, step: 0.1, format: "%.1f pt")
 
+            Toggle("Leading-bold (bionic) reading", isOn: $reader.leadingBoldEnabled)
+                .help("Bolds the start of each word so the eye anchors on word beginnings.")
+
             samplePreview
         } header: {
             Text("Body Text")

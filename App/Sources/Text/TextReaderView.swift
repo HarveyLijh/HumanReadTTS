@@ -275,8 +275,12 @@ private struct PlainTextView: NSViewRepresentable {
             if let kern = typography.kern {
                 attrs[.kern] = kern
             }
+            let styled = NSMutableAttributedString(string: text, attributes: attrs)
+            if typography.leadingBold {
+                BionicReading.emphasize(styled)
+            }
             storage.beginEditing()
-            storage.setAttributedString(NSAttributedString(string: text, attributes: attrs))
+            storage.setAttributedString(styled)
             storage.endEditing()
 
             context.coordinator.lastText = text

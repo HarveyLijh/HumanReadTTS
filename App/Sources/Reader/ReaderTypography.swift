@@ -85,15 +85,20 @@ struct ReaderTypography: Equatable, Sendable {
     var lineHeightMultiple: CGFloat
     /// Extra inter-glyph spacing in points. 0 = the font's native metrics.
     var letterSpacing: CGFloat
+    /// When true, the leading characters of each word are bolded
+    /// ("bionic"/leading-bold reading). Off reproduces the plain look.
+    var leadingBold: Bool
 
     init(
         face: ReaderFontFace = .serif,
         lineHeightMultiple: CGFloat = 1.25,
-        letterSpacing: CGFloat = 0
+        letterSpacing: CGFloat = 0,
+        leadingBold: Bool = false
     ) {
         self.face = face
         self.lineHeightMultiple = lineHeightMultiple
         self.letterSpacing = letterSpacing
+        self.leadingBold = leadingBold
     }
 
     @MainActor
@@ -101,7 +106,8 @@ struct ReaderTypography: Equatable, Sendable {
         self.init(
             face: settings.fontFace,
             lineHeightMultiple: CGFloat(settings.lineSpacingMultiple),
-            letterSpacing: CGFloat(settings.letterSpacing)
+            letterSpacing: CGFloat(settings.letterSpacing),
+            leadingBold: settings.leadingBoldEnabled
         )
     }
 
