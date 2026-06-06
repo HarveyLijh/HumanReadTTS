@@ -57,6 +57,7 @@
 		2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0065 /* ShortcutsSettingsView.swift */; };
 		2B00000000000000000A0067 /* ReadingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0067 /* ReadingSettingsView.swift */; };
 		2B00000000000000000A0068 /* PlaybackControlsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0068 /* PlaybackControlsSettingsView.swift */; };
+		2B00000000000000000A0069 /* LearningSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0069 /* LearningSettingsView.swift */; };
 		2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0063 /* ModelsSettingsView.swift */; };
 		2B00000000000000000A0071 /* ModelEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0071 /* ModelEntry.swift */; };
 		2B00000000000000000A0072 /* ModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0072 /* ModelCatalog.swift */; };
@@ -106,10 +107,12 @@
 		2B00000000000000000A0951 /* ReadingOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0951 /* ReadingOrder.swift */; };
 		2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D09 /* AnkiCSVExporter.swift */; };
 		2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D08 /* VocabularyStore.swift */; };
+		2B00000000000000000A0D0A /* LearningSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D0A /* LearningSettings.swift */; };
 		2B00000000000000000A0D07 /* WordRangeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D07 /* WordRangeResolver.swift */; };
 		2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001B /* ReadingOrderTests.swift */; };
 		2B00000000000000000B0018 /* AnkiCSVExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */; };
 		2B00000000000000000B001A /* VocabularyStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001A /* VocabularyStoreTests.swift */; };
+		2B00000000000000000B0020 /* LearningSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0020 /* LearningSettingsTests.swift */; };
 		2B00000000000000000B0019 /* WordRangeResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0019 /* WordRangeResolverTests.swift */; };
 		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
 		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
@@ -191,10 +194,12 @@
 		2A00000000000000000A0951 /* ReadingOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrder.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D09 /* AnkiCSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporter.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D08 /* VocabularyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStore.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0D0A /* LearningSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningSettings.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D07 /* WordRangeResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordRangeResolver.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001B /* ReadingOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001A /* VocabularyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStoreTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0020 /* LearningSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningSettingsTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0019 /* WordRangeResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordRangeResolverTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
@@ -221,6 +226,7 @@
 		2A00000000000000000A0065 /* ShortcutsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0067 /* ReadingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0068 /* PlaybackControlsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsSettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0069 /* LearningSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0063 /* ModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0071 /* ModelEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0072 /* ModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalog.swift; sourceTree = "<group>"; };
@@ -479,6 +485,7 @@
 				2A00000000000000000A0065 /* ShortcutsSettingsView.swift */,
 				2A00000000000000000A0067 /* ReadingSettingsView.swift */,
 				2A00000000000000000A0068 /* PlaybackControlsSettingsView.swift */,
+				2A00000000000000000A0069 /* LearningSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -577,6 +584,7 @@
 			children = (
 				2A00000000000000000A0D09 /* AnkiCSVExporter.swift */,
 				2A00000000000000000A0D08 /* VocabularyStore.swift */,
+				2A00000000000000000A0D0A /* LearningSettings.swift */,
 			);
 			path = Learning;
 			sourceTree = "<group>";
@@ -649,6 +657,7 @@
 				2A00000000000000000B001B /* ReadingOrderTests.swift */,
 				2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */,
 				2A00000000000000000B001A /* VocabularyStoreTests.swift */,
+				2A00000000000000000B0020 /* LearningSettingsTests.swift */,
 				2A00000000000000000B0019 /* WordRangeResolverTests.swift */,
 			);
 			path = AppTests;
@@ -922,6 +931,7 @@
 				2B00000000000000000A0951 /* ReadingOrder.swift in Sources */,
 				2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */,
 				2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */,
+				2B00000000000000000A0D0A /* LearningSettings.swift in Sources */,
 				2B00000000000000000A0D07 /* WordRangeResolver.swift in Sources */,
 				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
 				2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */,
@@ -943,6 +953,7 @@
 				2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */,
 				2B00000000000000000A0067 /* ReadingSettingsView.swift in Sources */,
 				2B00000000000000000A0068 /* PlaybackControlsSettingsView.swift in Sources */,
+				2B00000000000000000A0069 /* LearningSettingsView.swift in Sources */,
 				2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */,
 				2B00000000000000000A0071 /* ModelEntry.swift in Sources */,
 				2B00000000000000000A0072 /* ModelCatalog.swift in Sources */,
@@ -1002,6 +1013,7 @@
 				2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */,
 				2B00000000000000000B0018 /* AnkiCSVExporterTests.swift in Sources */,
 				2B00000000000000000B001A /* VocabularyStoreTests.swift in Sources */,
+				2B00000000000000000B0020 /* LearningSettingsTests.swift in Sources */,
 				2B00000000000000000B0019 /* WordRangeResolverTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

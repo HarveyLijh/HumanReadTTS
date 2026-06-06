@@ -46,8 +46,14 @@ struct SettingsView: View {
             PlaybackControlsSettingsView()
                 .tabItem { Label("Playback Controls", systemImage: "playpause.circle") }
                 .tag(7)
+
+            LearningSettingsView()
+                .tabItem { Label("Learning", systemImage: "character.book.closed.fill") }
+                .tag(8)
         }
-        .frame(width: 620, height: 540)
+        // Wide enough that all tab items stay on the toolbar instead of
+        // collapsing the last ones into a "more items" overflow chevron.
+        .frame(width: 720, height: 540)
     }
 
     private var playbackTab: some View {
