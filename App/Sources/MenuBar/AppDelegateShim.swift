@@ -14,6 +14,11 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
     private var fontShortcutMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Register the bundled SIL-OFL reading faces (OpenDyslexic,
+        // Atkinson Hyperlegible) so `NSFont(name:)` resolves them for the
+        // Reading settings font picker. Idempotent and cheap.
+        ReaderFonts.registerBundledFonts()
+
         let provider = ServicesProvider()
         NSApp.servicesProvider = provider
         servicesProvider = provider

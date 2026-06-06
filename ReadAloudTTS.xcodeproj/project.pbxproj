@@ -94,6 +94,14 @@
 		2B00000000000000000B0012 /* HighlightStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0012 /* HighlightStyleTests.swift */; };
 		2B00000000000000000B0014 /* NowPlayingMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0014 /* NowPlayingMappingTests.swift */; };
 		2B00000000000000000B0015 /* SleepTimerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0015 /* SleepTimerTests.swift */; };
+		2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E7 /* ReaderTypography.swift */; };
+		2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0013 /* ReaderTypographyTests.swift */; };
+		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
+		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
+		2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */; };
+		2B00000000000000000A0E06 /* AtkinsonHyperlegible-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E06 /* AtkinsonHyperlegible-Bold.otf */; };
+		2B00000000000000000A0E03 /* OpenDyslexic-OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E03 /* OpenDyslexic-OFL.txt */; };
+		2B00000000000000000A0E04 /* AtkinsonHyperlegible-OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E04 /* AtkinsonHyperlegible-OFL.txt */; };
 		2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B3 /* AudioExportFormat.swift */; };
 		2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B4 /* ExportQueueView.swift */; };
 		2B00000000000000000A00B5 /* ExportOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B5 /* ExportOverrides.swift */; };
@@ -158,6 +166,14 @@
 		2A00000000000000000A0048 /* NowPlayingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingController.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0049 /* SleepTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepTimer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E5 /* HighlightStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStyle.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00E7 /* ReaderTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypography.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0013 /* ReaderTypographyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypographyTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
+		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
+		2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Regular.otf"; sourceTree = "<group>"; };
+		2A00000000000000000A0E06 /* AtkinsonHyperlegible-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Bold.otf"; sourceTree = "<group>"; };
+		2A00000000000000000A0E03 /* OpenDyslexic-OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "OpenDyslexic-OFL.txt"; sourceTree = "<group>"; };
+		2A00000000000000000A0E04 /* AtkinsonHyperlegible-OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "AtkinsonHyperlegible-OFL.txt"; sourceTree = "<group>"; };
 		2A00000000000000000A0085 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A00000000000000000A0091 /* PronunciationDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionary.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0092 /* PronunciationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationSettingsView.swift; sourceTree = "<group>"; };
@@ -282,8 +298,30 @@
 				2A00000000000000000A00F3 /* AppIcon.icns */,
 				2A00000000000000000A0D03 /* WelcomeSample.md */,
 				2A00000000000000000A0D04 /* mermaid.min.js */,
+				1B00000000000000000A001A /* Fonts */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A001A /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */,
+				2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */,
+				2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */,
+				2A00000000000000000A0E06 /* AtkinsonHyperlegible-Bold.otf */,
+				1B00000000000000000A001B /* LICENSES */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		1B00000000000000000A001B /* LICENSES */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0E03 /* OpenDyslexic-OFL.txt */,
+				2A00000000000000000A0E04 /* AtkinsonHyperlegible-OFL.txt */,
+			);
+			path = LICENSES;
 			sourceTree = "<group>";
 		};
 		1B00000000000000000A0003 /* Sources */ = {
@@ -498,6 +536,7 @@
 				2A00000000000000000A00E3 /* SearchBar.swift */,
 				2A00000000000000000A00E4 /* FontSizeControl.swift */,
 				2A00000000000000000A00E5 /* HighlightStyle.swift */,
+				2A00000000000000000A00E7 /* ReaderTypography.swift */,
 			);
 			path = Reader;
 			sourceTree = "<group>";
@@ -541,6 +580,7 @@
 				2A00000000000000000B0012 /* HighlightStyleTests.swift */,
 				2A00000000000000000B0014 /* NowPlayingMappingTests.swift */,
 				2A00000000000000000B0015 /* SleepTimerTests.swift */,
+				2A00000000000000000B0013 /* ReaderTypographyTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -754,6 +794,12 @@
 				2B00000000000000000A00F3 /* AppIcon.icns in Resources */,
 				2B00000000000000000A0D03 /* WelcomeSample.md in Resources */,
 				2B00000000000000000A0D04 /* mermaid.min.js in Resources */,
+				2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */,
+				2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */,
+				2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */,
+				2B00000000000000000A0E06 /* AtkinsonHyperlegible-Bold.otf in Resources */,
+				2B00000000000000000A0E03 /* OpenDyslexic-OFL.txt in Resources */,
+				2B00000000000000000A0E04 /* AtkinsonHyperlegible-OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -804,6 +850,7 @@
 				2B00000000000000000A0048 /* NowPlayingController.swift in Sources */,
 				2B00000000000000000A0049 /* SleepTimer.swift in Sources */,
 				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
+				2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */,
 				2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */,
 				2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */,
 				2B00000000000000000A00A1 /* ReadingStats.swift in Sources */,
@@ -871,6 +918,7 @@
 				2B00000000000000000B0012 /* HighlightStyleTests.swift in Sources */,
 				2B00000000000000000B0014 /* NowPlayingMappingTests.swift in Sources */,
 				2B00000000000000000B0015 /* SleepTimerTests.swift in Sources */,
+				2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -125,6 +125,7 @@ struct ScratchpadView: View {
                 activeSentence: activeSentence,
                 spokenSubRange: player.spokenSubRange,
                 fontScale: readerSettings.fontScale,
+                typography: ReaderTypography(from: readerSettings),
                 onReadFromOffset: handleReadFromOffset
             )
                 .padding(.horizontal, 24)
@@ -327,6 +328,7 @@ private struct ScratchpadPreview: NSViewRepresentable {
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
     let fontScale: Double
+    let typography: ReaderTypography
     /// Double-click / "Read from here" callback. Kept optional so
     /// the scratchpad preview can be reused in contexts (screenshots,
     /// unit tests) that don't drive playback.
@@ -335,6 +337,7 @@ private struct ScratchpadPreview: NSViewRepresentable {
     final class Coordinator {
         var lastRenderedSource: String?
         var lastRenderedScale: Double?
+        var lastTypography: ReaderTypography?
         var lastSentenceRange: NSRange?
         var lastSubRange: NSRange?
         var lastScrolledSentenceIndex: Int?
@@ -381,11 +384,13 @@ private struct ScratchpadPreview: NSViewRepresentable {
         // changed — walking the markdown parser on every view update
         // is wasteful when the parent re-renders for unrelated reasons.
         if context.coordinator.lastRenderedSource != markdown
-            || context.coordinator.lastRenderedScale != fontScale {
-            let rendered = MarkdownRenderer.render(markdown, fontScale: fontScale)
+            || context.coordinator.lastRenderedScale != fontScale
+            || context.coordinator.lastTypography != typography {
+            let rendered = MarkdownRenderer.render(markdown, fontScale: fontScale, typography: typography)
             storage.setAttributedString(rendered)
             context.coordinator.lastRenderedSource = markdown
             context.coordinator.lastRenderedScale = fontScale
+            context.coordinator.lastTypography = typography
             context.coordinator.lastSentenceRange = nil
             context.coordinator.lastSubRange = nil
             context.coordinator.lastScrolledSentenceIndex = nil

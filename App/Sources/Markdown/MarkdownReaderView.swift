@@ -128,6 +128,13 @@ struct MarkdownReaderView: View {
             // survives the resize.
             rerenderAttributedFromCache()
         }
+        .onChange(of: ReaderTypography(from: readerSettings)) { _, _ in
+            // Body face, line height, or letter spacing changed in the
+            // Reading settings tab. Re-render the attributed string only;
+            // character content is identical so cached sentence offsets
+            // and playback alignment stay valid.
+            rerenderAttributedFromCache()
+        }
         .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
             presentSearch()
         }
@@ -227,6 +234,7 @@ struct MarkdownReaderView: View {
             markdownImages: markdownImages,
             widthCache: figureWidths,
             fontScale: readerSettings.fontScale,
+            typography: ReaderTypography(from: readerSettings),
             baseURL: url.deletingLastPathComponent()
         )
         Self.log.info("rendered markdown in \(ContinuousClock.now - parseStart, privacy: .public)")
@@ -288,6 +296,7 @@ struct MarkdownReaderView: View {
             markdownImages: markdownImages,
             widthCache: figureWidths,
             fontScale: readerSettings.fontScale,
+            typography: ReaderTypography(from: readerSettings),
             baseURL: url.deletingLastPathComponent()
         )
     }
@@ -538,9 +547,10 @@ enum MarkdownRenderer {
         markdownImages: [URL: NSImage] = [:],
         widthCache: FigureWidthCache? = nil,
         fontScale: Double = 1.0,
+        typography: ReaderTypography = ReaderTypography(),
         baseURL: URL? = nil
     ) -> NSAttributedString {
-        let theme = Theme(scale: fontScale)
+        let theme = Theme(scale: fontScale, typography: typography)
 
         let attributed: AttributedString
         do {
@@ -1150,9 +1160,9 @@ enum MarkdownRenderer {
 
         let bodyAttributes: [NSAttributedString.Key: Any]
 
-        init(scale: Double = 1.0) {
+        init(scale: Double = 1.0, typography: ReaderTypography = ReaderTypography()) {
             let s = CGFloat(scale)
-            let bodyBase = NSFont(name: "New York", size: 16 * s) ?? NSFont.systemFont(ofSize: 16 * s)
+            let bodyBase = typography.baseFont(size: 16 * s)
             let manager = NSFontManager.shared
             self.body = bodyBase
             self.bodyBold = manager.convert(bodyBase, toHaveTrait: .boldFontMask)
@@ -1161,24 +1171,26 @@ enum MarkdownRenderer {
             self.mono = NSFont.monospacedSystemFont(ofSize: 13 * s, weight: .regular)
             self.monoBold = NSFont.monospacedSystemFont(ofSize: 13 * s, weight: .bold)
 
-            let h1Base = NSFont(name: "New York", size: 28 * s) ?? NSFont.systemFont(ofSize: 28 * s)
-            let h2Base = NSFont(name: "New York", size: 22 * s) ?? NSFont.systemFont(ofSize: 22 * s)
-            let h3Base = NSFont(name: "New York", size: 18 * s) ?? NSFont.systemFont(ofSize: 18 * s)
-            let h4Base = NSFont(name: "New York", size: 16 * s) ?? NSFont.systemFont(ofSize: 16 * s)
+            let h1Base = typography.baseFont(size: 28 * s)
+            let h2Base = typography.baseFont(size: 22 * s)
+            let h3Base = typography.baseFont(size: 18 * s)
+            let h4Base = typography.baseFont(size: 16 * s)
             self.h1 = manager.convert(h1Base, toHaveTrait: .boldFontMask)
             self.h2 = manager.convert(h2Base, toHaveTrait: .boldFontMask)
             self.h3 = manager.convert(h3Base, toHaveTrait: .boldFontMask)
             self.h4 = manager.convert(h4Base, toHaveTrait: .boldFontMask)
 
-            let para = NSMutableParagraphStyle()
-            para.lineHeightMultiple = 1.25
-            para.paragraphSpacing = 6
+            let para = typography.paragraphStyle(paragraphSpacing: 6)
 
-            self.bodyAttributes = [
+            var attrs: [NSAttributedString.Key: Any] = [
                 .font: bodyBase,
                 .foregroundColor: NSColor.labelColor,
                 .paragraphStyle: para,
             ]
+            if let kern = typography.kern {
+                attrs[.kern] = kern
+            }
+            self.bodyAttributes = attrs
         }
 
         func attributes(

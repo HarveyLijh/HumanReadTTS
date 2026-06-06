@@ -51,10 +51,44 @@ final class ReaderSettings {
         }
     }
 
+    /// Body typeface for the synthesized readers (Markdown, plain text,
+    /// Scratchpad preview). `.serif` reproduces the historic New York
+    /// look, so the default leaves existing documents unchanged.
+    var fontFace: ReaderFontFace = .serif {
+        didSet { defaults.set(fontFace.rawValue, forKey: fontFaceKey) }
+    }
+
+    /// Line-height multiple. Clamped to a readable band like `fontScale`.
+    var lineSpacingMultiple: Double = 1.25 {
+        didSet {
+            let clamped = min(2.2, max(1.0, lineSpacingMultiple))
+            if clamped != lineSpacingMultiple {
+                lineSpacingMultiple = clamped
+                return
+            }
+            defaults.set(lineSpacingMultiple, forKey: lineSpacingMultipleKey)
+        }
+    }
+
+    /// Extra inter-glyph spacing in points (0 = the font's own metrics).
+    var letterSpacing: Double = 0 {
+        didSet {
+            let clamped = min(2.5, max(0, letterSpacing))
+            if clamped != letterSpacing {
+                letterSpacing = clamped
+                return
+            }
+            defaults.set(letterSpacing, forKey: letterSpacingKey)
+        }
+    }
+
     private let defaults: UserDefaults
     private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
     private let highlightPaletteKey = "app.readaloudtts.mac.reader.highlightPalette.v1"
     private let highlightOpacityKey = "app.readaloudtts.mac.reader.highlightOpacity.v1"
+    private let fontFaceKey = "app.readaloudtts.mac.reader.fontFace.v1"
+    private let lineSpacingMultipleKey = "app.readaloudtts.mac.reader.lineSpacingMultiple.v1"
+    private let letterSpacingKey = "app.readaloudtts.mac.reader.letterSpacing.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -70,6 +104,18 @@ final class ReaderSettings {
             let stored = defaults.double(forKey: highlightOpacityKey)
             highlightOpacity = min(HighlightStyle.maxOpacity, max(HighlightStyle.minOpacity, stored))
         }
+        if let raw = defaults.string(forKey: fontFaceKey),
+           let face = ReaderFontFace(rawValue: raw) {
+            fontFace = face
+        }
+        if defaults.object(forKey: lineSpacingMultipleKey) != nil {
+            let stored = defaults.double(forKey: lineSpacingMultipleKey)
+            lineSpacingMultiple = min(2.2, max(1.0, stored))
+        }
+        if defaults.object(forKey: letterSpacingKey) != nil {
+            let stored = defaults.double(forKey: letterSpacingKey)
+            letterSpacing = min(2.5, max(0, stored))
+        }
     }
 
     func increase() {
@@ -84,6 +130,9 @@ final class ReaderSettings {
         fontScale = 1.0
         highlightPalette = .teal
         highlightOpacity = 0.25
+        fontFace = .serif
+        lineSpacingMultiple = 1.25
+        letterSpacing = 0
     }
 }
 

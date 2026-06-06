@@ -46,6 +46,7 @@ struct TextReaderView: View {
                             searchMatches: searchMatches,
                             currentMatchIndex: search.currentIndex,
                             fontScale: readerSettings.fontScale,
+                            typography: ReaderTypography(from: readerSettings),
                             onReadFromOffset: handleReadFromOffset
                         )
                     }
@@ -211,11 +212,13 @@ private struct PlainTextView: NSViewRepresentable {
     let searchMatches: [NSRange]
     let currentMatchIndex: Int
     let fontScale: Double
+    let typography: ReaderTypography
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
         var lastText: String?
         var lastAppliedScale: Double?
+        var lastTypography: ReaderTypography?
         var lastSentenceRange: NSRange?
         var lastSubRange: NSRange?
         var lastScrolledSentenceIndex: Int?
@@ -259,23 +262,26 @@ private struct PlainTextView: NSViewRepresentable {
 
         let textChanged = context.coordinator.lastText != text
         let scaleChanged = context.coordinator.lastAppliedScale != fontScale
+        let typoChanged = context.coordinator.lastTypography != typography
 
-        if textChanged || scaleChanged {
-            let font = NSFont(name: "New York", size: 16 * CGFloat(fontScale))
-                ?? NSFont.systemFont(ofSize: 16 * CGFloat(fontScale))
-            let para = NSMutableParagraphStyle()
-            para.lineHeightMultiple = 1.35
-            let attrs: [NSAttributedString.Key: Any] = [
+        if textChanged || scaleChanged || typoChanged {
+            let font = typography.baseFont(size: 16 * CGFloat(fontScale))
+            let para = typography.paragraphStyle()
+            var attrs: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: NSColor.labelColor,
                 .paragraphStyle: para,
             ]
+            if let kern = typography.kern {
+                attrs[.kern] = kern
+            }
             storage.beginEditing()
             storage.setAttributedString(NSAttributedString(string: text, attributes: attrs))
             storage.endEditing()
 
             context.coordinator.lastText = text
             context.coordinator.lastAppliedScale = fontScale
+            context.coordinator.lastTypography = typography
             context.coordinator.lastSentenceRange = nil
             context.coordinator.lastSubRange = nil
             context.coordinator.lastScrolledSentenceIndex = nil
