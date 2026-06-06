@@ -16,7 +16,12 @@ final class MenuBarCommand {
     private let defaults = UserDefaults.standard
     private let hintShownKey = "app.readaloudtts.mac.shortcuts.didShowSelectionHint.v1"
 
-    private init() {}
+    private init() {
+        // When a menu-bar read finishes on its own, pull the next queued
+        // item (if any and auto-advance is on). Document-window players
+        // leave onReachedEnd nil, so the queue only chains menu-bar reads.
+        player.onReachedEnd = { [weak self] in self?.handleReachedEnd() }
+    }
 
     /// True while the menubar player is actively speaking — drives the
     /// animated menu-bar icon.
@@ -101,6 +106,29 @@ final class MenuBarCommand {
             player.load(sentences)
             player.togglePlayPause()
         }
+    }
+
+    /// Add text to the reading queue. If the reader is idle the item
+    /// starts immediately; otherwise it waits behind the current read.
+    /// Used by the menu-bar "Queue Clipboard" action and the queue UI.
+    func enqueueText(_ text: String, title: String? = nil) {
+        guard ReadingQueue.shared.enqueue(text, title: title) != nil else { return }
+        if case .idle = player.state {
+            advanceQueue()
+        }
+    }
+
+    /// Pull and read the next queued item, if any.
+    private func advanceQueue() {
+        guard let item = ReadingQueue.shared.dequeueNext() else { return }
+        readText(item.text)
+    }
+
+    /// `SpeechPlayer.onReachedEnd` hook — chain to the next queued item
+    /// when auto-advance is on.
+    private func handleReachedEnd() {
+        guard ReadingQueue.shared.autoAdvance else { return }
+        advanceQueue()
     }
 
     /// Convenience for the menubar button label.

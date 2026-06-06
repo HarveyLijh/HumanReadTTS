@@ -39,6 +39,7 @@
 		2B00000000000000000A0087 /* ReadHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0087 /* ReadHUD.swift */; };
 		2B00000000000000000A0048 /* NowPlayingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0048 /* NowPlayingController.swift */; };
 		2B00000000000000000A0049 /* SleepTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0049 /* SleepTimer.swift */; };
+		2B00000000000000000A004A /* ReadingQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A004A /* ReadingQueue.swift */; };
 		2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E5 /* HighlightStyle.swift */; };
 		2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0091 /* PronunciationDictionary.swift */; };
 		2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0092 /* PronunciationSettingsView.swift */; };
@@ -55,6 +56,7 @@
 		2B00000000000000000A0062 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0062 /* SettingsView.swift */; };
 		2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0065 /* ShortcutsSettingsView.swift */; };
 		2B00000000000000000A0067 /* ReadingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0067 /* ReadingSettingsView.swift */; };
+		2B00000000000000000A0068 /* PlaybackControlsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0068 /* PlaybackControlsSettingsView.swift */; };
 		2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0063 /* ModelsSettingsView.swift */; };
 		2B00000000000000000A0071 /* ModelEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0071 /* ModelEntry.swift */; };
 		2B00000000000000000A0072 /* ModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0072 /* ModelCatalog.swift */; };
@@ -99,6 +101,7 @@
 		2B00000000000000000A00E9 /* BionicReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E9 /* BionicReading.swift */; };
 		2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0013 /* ReaderTypographyTests.swift */; };
 		2B00000000000000000B001C /* BionicReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001C /* BionicReadingTests.swift */; };
+		2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0016 /* ReadingQueueTests.swift */; };
 		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
 		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
 		2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */; };
@@ -168,11 +171,13 @@
 		2A00000000000000000A0087 /* ReadHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadHUD.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0048 /* NowPlayingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingController.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0049 /* SleepTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepTimer.swift; sourceTree = "<group>"; };
+		2A00000000000000000A004A /* ReadingQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingQueue.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E5 /* HighlightStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStyle.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E7 /* ReaderTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypography.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00E9 /* BionicReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BionicReading.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0013 /* ReaderTypographyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypographyTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001C /* BionicReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BionicReadingTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0016 /* ReadingQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingQueueTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Regular.otf"; sourceTree = "<group>"; };
@@ -197,6 +202,7 @@
 		2A00000000000000000A0062 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0065 /* ShortcutsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0067 /* ReadingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingSettingsView.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0068 /* PlaybackControlsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackControlsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0063 /* ModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0071 /* ModelEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEntry.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0072 /* ModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalog.swift; sourceTree = "<group>"; };
@@ -424,6 +430,7 @@
 				2A00000000000000000A0047 /* KokoroChunker.swift */,
 				2A00000000000000000A0048 /* NowPlayingController.swift */,
 				2A00000000000000000A0049 /* SleepTimer.swift */,
+				2A00000000000000000A004A /* ReadingQueue.swift */,
 			);
 			path = Playback;
 			sourceTree = "<group>";
@@ -450,6 +457,7 @@
 				2A00000000000000000A00A2 /* AnalyticsSettingsView.swift */,
 				2A00000000000000000A0065 /* ShortcutsSettingsView.swift */,
 				2A00000000000000000A0067 /* ReadingSettingsView.swift */,
+				2A00000000000000000A0068 /* PlaybackControlsSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -590,6 +598,7 @@
 				2A00000000000000000B0015 /* SleepTimerTests.swift */,
 				2A00000000000000000B0013 /* ReaderTypographyTests.swift */,
 				2A00000000000000000B001C /* BionicReadingTests.swift */,
+				2A00000000000000000B0016 /* ReadingQueueTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -858,6 +867,7 @@
 				2B00000000000000000A0087 /* ReadHUD.swift in Sources */,
 				2B00000000000000000A0048 /* NowPlayingController.swift in Sources */,
 				2B00000000000000000A0049 /* SleepTimer.swift in Sources */,
+				2B00000000000000000A004A /* ReadingQueue.swift in Sources */,
 				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
 				2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */,
 				2B00000000000000000A00E9 /* BionicReading.swift in Sources */,
@@ -877,6 +887,7 @@
 				2B00000000000000000A0062 /* SettingsView.swift in Sources */,
 				2B00000000000000000A0065 /* ShortcutsSettingsView.swift in Sources */,
 				2B00000000000000000A0067 /* ReadingSettingsView.swift in Sources */,
+				2B00000000000000000A0068 /* PlaybackControlsSettingsView.swift in Sources */,
 				2B00000000000000000A0063 /* ModelsSettingsView.swift in Sources */,
 				2B00000000000000000A0071 /* ModelEntry.swift in Sources */,
 				2B00000000000000000A0072 /* ModelCatalog.swift in Sources */,
@@ -931,6 +942,7 @@
 				2B00000000000000000B0015 /* SleepTimerTests.swift in Sources */,
 				2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */,
 				2B00000000000000000B001C /* BionicReadingTests.swift in Sources */,
+				2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

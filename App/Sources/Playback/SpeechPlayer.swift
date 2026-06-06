@@ -67,6 +67,12 @@ final class SpeechPlayer {
     /// "end of current sentence" mode. Cleared once honored.
     var stopAtNextSentenceBoundary: Bool = false
 
+    /// Fired once the last sentence finishes by natural playback (not a
+    /// user `stop()`), after `state` has gone `.idle`. The reading queue
+    /// uses it to auto-advance to the next item; if the handler starts a
+    /// new read it overrides the idle state. Nil = nothing queued.
+    var onReachedEnd: (() -> Void)?
+
     /// The current sentence queue. Set by `load(_:)` before the
     /// first play so UI can show enabled controls even before
     /// playback starts.
@@ -720,7 +726,11 @@ final class SpeechPlayer {
         if nextIndex < sentences.count {
             speakCurrent()
         } else {
+            // Genuine end of content. Go idle first, then let the queue
+            // (if any) advance — a handler that starts the next item
+            // overrides this idle state, so order matters here.
             state = .idle
+            onReachedEnd?()
         }
     }
 

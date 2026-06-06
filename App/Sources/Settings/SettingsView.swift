@@ -42,6 +42,10 @@ struct SettingsView: View {
             ReadingSettingsView()
                 .tabItem { Label("Reading", systemImage: "textformat") }
                 .tag(6)
+
+            PlaybackControlsSettingsView()
+                .tabItem { Label("Playback Controls", systemImage: "playpause.circle") }
+                .tag(7)
         }
         .frame(width: 620, height: 540)
     }

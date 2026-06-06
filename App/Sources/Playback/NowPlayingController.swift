@@ -64,6 +64,12 @@ final class NowPlayingController {
     /// when there is nothing loaded.
     func refresh() {
         let player = activePlayer
+        // Read inside the observation-tracked refresh so toggling the
+        // preference re-arms and takes effect immediately.
+        guard SpeechSettings.shared.showInNowPlaying else {
+            clear()
+            return
+        }
         guard !player.sentences.isEmpty, player.state.sentenceIndex != nil else {
             clear()
             return

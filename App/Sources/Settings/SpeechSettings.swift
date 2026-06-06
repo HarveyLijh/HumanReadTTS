@@ -88,6 +88,13 @@ final class SpeechSettings {
         didSet { defaults.set(sleepTimerMinutes, forKey: sleepTimerMinutesKey) }
     }
 
+    /// When true (default), reads publish to Control Center / the Now
+    /// Playing widget and bind the hardware media keys. Off keeps reads
+    /// out of the system transport.
+    var showInNowPlaying: Bool = true {
+        didSet { defaults.set(showInNowPlaying, forKey: showInNowPlayingKey) }
+    }
+
     private let defaults: UserDefaults
     private let rateKey = "app.readaloudtts.mac.speech.rate.v1"
     private let pitchKey = "app.readaloudtts.mac.speech.pitch.v1"
@@ -97,6 +104,7 @@ final class SpeechSettings {
     private let skipRulesKey = "app.readaloudtts.mac.speech.skipRules.v1"
     private let restoreClipboardKey = "app.readaloudtts.mac.shortcuts.restoreClipboard.v1"
     private let sleepTimerMinutesKey = "app.readaloudtts.mac.playback.sleepTimerMinutes.v1"
+    private let showInNowPlayingKey = "app.readaloudtts.mac.playback.showInNowPlaying.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -116,6 +124,9 @@ final class SpeechSettings {
         if defaults.object(forKey: sleepTimerMinutesKey) != nil {
             sleepTimerMinutes = defaults.integer(forKey: sleepTimerMinutesKey)
         }
+        if defaults.object(forKey: showInNowPlayingKey) != nil {
+            showInNowPlaying = defaults.bool(forKey: showInNowPlayingKey)
+        }
     }
 
     func reset() {
@@ -127,6 +138,7 @@ final class SpeechSettings {
         skipRules = SkipRule.builtIns
         restoreClipboardAfterReading = true
         sleepTimerMinutes = 15
+        showInNowPlaying = true
     }
 
     private func persistSkipRules() {
