@@ -106,9 +106,11 @@
 		2B00000000000000000A0951 /* ReadingOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0951 /* ReadingOrder.swift */; };
 		2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D09 /* AnkiCSVExporter.swift */; };
 		2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D08 /* VocabularyStore.swift */; };
+		2B00000000000000000A0D07 /* WordRangeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D07 /* WordRangeResolver.swift */; };
 		2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001B /* ReadingOrderTests.swift */; };
 		2B00000000000000000B0018 /* AnkiCSVExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */; };
 		2B00000000000000000B001A /* VocabularyStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001A /* VocabularyStoreTests.swift */; };
+		2B00000000000000000B0019 /* WordRangeResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0019 /* WordRangeResolverTests.swift */; };
 		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
 		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
 		2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */; };
@@ -189,9 +191,11 @@
 		2A00000000000000000A0951 /* ReadingOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrder.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D09 /* AnkiCSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporter.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D08 /* VocabularyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStore.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0D07 /* WordRangeResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordRangeResolver.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001B /* ReadingOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001A /* VocabularyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStoreTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0019 /* WordRangeResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordRangeResolverTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Regular.otf"; sourceTree = "<group>"; };
@@ -379,6 +383,7 @@
 				1B00000000000000000A0019 /* Text */,
 				1B00000000000000000A001E /* OCR */,
 				1B00000000000000000A001D /* Learning */,
+				1B00000000000000000A001C /* Translation */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -576,6 +581,14 @@
 			path = Learning;
 			sourceTree = "<group>";
 		};
+		1B00000000000000000A001C /* Translation */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0D07 /* WordRangeResolver.swift */,
+			);
+			path = Translation;
+			sourceTree = "<group>";
+		};
 		1B00000000000000000A0014 /* Reader */ = {
 			isa = PBXGroup;
 			children = (
@@ -636,6 +649,7 @@
 				2A00000000000000000B001B /* ReadingOrderTests.swift */,
 				2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */,
 				2A00000000000000000B001A /* VocabularyStoreTests.swift */,
+				2A00000000000000000B0019 /* WordRangeResolverTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -908,6 +922,7 @@
 				2B00000000000000000A0951 /* ReadingOrder.swift in Sources */,
 				2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */,
 				2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */,
+				2B00000000000000000A0D07 /* WordRangeResolver.swift in Sources */,
 				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
 				2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */,
 				2B00000000000000000A00E9 /* BionicReading.swift in Sources */,
@@ -987,6 +1002,7 @@
 				2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */,
 				2B00000000000000000B0018 /* AnkiCSVExporterTests.swift in Sources */,
 				2B00000000000000000B001A /* VocabularyStoreTests.swift in Sources */,
+				2B00000000000000000B0019 /* WordRangeResolverTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
