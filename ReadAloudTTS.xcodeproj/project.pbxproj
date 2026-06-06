@@ -103,6 +103,8 @@
 		2B00000000000000000B001C /* BionicReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001C /* BionicReadingTests.swift */; };
 		2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0016 /* ReadingQueueTests.swift */; };
 		2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0017 /* SentenceLanguageTests.swift */; };
+		2B00000000000000000A0951 /* ReadingOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0951 /* ReadingOrder.swift */; };
+		2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001B /* ReadingOrderTests.swift */; };
 		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
 		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
 		2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */; };
@@ -180,6 +182,8 @@
 		2A00000000000000000B001C /* BionicReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BionicReadingTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0016 /* ReadingQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingQueueTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0017 /* SentenceLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceLanguageTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0951 /* ReadingOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrder.swift; sourceTree = "<group>"; };
+		2A00000000000000000B001B /* ReadingOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Regular.otf"; sourceTree = "<group>"; };
@@ -365,6 +369,7 @@
 				1B00000000000000000A0017 /* Onboarding */,
 				1B00000000000000000A0018 /* DOCX */,
 				1B00000000000000000A0019 /* Text */,
+				1B00000000000000000A001E /* OCR */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -545,6 +550,14 @@
 			path = Text;
 			sourceTree = "<group>";
 		};
+		1B00000000000000000A001E /* OCR */ = {
+			isa = PBXGroup;
+			children = (
+				2A00000000000000000A0951 /* ReadingOrder.swift */,
+			);
+			path = OCR;
+			sourceTree = "<group>";
+		};
 		1B00000000000000000A0014 /* Reader */ = {
 			isa = PBXGroup;
 			children = (
@@ -602,6 +615,7 @@
 				2A00000000000000000B001C /* BionicReadingTests.swift */,
 				2A00000000000000000B0016 /* ReadingQueueTests.swift */,
 				2A00000000000000000B0017 /* SentenceLanguageTests.swift */,
+				2A00000000000000000B001B /* ReadingOrderTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -871,6 +885,7 @@
 				2B00000000000000000A0048 /* NowPlayingController.swift in Sources */,
 				2B00000000000000000A0049 /* SleepTimer.swift in Sources */,
 				2B00000000000000000A004A /* ReadingQueue.swift in Sources */,
+				2B00000000000000000A0951 /* ReadingOrder.swift in Sources */,
 				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
 				2B00000000000000000A00E7 /* ReaderTypography.swift in Sources */,
 				2B00000000000000000A00E9 /* BionicReading.swift in Sources */,
@@ -947,6 +962,7 @@
 				2B00000000000000000B001C /* BionicReadingTests.swift in Sources */,
 				2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */,
 				2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */,
+				2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
