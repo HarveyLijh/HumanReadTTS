@@ -43,12 +43,24 @@ enum SentenceSegmenter {
                     text: trimmed,
                     blockIndex: blockIndex,
                     offsetInBlock: nsRange.location,
-                    lengthInBlock: nsRange.length
+                    lengthInBlock: nsRange.length,
+                    language: detectLanguage(trimmed)
                 ))
                 return true
             }
         }
 
         return sentences
+    }
+
+    /// Best-effort BCP-47 language for a sentence. Very short fragments
+    /// are skipped (nil) because the recognizer is unreliable on a word
+    /// or two, and a wrong tag is worse than none for downstream voice
+    /// and translation routing.
+    static func detectLanguage(_ text: String) -> String? {
+        guard text.count >= 4 else { return nil }
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(text)
+        return recognizer.dominantLanguage?.rawValue
     }
 }

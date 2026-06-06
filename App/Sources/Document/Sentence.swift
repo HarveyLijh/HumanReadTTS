@@ -16,4 +16,24 @@ struct Sentence: Equatable, Hashable, Sendable {
     let blockIndex: Int
     let offsetInBlock: Int
     let lengthInBlock: Int
+    /// BCP-47 language code detected for this sentence (e.g. `"en"`,
+    /// `"zh-Hans"`), or nil when detection was skipped or inconclusive.
+    /// Populated by `SentenceSegmenter`; bilingual features read it to
+    /// route voices and translation without re-detecting. Optional with
+    /// an init default so callers that don't care can omit it.
+    let language: String?
+
+    init(
+        text: String,
+        blockIndex: Int,
+        offsetInBlock: Int,
+        lengthInBlock: Int,
+        language: String? = nil
+    ) {
+        self.text = text
+        self.blockIndex = blockIndex
+        self.offsetInBlock = offsetInBlock
+        self.lengthInBlock = lengthInBlock
+        self.language = language
+    }
 }

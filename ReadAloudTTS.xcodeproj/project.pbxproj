@@ -102,6 +102,7 @@
 		2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0013 /* ReaderTypographyTests.swift */; };
 		2B00000000000000000B001C /* BionicReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001C /* BionicReadingTests.swift */; };
 		2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0016 /* ReadingQueueTests.swift */; };
+		2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0017 /* SentenceLanguageTests.swift */; };
 		2B00000000000000000A0E01 /* OpenDyslexic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */; };
 		2B00000000000000000A0E05 /* OpenDyslexic-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */; };
 		2B00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */; };
@@ -178,6 +179,7 @@
 		2A00000000000000000B0013 /* ReaderTypographyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderTypographyTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001C /* BionicReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BionicReadingTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0016 /* ReadingQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingQueueTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0017 /* SentenceLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceLanguageTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0E01 /* OpenDyslexic-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Regular.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E05 /* OpenDyslexic-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenDyslexic-Bold.otf"; sourceTree = "<group>"; };
 		2A00000000000000000A0E02 /* AtkinsonHyperlegible-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Regular.otf"; sourceTree = "<group>"; };
@@ -599,6 +601,7 @@
 				2A00000000000000000B0013 /* ReaderTypographyTests.swift */,
 				2A00000000000000000B001C /* BionicReadingTests.swift */,
 				2A00000000000000000B0016 /* ReadingQueueTests.swift */,
+				2A00000000000000000B0017 /* SentenceLanguageTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -943,6 +946,7 @@
 				2B00000000000000000B0013 /* ReaderTypographyTests.swift in Sources */,
 				2B00000000000000000B001C /* BionicReadingTests.swift in Sources */,
 				2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */,
+				2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
