@@ -36,9 +36,18 @@ final class DroppedDocumentTests: XCTestCase {
         XCTAssertEqual(DroppedDocument(url: URL(filePath: "/tmp/Memo.TXT"))?.kind, .text)
     }
 
+    func test_acceptsImageExtensionsAsOCR() {
+        for ext in DroppedDocument.imageExtensions {
+            XCTAssertEqual(DroppedDocument(url: URL(filePath: "/tmp/scan.\(ext)"))?.kind, .image,
+                           "\(ext) should route to OCR")
+            XCTAssertEqual(DroppedDocument(url: URL(filePath: "/tmp/SCAN.\(ext.uppercased())"))?.kind, .image,
+                           "\(ext) uppercase should route to OCR")
+        }
+    }
+
     func test_rejectsUnsupportedExtensions() {
         XCTAssertNil(DroppedDocument(url: URL(filePath: "/tmp/document.doc")))
-        XCTAssertNil(DroppedDocument(url: URL(filePath: "/tmp/image.png")))
+        XCTAssertNil(DroppedDocument(url: URL(filePath: "/tmp/archive.zip")))
         XCTAssertNil(DroppedDocument(url: URL(filePath: "/tmp/no-extension")))
     }
 }

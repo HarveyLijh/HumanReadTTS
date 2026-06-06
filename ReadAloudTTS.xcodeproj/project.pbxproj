@@ -108,6 +108,7 @@
 		2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0017 /* SentenceLanguageTests.swift */; };
 		2B00000000000000000A0951 /* ReadingOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0951 /* ReadingOrder.swift */; };
 		2B00000000000000000A0952 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0952 /* OCRService.swift */; };
+		2B00000000000000000A0953 /* ImageOCRReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0953 /* ImageOCRReaderView.swift */; };
 		2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D09 /* AnkiCSVExporter.swift */; };
 		2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D08 /* VocabularyStore.swift */; };
 		2B00000000000000000A0D0A /* LearningSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D0A /* LearningSettings.swift */; };
@@ -204,6 +205,7 @@
 		2A00000000000000000B0017 /* SentenceLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceLanguageTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0951 /* ReadingOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrder.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0952 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0953 /* ImageOCRReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOCRReaderView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D09 /* AnkiCSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporter.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D08 /* VocabularyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStore.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D0A /* LearningSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningSettings.swift; sourceTree = "<group>"; };
@@ -594,6 +596,7 @@
 			children = (
 				2A00000000000000000A0951 /* ReadingOrder.swift */,
 				2A00000000000000000A0952 /* OCRService.swift */,
+				2A00000000000000000A0953 /* ImageOCRReaderView.swift */,
 			);
 			path = OCR;
 			sourceTree = "<group>";
@@ -957,6 +960,7 @@
 				2B00000000000000000A004A /* ReadingQueue.swift in Sources */,
 				2B00000000000000000A0951 /* ReadingOrder.swift in Sources */,
 				2B00000000000000000A0952 /* OCRService.swift in Sources */,
+				2B00000000000000000A0953 /* ImageOCRReaderView.swift in Sources */,
 				2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */,
 				2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */,
 				2B00000000000000000A0D0A /* LearningSettings.swift in Sources */,

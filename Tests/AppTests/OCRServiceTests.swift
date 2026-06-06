@@ -54,17 +54,11 @@ final class OCRServiceTests: XCTestCase {
             _ = try await OCRService.shared.recognizeText(in: blank)
             XCTFail("blank page should not yield text")
         } catch let error as OCRError {
-            XCTAssertEqual(error, OCRError.noText)
+            guard case .noText = error else {
+                return XCTFail("unexpected OCR error: \(error)")
+            }
         } catch {
             XCTFail("unexpected error: \(error)")
-        }
-    }
-}
-
-extension OCRError: Equatable {
-    public static func == (lhs: OCRError, rhs: OCRError) -> Bool {
-        switch (lhs, rhs) {
-        case (.noText, .noText): return true
         }
     }
 }

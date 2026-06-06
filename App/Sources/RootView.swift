@@ -269,6 +269,8 @@ struct RootView: View {
             TextReaderView(url: document.url, player: player)
         case .docx:
             DOCXReaderView(url: document.url, player: player)
+        case .image:
+            ImageOCRReaderView(url: document.url, player: player)
         }
     }
 
@@ -483,11 +485,11 @@ struct RootView: View {
         panel.title = "Open a document"
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
-        var types: [UTType] = [.pdf, .epub, .plainText, .text]
+        var types: [UTType] = [.pdf, .epub, .plainText, .text, .image]
         // Conditionally add extension-based types so unsupported UTType
         // resolves don't crash the panel on machines with stripped
         // LaunchServices caches.
-        for ext in ["md", "markdown", "docx", "txt", "log"] {
+        for ext in ["md", "markdown", "docx", "txt", "log"] + DroppedDocument.imageExtensions {
             if let type = UTType(filenameExtension: ext) {
                 types.append(type)
             }

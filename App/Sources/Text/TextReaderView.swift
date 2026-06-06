@@ -208,7 +208,10 @@ struct TextReaderView: View {
     }
 }
 
-private struct PlainTextView: NSViewRepresentable {
+/// Read-only NSTextView host shared by the plain-text and image-OCR
+/// readers: applies typography, the reading theme, sentence/word
+/// highlight, and search marks to a recognized or decoded string.
+struct PlainTextView: NSViewRepresentable {
     let text: String
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?

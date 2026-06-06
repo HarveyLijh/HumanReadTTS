@@ -95,6 +95,13 @@ final class SpeechSettings {
         didSet { defaults.set(showInNowPlaying, forKey: showInNowPlayingKey) }
     }
 
+    /// BCP-47 languages Vision tries when reading an image. Defaults to
+    /// the app's English + Simplified Chinese focus so bilingual scans
+    /// recognize out of the box; an empty list lets Vision auto-select.
+    var ocrRecognitionLanguages: [String] = ["en-US", "zh-Hans"] {
+        didSet { defaults.set(ocrRecognitionLanguages, forKey: ocrLanguagesKey) }
+    }
+
     private let defaults: UserDefaults
     private let rateKey = "app.readaloudtts.mac.speech.rate.v1"
     private let pitchKey = "app.readaloudtts.mac.speech.pitch.v1"
@@ -105,6 +112,7 @@ final class SpeechSettings {
     private let restoreClipboardKey = "app.readaloudtts.mac.shortcuts.restoreClipboard.v1"
     private let sleepTimerMinutesKey = "app.readaloudtts.mac.playback.sleepTimerMinutes.v1"
     private let showInNowPlayingKey = "app.readaloudtts.mac.playback.showInNowPlaying.v1"
+    private let ocrLanguagesKey = "app.readaloudtts.mac.ocr.recognitionLanguages.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -127,6 +135,9 @@ final class SpeechSettings {
         if defaults.object(forKey: showInNowPlayingKey) != nil {
             showInNowPlaying = defaults.bool(forKey: showInNowPlayingKey)
         }
+        if let langs = defaults.array(forKey: ocrLanguagesKey) as? [String] {
+            ocrRecognitionLanguages = langs
+        }
     }
 
     func reset() {
@@ -139,6 +150,7 @@ final class SpeechSettings {
         restoreClipboardAfterReading = true
         sleepTimerMinutes = 15
         showInNowPlaying = true
+        ocrRecognitionLanguages = ["en-US", "zh-Hans"]
     }
 
     private func persistSkipRules() {

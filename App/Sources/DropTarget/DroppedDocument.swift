@@ -5,7 +5,8 @@ import Foundation
 /// Construction is failable: only readable formats are accepted.
 /// The validation belongs here (not in the view) so the Sources build
 /// phase has one well-tested boundary for "is this a file ReadAloudTTS
-/// can read?" Today: PDF, Markdown, EPUB, plain text, and DOCX.
+/// can read?" Today: PDF, Markdown, EPUB, plain text, DOCX, and images
+/// (read via on-device OCR).
 struct DroppedDocument: Equatable, Hashable {
     enum Kind: String, Equatable, Hashable {
         case pdf
@@ -13,7 +14,11 @@ struct DroppedDocument: Equatable, Hashable {
         case epub
         case text
         case docx
+        case image
     }
+
+    /// Image extensions read through OCR.
+    static let imageExtensions = ["png", "jpg", "jpeg", "heic", "heif", "tiff", "tif", "gif", "bmp", "webp"]
 
     let url: URL
     let kind: Kind
@@ -30,6 +35,8 @@ struct DroppedDocument: Equatable, Hashable {
             self.kind = .text
         case "docx":
             self.kind = .docx
+        case let ext where Self.imageExtensions.contains(ext):
+            self.kind = .image
         default:
             return nil
         }

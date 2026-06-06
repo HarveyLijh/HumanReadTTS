@@ -1,5 +1,6 @@
 import Foundation
 import PDFKit
+import AppKit
 
 /// Loads a document's sentences independently of the reader views so
 /// the "Generate Audio…" sheet can work on any library entry —
@@ -24,6 +25,7 @@ enum ExportSentenceLoader {
         case epubReadFailed(String)
         case docxReadFailed(String)
         case textReadFailed(String)
+        case imageReadFailed(String)
 
         var errorDescription: String? {
             switch self {
@@ -33,6 +35,7 @@ enum ExportSentenceLoader {
             case .epubReadFailed(let m): return "Couldn't read EPUB: \(m)"
             case .docxReadFailed(let m): return "Couldn't read DOCX: \(m)"
             case .textReadFailed(let m): return "Couldn't read text file: \(m)"
+            case .imageReadFailed(let m): return "Couldn't read image: \(m)"
             }
         }
     }
@@ -97,6 +100,21 @@ enum ExportSentenceLoader {
                 return await SentenceSegmenter.segment([block])
             } catch {
                 throw LoadError.textReadFailed(error.localizedDescription)
+            }
+        case .image:
+            guard let image = NSImage(contentsOf: url),
+                  let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+                throw LoadError.imageReadFailed("the image couldn't be opened")
+            }
+            do {
+                let text = try await OCRService.shared.recognizeText(
+                    in: cgImage,
+                    languages: SpeechSettings.shared.ocrRecognitionLanguages
+                )
+                let block = DocumentBlock(text: text, pageIndex: 0, offsetInPage: 0)
+                return await SentenceSegmenter.segment([block])
+            } catch {
+                throw LoadError.imageReadFailed(error.localizedDescription)
             }
         }
     }
