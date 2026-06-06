@@ -61,6 +61,12 @@ final class SpeechPlayer {
     private(set) var state: PlaybackState = .idle
     private(set) var lastSwitchEvent: SwitchEvent?
 
+    /// When set, the player pauses at the next sentence boundary
+    /// instead of advancing — the current sentence finishes speaking,
+    /// then playback stops in place. Used by the sleep timer's
+    /// "end of current sentence" mode. Cleared once honored.
+    var stopAtNextSentenceBoundary: Bool = false
+
     /// The current sentence queue. Set by `load(_:)` before the
     /// first play so UI can show enabled controls even before
     /// playback starts.
@@ -117,6 +123,7 @@ final class SpeechPlayer {
         self.nextIndex = 0
         self.state = .idle
         self.spokenSubRange = nil
+        self.stopAtNextSentenceBoundary = false
         self.prefetchedKokoro.removeAll()
         self.prefetchedQwen.removeAll()
         self.alignmentTask?.cancel()
@@ -697,6 +704,19 @@ final class SpeechPlayer {
         recordSentenceForStats()
         spokenSubRange = nil
         nextIndex += 1
+
+        // Sleep timer "end of current sentence": the sentence the user
+        // was on has finished playing, so pause at the upcoming one
+        // rather than continuing. This leaves a `.paused` state with no
+        // suspended utterance, matching `seekPaused`/`setVoice`.
+        if stopAtNextSentenceBoundary {
+            stopAtNextSentenceBoundary = false
+            state = nextIndex < sentences.count
+                ? .paused(sentenceIndex: nextIndex)
+                : .idle
+            return
+        }
+
         if nextIndex < sentences.count {
             speakCurrent()
         } else {

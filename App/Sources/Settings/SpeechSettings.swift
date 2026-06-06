@@ -82,6 +82,12 @@ final class SpeechSettings {
         didSet { defaults.set(restoreClipboardAfterReading, forKey: restoreClipboardKey) }
     }
 
+    /// Default duration (minutes) preselected in the sleep-timer menu.
+    /// The timer itself is never armed automatically on launch.
+    var sleepTimerMinutes: Int = 15 {
+        didSet { defaults.set(sleepTimerMinutes, forKey: sleepTimerMinutesKey) }
+    }
+
     private let defaults: UserDefaults
     private let rateKey = "app.readaloudtts.mac.speech.rate.v1"
     private let pitchKey = "app.readaloudtts.mac.speech.pitch.v1"
@@ -90,6 +96,7 @@ final class SpeechSettings {
     private let skipFigureCaptionsKey = "app.readaloudtts.mac.speech.skipFigureCaptions.v1"
     private let skipRulesKey = "app.readaloudtts.mac.speech.skipRules.v1"
     private let restoreClipboardKey = "app.readaloudtts.mac.shortcuts.restoreClipboard.v1"
+    private let sleepTimerMinutesKey = "app.readaloudtts.mac.playback.sleepTimerMinutes.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -106,6 +113,9 @@ final class SpeechSettings {
         stripCitations = defaults.bool(forKey: stripCitationsKey)
         skipFigureCaptions = defaults.bool(forKey: skipFigureCaptionsKey)
         skipRules = Self.loadSkipRules(from: defaults, key: skipRulesKey)
+        if defaults.object(forKey: sleepTimerMinutesKey) != nil {
+            sleepTimerMinutes = defaults.integer(forKey: sleepTimerMinutesKey)
+        }
     }
 
     func reset() {
@@ -116,6 +126,7 @@ final class SpeechSettings {
         skipFigureCaptions = false
         skipRules = SkipRule.builtIns
         restoreClipboardAfterReading = true
+        sleepTimerMinutes = 15
     }
 
     private func persistSkipRules() {
