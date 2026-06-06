@@ -26,6 +26,10 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
             Task { @MainActor in MenuBarCommand.shared.readSelectionOrClipboard() }
         }
 
+        // Publish reads to Control Center / lock screen / media keys and
+        // wire the hardware transport (play/pause/next/prev/stop).
+        NowPlayingController.shared.activate()
+
         installFontShortcutMonitor()
     }
 
