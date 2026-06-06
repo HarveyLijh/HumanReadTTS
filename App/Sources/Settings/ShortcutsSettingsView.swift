@@ -38,6 +38,17 @@ struct ShortcutsSettingsView: View {
             }
 
             Section {
+                ForEach(Self.ocrLanguages, id: \.code) { lang in
+                    Toggle(lang.name, isOn: ocrLanguage(lang.code))
+                }
+            } header: {
+                Text("Image OCR Languages")
+            } footer: {
+                Text("Languages to look for when reading an image or screenshot. Pick the scripts you read; fewer, well-chosen languages recognize faster and more accurately. With none selected, the system chooses automatically.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
                 LabeledContent {
                     Button("Open Accessibility Settings…") {
                         SelectionPermission.openAccessibilitySettings()
@@ -53,5 +64,36 @@ struct ShortcutsSettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Curated OCR recognition languages offered as toggles. Codes are
+    /// the BCP-47 tags Vision expects.
+    private static let ocrLanguages: [(code: String, name: String)] = [
+        ("en-US", "English"),
+        ("zh-Hans", "Chinese (Simplified)"),
+        ("zh-Hant", "Chinese (Traditional)"),
+        ("ja-JP", "Japanese"),
+        ("ko-KR", "Korean"),
+        ("fr-FR", "French"),
+        ("de-DE", "German"),
+        ("es-ES", "Spanish"),
+    ]
+
+    /// Binding that toggles `code` in/out of the recognition list while
+    /// preserving order (Vision treats earlier languages as higher
+    /// priority).
+    private func ocrLanguage(_ code: String) -> Binding<Bool> {
+        Binding(
+            get: { settings.ocrRecognitionLanguages.contains(code) },
+            set: { isOn in
+                var languages = settings.ocrRecognitionLanguages
+                if isOn {
+                    if !languages.contains(code) { languages.append(code) }
+                } else {
+                    languages.removeAll { $0 == code }
+                }
+                settings.ocrRecognitionLanguages = languages
+            }
+        )
     }
 }
