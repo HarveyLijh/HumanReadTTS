@@ -30,14 +30,45 @@ final class ReaderSettings {
     /// Step used by ⌘+ / ⌘-. Matches the slider's perceived "click".
     static let step: Double = 0.1
 
+    /// Playback-highlight palette (color-blind-aware). Default `.teal`
+    /// reproduces the historic accent highlight; read by
+    /// `HighlightStyle.current`.
+    var highlightPalette: HighlightPalette = .teal {
+        didSet { defaults.set(highlightPalette.rawValue, forKey: highlightPaletteKey) }
+    }
+
+    /// Opacity of the sentence highlight band. The active-word band is
+    /// derived from this (`+ HighlightStyle.wordBoost`). Clamped to a
+    /// legible range on every set, like `fontScale`.
+    var highlightOpacity: Double = 0.25 {
+        didSet {
+            let clamped = min(HighlightStyle.maxOpacity, max(HighlightStyle.minOpacity, highlightOpacity))
+            if clamped != highlightOpacity {
+                highlightOpacity = clamped
+                return
+            }
+            defaults.set(highlightOpacity, forKey: highlightOpacityKey)
+        }
+    }
+
     private let defaults: UserDefaults
     private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
+    private let highlightPaletteKey = "app.readaloudtts.mac.reader.highlightPalette.v1"
+    private let highlightOpacityKey = "app.readaloudtts.mac.reader.highlightOpacity.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         if defaults.object(forKey: fontScaleKey) != nil {
             let stored = defaults.double(forKey: fontScaleKey)
             fontScale = min(Self.maxScale, max(Self.minScale, stored))
+        }
+        if let raw = defaults.string(forKey: highlightPaletteKey),
+           let palette = HighlightPalette(rawValue: raw) {
+            highlightPalette = palette
+        }
+        if defaults.object(forKey: highlightOpacityKey) != nil {
+            let stored = defaults.double(forKey: highlightOpacityKey)
+            highlightOpacity = min(HighlightStyle.maxOpacity, max(HighlightStyle.minOpacity, stored))
         }
     }
 
@@ -51,6 +82,8 @@ final class ReaderSettings {
 
     func reset() {
         fontScale = 1.0
+        highlightPalette = .teal
+        highlightOpacity = 0.25
     }
 }
 

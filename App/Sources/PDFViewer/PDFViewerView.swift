@@ -320,7 +320,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
 
             if let sentence = activeSentence,
                let sentenceSelection = selection(for: sentence) {
-                let soft = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.25)
+                let soft = HighlightStyle.current.sentenceBand
                 for lineSelection in sentenceSelection.selectionsByLine() {
                     for page in lineSelection.pages {
                         let bounds = lineSelection.bounds(for: page)
@@ -347,7 +347,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
             if let sentence = activeSentence,
                let sub = spokenSubRange,
                let wordSelection = wordSelection(for: sentence, subRange: sub) {
-                let bright = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.55)
+                let bright = HighlightStyle.current.activeWord
                 for lineSelection in wordSelection.selectionsByLine() {
                     for page in lineSelection.pages {
                         let bounds = lineSelection.bounds(for: page)

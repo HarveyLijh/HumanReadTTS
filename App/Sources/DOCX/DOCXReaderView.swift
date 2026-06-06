@@ -326,7 +326,7 @@ private struct DOCXTextView: NSViewRepresentable {
             return
         }
 
-        let soft = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.25)
+        let soft = HighlightStyle.current.sentenceBand
         storage.addAttribute(.backgroundColor, value: soft, range: sentenceRange)
         coordinator.lastSentenceRange = sentenceRange
 
@@ -334,7 +334,7 @@ private struct DOCXTextView: NSViewRepresentable {
             let subOrigin = sentence.offsetInBlock + sub.location
             let subRange = NSRange(location: subOrigin, length: sub.length)
             if NSMaxRange(subRange) <= storage.length {
-                let bright = NSColor(Color.readAloudTTSAccent).withAlphaComponent(0.55)
+                let bright = HighlightStyle.current.activeWord
                 storage.addAttribute(.backgroundColor, value: bright, range: subRange)
                 coordinator.lastSubRange = subRange
             } else {

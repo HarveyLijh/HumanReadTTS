@@ -37,6 +37,7 @@
 		2B00000000000000000A0084 /* AppDelegateShim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0084 /* AppDelegateShim.swift */; };
 		2B00000000000000000A0086 /* SelectionReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0086 /* SelectionReader.swift */; };
 		2B00000000000000000A0087 /* ReadHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0087 /* ReadHUD.swift */; };
+		2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00E5 /* HighlightStyle.swift */; };
 		2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0091 /* PronunciationDictionary.swift */; };
 		2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0092 /* PronunciationSettingsView.swift */; };
 		2B00000000000000000A00A1 /* ReadingStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00A1 /* ReadingStats.swift */; };
@@ -88,6 +89,7 @@
 		2B00000000000000000B000F /* SkipRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B000F /* SkipRuleTests.swift */; };
 		2B00000000000000000B0010 /* KokoroChunkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0010 /* KokoroChunkerTests.swift */; };
 		2B00000000000000000B0011 /* SelectionReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0011 /* SelectionReaderTests.swift */; };
+		2B00000000000000000B0012 /* HighlightStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0012 /* HighlightStyleTests.swift */; };
 		2B00000000000000000A00B3 /* AudioExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B3 /* AudioExportFormat.swift */; };
 		2B00000000000000000A00B4 /* ExportQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B4 /* ExportQueueView.swift */; };
 		2B00000000000000000A00B5 /* ExportOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A00B5 /* ExportOverrides.swift */; };
@@ -149,6 +151,7 @@
 		2A00000000000000000A0084 /* AppDelegateShim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateShim.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0086 /* SelectionReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionReader.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0087 /* ReadHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadHUD.swift; sourceTree = "<group>"; };
+		2A00000000000000000A00E5 /* HighlightStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStyle.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0085 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A00000000000000000A0091 /* PronunciationDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationDictionary.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0092 /* PronunciationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronunciationSettingsView.swift; sourceTree = "<group>"; };
@@ -194,6 +197,7 @@
 		2A00000000000000000B000F /* SkipRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipRuleTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0010 /* KokoroChunkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroChunkerTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0011 /* SelectionReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionReaderTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0012 /* HighlightStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStyleTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B3 /* AudioExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExportFormat.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B4 /* ExportQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportQueueView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A00B5 /* ExportOverrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportOverrides.swift; sourceTree = "<group>"; };
@@ -483,6 +487,7 @@
 				2A00000000000000000A00E2 /* ClickableReaderTextView.swift */,
 				2A00000000000000000A00E3 /* SearchBar.swift */,
 				2A00000000000000000A00E4 /* FontSizeControl.swift */,
+				2A00000000000000000A00E5 /* HighlightStyle.swift */,
 			);
 			path = Reader;
 			sourceTree = "<group>";
@@ -523,6 +528,7 @@
 				2A00000000000000000B000F /* SkipRuleTests.swift */,
 				2A00000000000000000B0010 /* KokoroChunkerTests.swift */,
 				2A00000000000000000B0011 /* SelectionReaderTests.swift */,
+				2A00000000000000000B0012 /* HighlightStyleTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -783,6 +789,7 @@
 				2B00000000000000000A0084 /* AppDelegateShim.swift in Sources */,
 				2B00000000000000000A0086 /* SelectionReader.swift in Sources */,
 				2B00000000000000000A0087 /* ReadHUD.swift in Sources */,
+				2B00000000000000000A00E5 /* HighlightStyle.swift in Sources */,
 				2B00000000000000000A0091 /* PronunciationDictionary.swift in Sources */,
 				2B00000000000000000A0092 /* PronunciationSettingsView.swift in Sources */,
 				2B00000000000000000A00A1 /* ReadingStats.swift in Sources */,
@@ -847,6 +854,7 @@
 				2B00000000000000000B000F /* SkipRuleTests.swift in Sources */,
 				2B00000000000000000B0010 /* KokoroChunkerTests.swift in Sources */,
 				2B00000000000000000B0011 /* SelectionReaderTests.swift in Sources */,
+				2B00000000000000000B0012 /* HighlightStyleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
