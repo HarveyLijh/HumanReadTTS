@@ -13,37 +13,43 @@ hardware. Updated as each PR lands.
 | XCTest suite | Full unit coverage in the app-hosted runner | When the runner is healthy |
 | Live app screenshot/gif | Real rendering and interaction | When a display is awake |
 
-### Current environment blockers
+### Environment status — cleared 2026-06-06
 
-Two parts of the original request — a green XCTest run and screenshots/gifs —
-are blocked by the machine state, not by the code:
+The two earlier blockers (wedged XCTest runner, asleep display) cleared after a
+reboot/unlock. Current state:
 
-- **XCTest runner wedged.** `xcodebuild test` fails with "The test runner hung
-  before establishing connection" (~330s, 0 tests). Intermittent and
-  environmental: it ran green earlier today (149 tests, 0 failures) then
-  re-wedged. Clears on reboot or one `Product > Test` run in Xcode. Until then,
-  each PR is gated on a clean build plus standalone logic checks, and the
-  written XCTest cases run as soon as the runner recovers.
-- **Display asleep → no screenshots.** With the Mac display asleep/locked,
-  `CGGetActiveDisplayList` reports 0 active displays, screen capture returns
-  "No displays available", and the menu-bar app composites no visible window.
-  Screenshots/gifs of the new UI need the display awake and unlocked.
+- **XCTest runner healthy.** `xcodebuild test -scheme ReadAloudTTS -destination
+  'platform=macOS'` runs green: **227 tests, 3 skipped, 0 failures**.
+- **Display awake.** Live reader windows and the Settings window screenshot
+  normally. Captures land in `docs/verification-assets/`.
 
-To capture the live screenshots once the display is awake, see
-`docs/`-adjacent notes: seed a face with
-`defaults write app.readaloudtts.mac app.readaloudtts.mac.reader.fontFace.v1 -string openDyslexic`,
-`open <built app> <sample.md>`, capture the reader window, then delete the key.
+Screenshot recipe: seed a pref (e.g.
+`defaults write app.readaloudtts.mac app.readaloudtts.mac.reader.readingTheme.v1 -string sepia`),
+`open -a <built app> <sample.md>`, capture the window region with
+`screencapture -x -R<x,y,w,h>`, then delete the key to restore.
 
-### Current standing (held)
+### Current standing
 
-All work that can be verified without an awake display or a healthy test
-runner is landed and committed. The remaining features — line-focus
-overlay, reading themes, the Translation-framework popover / dual-language
-/ pronunciation, and Vision OCR + ScreenCaptureKit capture — are framework
-and UI that cannot be exercised here. Per direction, they are **on hold**
-until the environment is cleared (wake/unlock the display; reboot or run
-`Product > Test` once in Xcode), after which each remaining PR is verified
-live (full suite + screenshots) as it lands.
+The accessibility and bilingual waves are **complete and screenshot-verified**:
+Learning tab, tap-to-translate popover, sepia/night reading themes, and the
+line-focus reading ruler all landed with live captures. Remaining: on-device
+OCR (Vision recognition is exercisable here; ScreenCaptureKit region capture
+needs Screen Recording permission), and the optional dual-language /
+pronunciation-drill study views.
+
+One automation limit remains: the tap-to-translate popover is driven by an
+Option-double-click on a custom NSTextView that exposes no accessibility
+elements, and synthetic mouse events need Accessibility/Input-Monitoring TCC a
+transient `swift` process lacks — so the popover itself can't be auto-captured
+headlessly. It reuses the proven double-click event path and is build- and
+unit-verified; the on-device translation also needs the language pair
+downloaded.
+
+### Screenshots (docs/verification-assets/)
+
+- `learning-settings-tab.png` — Learning tab: tap-to-translate + saved vocab + Anki export
+- `reading-theme-sepia.png`, `reading-theme-night.png` — themed Markdown reader
+- `line-focus-ruler.png` — reading ruler dimming around the pointer
 
 ## Status by feature
 
@@ -55,8 +61,8 @@ live (full suite + screenshots) as it lands.
 | 2 — Typography | `ReaderTypography`, bundled OpenDyslexic + Atkinson Hyperlegible, Markdown/Text/Scratchpad threaded, launch registration | ok | ok (`/tmp/verify_typography.swift`, all pass) | `ReaderTypographyTests` (16) | pending display |
 | 4a — Reading tab | Settings → Reading: font, size, spacing, highlight, live previews, OFL attribution | ok | n/a (binds tested `ReaderSettings`) | — | pending display |
 | 3a — Leading bold | `BionicReading` bold-prefix pass, off by default, Reading-tab toggle | ok | ok (`/tmp/verify_bionic.swift`) | `BionicReadingTests` (4) | pending display |
-| 3b — Line focus | reading ruler overlay | todo (needs display to verify) | | | |
-| 4b — Reading themes | sepia/dark reading surface | todo (needs display to verify) | | | |
+| 3b — Line focus | reading ruler overlay, pointer-following dim band | ok | ok | `ReaderSettingsTests` (4) | done (`line-focus-ruler.png`) |
+| 4b — Reading themes | sepia / night reading surface | ok | ok | `ReadingThemeTests` (4) | done (`reading-theme-sepia.png`, `reading-theme-night.png`) |
 
 ### Now Playing + media keys + sleep timer + queue — COMPLETE (code)
 
@@ -73,10 +79,11 @@ live (full suite + screenshots) as it lands.
 | --- | --- | --- | --- | --- | --- |
 | 1 — Sentence language | `Sentence.language` + `SentenceSegmenter` NLLanguageRecognizer, zero behavior change | ok | ok (`/tmp/verify_lang.swift`) | `SentenceLanguageTests` (6) | n/a |
 | 2 — Word resolver | `WordRangeResolver` (tap-to-translate word lookup, CJK-aware) | ok | ok (`/tmp/verify_wordrange.swift`) | `WordRangeResolverTests` (7) | n/a |
-| 2 — Translation popover | `TranslationCoordinator`, popover, Opt-double-click | held (Translation framework — device only) | | | |
-| 3 — Vocabulary store | `VocabularyStore` JSON persistence + dedup | ok | n/a | `VocabularyStoreTests` (7) | pending |
-| 4 — Dual language view | L1 under each block | held (device only) | | | |
-| 5 — Anki export | `AnkiCSVExporter` (RFC-4180, CJK, tags) | ok | ok (`/tmp/verify_anki.swift`) | `AnkiCSVExporterTests` (9) | n/a |
+| 2 — Translation popover | `TranslationPopoverView/Controller`, Opt-double-click + right-click, on-device translate, save-to-vocab | ok | ok | `WordRangeResolverTests` (+4 sentence) | wired + unit-verified; popover not auto-captureable (see note) |
+| 3 — Vocabulary store | `VocabularyStore` JSON persistence + dedup | ok | n/a | `VocabularyStoreTests` (7) | surfaced in Learning tab |
+| 3b — Learning tab | `LearningSettingsView`: tap-to-translate toggle, target language, vocab list, Anki export | ok | ok | `LearningSettingsTests` (5) | done (`learning-settings-tab.png`) |
+| 4 — Dual language view | L1 under each block | held (optional) | | | |
+| 5 — Anki export | `AnkiCSVExporter` (RFC-4180, CJK, tags) | ok | ok (`/tmp/verify_anki.swift`) | `AnkiCSVExporterTests` (9) | reachable via Learning tab |
 | 5 — Pronunciation drill | `PronunciationDrill`, voice routing | held (device only) | | | |
 
 ### On-device OCR
