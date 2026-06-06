@@ -47,6 +47,7 @@ struct TextReaderView: View {
                             currentMatchIndex: search.currentIndex,
                             fontScale: readerSettings.fontScale,
                             typography: ReaderTypography(from: readerSettings),
+                            readingTheme: readerSettings.readingTheme,
                             onReadFromOffset: handleReadFromOffset
                         )
                     }
@@ -213,6 +214,7 @@ private struct PlainTextView: NSViewRepresentable {
     let currentMatchIndex: Int
     let fontScale: Double
     let typography: ReaderTypography
+    let readingTheme: ReadingTheme
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -259,6 +261,7 @@ private struct PlainTextView: NSViewRepresentable {
               let storage = tv.textStorage else { return }
 
         tv.onReadFromOffset = onReadFromOffset
+        readingTheme.apply(toScrollView: nsView, textView: tv)
 
         let textChanged = context.coordinator.lastText != text
         let scaleChanged = context.coordinator.lastAppliedScale != fontScale

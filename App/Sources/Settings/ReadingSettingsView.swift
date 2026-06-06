@@ -15,6 +15,7 @@ struct ReadingSettingsView: View {
     var body: some View {
         Form {
             bodyTextSection
+            themeSection
             highlightSection
             attributionSection
 
@@ -73,6 +74,50 @@ struct ReadingSettingsView: View {
             .padding(12)
             .background(Color.readAloudTTSSurface, in: RoundedRectangle(cornerRadius: 8))
             .accessibilityLabel("Live preview of the selected reading font and spacing")
+    }
+
+    // MARK: - Reading theme
+
+    private var themeSection: some View {
+        Section {
+            Picker("Surface", selection: $reader.readingTheme) {
+                ForEach(ReadingTheme.allCases) { theme in
+                    HStack {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(theme.swatchColor)
+                            .frame(width: 16, height: 12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .strokeBorder(Color.secondary.opacity(0.3))
+                            )
+                        Text(theme.displayName)
+                    }
+                    .tag(theme)
+                }
+            }
+            Text(reader.readingTheme.subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            themePreview
+        } header: {
+            Text("Reading Theme")
+        } footer: {
+            Text("Tints the page behind Markdown, plain-text, and Scratchpad reading. Sepia and Night set their own light/dark text so the page stays comfortable regardless of system appearance.")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var themePreview: some View {
+        let theme = reader.readingTheme
+        return Text(sampleText)
+            .font(Font(reader.fontFace.baseFont(size: 15 * reader.fontScale) as CTFont))
+            .foregroundStyle(theme == .night ? Color.white.opacity(0.92) : Color.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(theme.swatchColor, in: RoundedRectangle(cornerRadius: 8))
+            .environment(\.colorScheme, theme == .night ? .dark : .light)
+            .accessibilityLabel("Live preview of the \(theme.displayName) reading surface")
     }
 
     // MARK: - Highlight

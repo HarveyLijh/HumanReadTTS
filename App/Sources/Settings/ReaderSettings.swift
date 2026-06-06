@@ -87,6 +87,12 @@ final class ReaderSettings {
         didSet { defaults.set(leadingBoldEnabled, forKey: leadingBoldKey) }
     }
 
+    /// Reading surface (page background + appearance). `.system` keeps the
+    /// historic adaptive surface, so existing readers look unchanged.
+    var readingTheme: ReadingTheme = .system {
+        didSet { defaults.set(readingTheme.rawValue, forKey: readingThemeKey) }
+    }
+
     private let defaults: UserDefaults
     private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
     private let highlightPaletteKey = "app.readaloudtts.mac.reader.highlightPalette.v1"
@@ -95,6 +101,7 @@ final class ReaderSettings {
     private let lineSpacingMultipleKey = "app.readaloudtts.mac.reader.lineSpacingMultiple.v1"
     private let letterSpacingKey = "app.readaloudtts.mac.reader.letterSpacing.v1"
     private let leadingBoldKey = "app.readaloudtts.mac.reader.leadingBold.v1"
+    private let readingThemeKey = "app.readaloudtts.mac.reader.readingTheme.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -125,6 +132,10 @@ final class ReaderSettings {
         if defaults.object(forKey: leadingBoldKey) != nil {
             leadingBoldEnabled = defaults.bool(forKey: leadingBoldKey)
         }
+        if let raw = defaults.string(forKey: readingThemeKey),
+           let theme = ReadingTheme(rawValue: raw) {
+            readingTheme = theme
+        }
     }
 
     func increase() {
@@ -143,6 +154,7 @@ final class ReaderSettings {
         lineSpacingMultiple = 1.25
         letterSpacing = 0
         leadingBoldEnabled = false
+        readingTheme = .system
     }
 }
 

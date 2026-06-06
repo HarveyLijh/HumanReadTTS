@@ -126,11 +126,12 @@ struct ScratchpadView: View {
                 spokenSubRange: player.spokenSubRange,
                 fontScale: readerSettings.fontScale,
                 typography: ReaderTypography(from: readerSettings),
+                readingTheme: readerSettings.readingTheme,
                 onReadFromOffset: handleReadFromOffset
             )
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
-                .background(Color.readAloudTTSSurface)
+                .background(readerSettings.readingTheme.swatchColor)
         }
     }
 
@@ -329,6 +330,7 @@ private struct ScratchpadPreview: NSViewRepresentable {
     let spokenSubRange: NSRange?
     let fontScale: Double
     let typography: ReaderTypography
+    let readingTheme: ReadingTheme
     /// Double-click / "Read from here" callback. Kept optional so
     /// the scratchpad preview can be reused in contexts (screenshots,
     /// unit tests) that don't drive playback.
@@ -376,6 +378,9 @@ private struct ScratchpadPreview: NSViewRepresentable {
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let textView = nsView.documentView as? ClickableReaderTextView,
               let storage = textView.textStorage else { return }
+        // Appearance only — the surface tint is painted by the SwiftUI
+        // background, since this preview draws no background of its own.
+        textView.appearance = readingTheme.appearance
         // Re-bind the callback on every update so swapping the
         // host (e.g. a different scratchpad instance sharing the
         // same NSView) points clicks at the right player.

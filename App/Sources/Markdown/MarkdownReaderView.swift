@@ -83,6 +83,7 @@ struct MarkdownReaderView: View {
                                 spokenSubRange: player.spokenSubRange,
                                 searchMatches: searchMatches,
                                 currentMatchIndex: search.currentIndex,
+                                readingTheme: readerSettings.readingTheme,
                                 onReadFromOffset: handleReadFromOffset
                             )
                         case .source:
@@ -1279,6 +1280,7 @@ private struct MarkdownTextView: NSViewRepresentable {
     let spokenSubRange: NSRange?
     let searchMatches: [NSRange]
     let currentMatchIndex: Int
+    let readingTheme: ReadingTheme
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -1316,6 +1318,7 @@ private struct MarkdownTextView: NSViewRepresentable {
               let storage = tv.textStorage else { return }
 
         tv.onReadFromOffset = onReadFromOffset
+        readingTheme.apply(toScrollView: nsView, textView: tv)
 
         let identity = ObjectIdentifier(attributed)
         if context.coordinator.lastAttributedIdentity != identity {
