@@ -107,6 +107,7 @@
 		2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0016 /* ReadingQueueTests.swift */; };
 		2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0017 /* SentenceLanguageTests.swift */; };
 		2B00000000000000000A0951 /* ReadingOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0951 /* ReadingOrder.swift */; };
+		2B00000000000000000A0952 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0952 /* OCRService.swift */; };
 		2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D09 /* AnkiCSVExporter.swift */; };
 		2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D08 /* VocabularyStore.swift */; };
 		2B00000000000000000A0D0A /* LearningSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D0A /* LearningSettings.swift */; };
@@ -115,6 +116,7 @@
 		2B00000000000000000A0D0C /* TranslationPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D0C /* TranslationPopoverView.swift */; };
 		2B00000000000000000A0D0B /* WordPronouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0D0B /* WordPronouncer.swift */; };
 		2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001B /* ReadingOrderTests.swift */; };
+		2B00000000000000000B0023 /* OCRServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0023 /* OCRServiceTests.swift */; };
 		2B00000000000000000B0018 /* AnkiCSVExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */; };
 		2B00000000000000000B001A /* VocabularyStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B001A /* VocabularyStoreTests.swift */; };
 		2B00000000000000000B0022 /* ReaderSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0022 /* ReaderSettingsTests.swift */; };
@@ -201,6 +203,7 @@
 		2A00000000000000000B0016 /* ReadingQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingQueueTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0017 /* SentenceLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceLanguageTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0951 /* ReadingOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrder.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0952 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D09 /* AnkiCSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporter.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D08 /* VocabularyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStore.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D0A /* LearningSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningSettings.swift; sourceTree = "<group>"; };
@@ -209,6 +212,7 @@
 		2A00000000000000000A0D0C /* TranslationPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationPopoverView.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0D0B /* WordPronouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordPronouncer.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001B /* ReadingOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingOrderTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0023 /* OCRServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRServiceTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnkiCSVExporterTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B001A /* VocabularyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStoreTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0022 /* ReaderSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderSettingsTests.swift; sourceTree = "<group>"; };
@@ -589,6 +593,7 @@
 			isa = PBXGroup;
 			children = (
 				2A00000000000000000A0951 /* ReadingOrder.swift */,
+				2A00000000000000000A0952 /* OCRService.swift */,
 			);
 			path = OCR;
 			sourceTree = "<group>";
@@ -674,6 +679,7 @@
 				2A00000000000000000B0016 /* ReadingQueueTests.swift */,
 				2A00000000000000000B0017 /* SentenceLanguageTests.swift */,
 				2A00000000000000000B001B /* ReadingOrderTests.swift */,
+				2A00000000000000000B0023 /* OCRServiceTests.swift */,
 				2A00000000000000000B0018 /* AnkiCSVExporterTests.swift */,
 				2A00000000000000000B001A /* VocabularyStoreTests.swift */,
 				2A00000000000000000B0022 /* ReaderSettingsTests.swift */,
@@ -950,6 +956,7 @@
 				2B00000000000000000A0049 /* SleepTimer.swift in Sources */,
 				2B00000000000000000A004A /* ReadingQueue.swift in Sources */,
 				2B00000000000000000A0951 /* ReadingOrder.swift in Sources */,
+				2B00000000000000000A0952 /* OCRService.swift in Sources */,
 				2B00000000000000000A0D09 /* AnkiCSVExporter.swift in Sources */,
 				2B00000000000000000A0D08 /* VocabularyStore.swift in Sources */,
 				2B00000000000000000A0D0A /* LearningSettings.swift in Sources */,
@@ -1037,6 +1044,7 @@
 				2B00000000000000000B0016 /* ReadingQueueTests.swift in Sources */,
 				2B00000000000000000B0017 /* SentenceLanguageTests.swift in Sources */,
 				2B00000000000000000B001B /* ReadingOrderTests.swift in Sources */,
+				2B00000000000000000B0023 /* OCRServiceTests.swift in Sources */,
 				2B00000000000000000B0018 /* AnkiCSVExporterTests.swift in Sources */,
 				2B00000000000000000B001A /* VocabularyStoreTests.swift in Sources */,
 				2B00000000000000000B0022 /* ReaderSettingsTests.swift in Sources */,
