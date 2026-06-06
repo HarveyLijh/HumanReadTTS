@@ -40,4 +40,21 @@ enum WordRangeResolver {
         guard let range = wordRange(in: text, at: utf16Index) else { return nil }
         return (text as NSString).substring(with: range)
     }
+
+    /// The trimmed sentence containing `utf16Index`, used as the saved
+    /// example-sentence context for a tapped word. Nil when the index is
+    /// out of range; an empty token range yields nil too.
+    static func sentence(in text: String, at utf16Index: Int) -> String? {
+        let ns = text as NSString
+        guard utf16Index >= 0, utf16Index < ns.length else { return nil }
+        let stringIndex = String.Index(utf16Offset: utf16Index, in: text)
+        guard stringIndex < text.endIndex else { return nil }
+
+        let tokenizer = NLTokenizer(unit: .sentence)
+        tokenizer.string = text
+        let range = tokenizer.tokenRange(at: stringIndex)
+        guard !range.isEmpty else { return nil }
+        let sentence = text[range].trimmingCharacters(in: .whitespacesAndNewlines)
+        return sentence.isEmpty ? nil : sentence
+    }
 }

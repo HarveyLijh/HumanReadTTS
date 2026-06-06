@@ -40,7 +40,14 @@ final class ClickableReaderTextView: NSTextView {
         guard event.clickCount == 2 else { return }
         let offset = characterOffset(for: event)
         guard offset >= 0 else { return }
-        onReadFromOffset?(offset)
+        // Option-double-click looks up the word instead of seeking
+        // playback. The controller is a no-op when the feature is off,
+        // so the plain double-click-to-read behavior is unchanged.
+        if event.modifierFlags.contains(.option) {
+            TranslationPopoverController.shared.present(forWordAt: offset, in: self)
+        } else {
+            onReadFromOffset?(offset)
+        }
     }
 
     override func menu(for event: NSEvent) -> NSMenu? {
@@ -70,6 +77,20 @@ final class ClickableReaderTextView: NSTextView {
             menu.insertItem(readToEnd, at: 0)
             menu.insertItem(readHere, at: 0)
         }
+
+        // A discoverable path to the same word lookup as Option-double-
+        // click, shown only when tap-to-translate is enabled.
+        if LearningSettings.shared.tapToTranslateEnabled,
+           let word = WordRangeResolver.word(in: string, at: offset) {
+            let translate = NSMenuItem(
+                title: "Translate “\(word)”",
+                action: #selector(translateFromHere(_:)),
+                keyEquivalent: ""
+            )
+            translate.target = self
+            menu.insertItem(translate, at: 0)
+            menu.insertItem(.separator(), at: 1)
+        }
         return menu
     }
 
@@ -83,6 +104,12 @@ final class ClickableReaderTextView: NSTextView {
         guard let offset = pendingMenuOffset else { return }
         pendingMenuOffset = nil
         (onReadFromOffsetToEnd ?? onReadFromOffset)?(offset)
+    }
+
+    @objc private func translateFromHere(_ sender: Any?) {
+        guard let offset = pendingMenuOffset else { return }
+        pendingMenuOffset = nil
+        TranslationPopoverController.shared.present(forWordAt: offset, in: self)
     }
 
     /// Translates a window-space `NSEvent` to the UTF-16 offset

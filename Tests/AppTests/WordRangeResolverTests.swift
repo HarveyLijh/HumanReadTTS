@@ -38,6 +38,33 @@ final class WordRangeResolverTests: XCTestCase {
         XCTAssertEqual((text as NSString).substring(with: range), "brown")
     }
 
+    func test_sentence_returnsEnclosingSentenceTrimmed() {
+        let text = "I like apples. She reads books. We walk home."
+        // Index 20 is inside "reads" of the middle sentence.
+        XCTAssertEqual(WordRangeResolver.sentence(in: text, at: 20), "She reads books.")
+    }
+
+    func test_sentence_firstAndLast() {
+        let text = "Hello world. Goodbye now."
+        XCTAssertEqual(WordRangeResolver.sentence(in: text, at: 0), "Hello world.")
+        XCTAssertEqual(WordRangeResolver.sentence(in: text, at: 20), "Goodbye now.")
+    }
+
+    func test_sentence_outOfBounds_returnsNil() {
+        XCTAssertNil(WordRangeResolver.sentence(in: "hi", at: -1))
+        XCTAssertNil(WordRangeResolver.sentence(in: "hi", at: 5))
+        XCTAssertNil(WordRangeResolver.sentence(in: "", at: 0))
+    }
+
+    func test_sentence_chineseContext() {
+        let text = "他正在过马路。请小心。"
+        // The first clause's terminator (。) lands mid-string; an index in
+        // the first clause returns that clause as context.
+        let sentence = WordRangeResolver.sentence(in: text, at: 2)
+        XCTAssertNotNil(sentence)
+        XCTAssertTrue(sentence!.contains("过马路"))
+    }
+
     func test_word_chineseSegmentsIntoWordNotGlyph() {
         // "我喜欢苹果" — clicking a character returns its whole word, which
         // includes the pointed-at character and is at least one char.
