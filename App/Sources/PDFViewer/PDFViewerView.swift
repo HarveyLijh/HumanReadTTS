@@ -54,7 +54,7 @@ struct PDFViewerView: View {
                         skipFigureCaptions: SpeechSettings.shared.skipFigureCaptions
                     )
                     blocks = extracted
-                    let parsed = await SentenceSegmenter.segment(extracted)
+                    let parsed = await SentenceSegmenter.segment(extracted, reflowLineWraps: true)
                     sentences = parsed
                     player.load(parsed)
                 }

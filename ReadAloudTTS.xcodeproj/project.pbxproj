@@ -24,6 +24,7 @@
 		2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0032 /* PDFTextExtractor.swift */; };
 		2B00000000000000000A0033 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0033 /* Sentence.swift */; };
 		2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0034 /* SentenceSegmenter.swift */; };
+		2B00000000000000000A0099 /* LineReflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0099 /* LineReflow.swift */; };
 		2B00000000000000000A0035 /* ResearchCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0035 /* ResearchCleanup.swift */; };
 		2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0041 /* SpeechPlayer.swift */; };
 		2B00000000000000000A0042 /* PlaybackTransportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000A0042 /* PlaybackTransportView.swift */; };
@@ -77,6 +78,7 @@
 		2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */; };
 		2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0003 /* PDFTextExtractorTests.swift */; };
 		2B00000000000000000B0004 /* SentenceSegmenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0004 /* SentenceSegmenterTests.swift */; };
+		2B00000000000000000B0025 /* LineReflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0025 /* LineReflowTests.swift */; };
 		2B00000000000000000B0005 /* MarkdownRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0005 /* MarkdownRendererTests.swift */; };
 		2B00000000000000000B0006 /* ModelStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0006 /* ModelStorageTests.swift */; };
 		2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */; };
@@ -178,6 +180,7 @@
 		2A00000000000000000A0032 /* PDFTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractor.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0033 /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0034 /* SentenceSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenter.swift; sourceTree = "<group>"; };
+		2A00000000000000000A0099 /* LineReflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineReflow.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0035 /* ResearchCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchCleanup.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0041 /* SpeechPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayer.swift; sourceTree = "<group>"; };
 		2A00000000000000000A0042 /* PlaybackTransportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTransportView.swift; sourceTree = "<group>"; };
@@ -257,6 +260,7 @@
 		2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoaderTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0003 /* PDFTextExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTextExtractorTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0004 /* SentenceSegmenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceSegmenterTests.swift; sourceTree = "<group>"; };
+		2A00000000000000000B0025 /* LineReflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineReflowTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0005 /* MarkdownRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRendererTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0006 /* ModelStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStorageTests.swift; sourceTree = "<group>"; };
 		2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalogReachabilityTests.swift; sourceTree = "<group>"; };
@@ -459,6 +463,7 @@
 				2A00000000000000000A0032 /* PDFTextExtractor.swift */,
 				2A00000000000000000A0033 /* Sentence.swift */,
 				2A00000000000000000A0034 /* SentenceSegmenter.swift */,
+				2A00000000000000000A0099 /* LineReflow.swift */,
 				2A00000000000000000A0035 /* ResearchCleanup.swift */,
 				2A00000000000000000A0036 /* SkipRule.swift */,
 			);
@@ -661,6 +666,7 @@
 				2A00000000000000000B0002 /* PDFDocumentLoaderTests.swift */,
 				2A00000000000000000B0003 /* PDFTextExtractorTests.swift */,
 				2A00000000000000000B0004 /* SentenceSegmenterTests.swift */,
+				2A00000000000000000B0025 /* LineReflowTests.swift */,
 				2A00000000000000000B0005 /* MarkdownRendererTests.swift */,
 				2A00000000000000000B0006 /* ModelStorageTests.swift */,
 				2A00000000000000000B0007 /* ModelCatalogReachabilityTests.swift */,
@@ -942,6 +948,7 @@
 				2B00000000000000000A0032 /* PDFTextExtractor.swift in Sources */,
 				2B00000000000000000A0033 /* Sentence.swift in Sources */,
 				2B00000000000000000A0034 /* SentenceSegmenter.swift in Sources */,
+				2B00000000000000000A0099 /* LineReflow.swift in Sources */,
 				2B00000000000000000A0035 /* ResearchCleanup.swift in Sources */,
 				2B00000000000000000A0041 /* SpeechPlayer.swift in Sources */,
 				2B00000000000000000A0042 /* PlaybackTransportView.swift in Sources */,
@@ -1027,6 +1034,7 @@
 				2B00000000000000000B0002 /* PDFDocumentLoaderTests.swift in Sources */,
 				2B00000000000000000B0003 /* PDFTextExtractorTests.swift in Sources */,
 				2B00000000000000000B0004 /* SentenceSegmenterTests.swift in Sources */,
+				2B00000000000000000B0025 /* LineReflowTests.swift in Sources */,
 				2B00000000000000000B0005 /* MarkdownRendererTests.swift in Sources */,
 				2B00000000000000000B0006 /* ModelStorageTests.swift in Sources */,
 				2B00000000000000000B0007 /* ModelCatalogReachabilityTests.swift in Sources */,

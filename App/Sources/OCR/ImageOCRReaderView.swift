@@ -172,7 +172,7 @@ struct ImageOCRReaderView: View {
             )
             rawText = recognized
             let block = DocumentBlock(text: recognized, pageIndex: 0, offsetInPage: 0)
-            let parsed = await SentenceSegmenter.segment([block])
+            let parsed = await SentenceSegmenter.segment([block], reflowLineWraps: true)
             sentences = parsed
             player.load(parsed)
             status = .ready

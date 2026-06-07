@@ -66,6 +66,66 @@ final class SentenceSegmenterTests: XCTestCase {
         }
     }
 
+    // MARK: reflowLineWraps
+
+    /// A PDF-style block where one sentence is hard-wrapped across four
+    /// visual lines. Without reflow `NLTokenizer` splits on every `\n`.
+    private static let wrappedBlock = DocumentBlock(
+        text: "Learning happens wherever people confront problems they do not yet know how to solve, and it\nhappens at least as often outside classrooms as within them: in the puzzle a player retries until it\nclicks, in the game whose rules must be mastered before one can advance, in any unfamiliar task\napproached by trial and error. What most determines whether a person learns or disengages.",
+        pageIndex: 0,
+        offsetInPage: 0
+    )
+
+    func test_reflow_joinsWrappedLinesIntoRealSentences() {
+        let sentences = SentenceSegmenter.segmentSync([Self.wrappedBlock], reflowLineWraps: true)
+        XCTAssertEqual(sentences.count, 2)
+        XCTAssertEqual(sentences.first?.text.hasSuffix("trial and error."), true)
+        XCTAssertEqual(sentences.last?.text.hasPrefix("What most determines"), true)
+    }
+
+    func test_reflow_sentencesHaveNoInternalNewlines() {
+        let sentences = SentenceSegmenter.segmentSync([Self.wrappedBlock], reflowLineWraps: true)
+        XCTAssertTrue(sentences.allSatisfy { !$0.text.contains("\n") })
+    }
+
+    func test_default_keepsPerLineFragmentation() {
+        // reflowLineWraps defaults to false: behavior is unchanged, so
+        // the hard-wrapped block still fragments per visual line.
+        let sentences = SentenceSegmenter.segmentSync([Self.wrappedBlock])
+        XCTAssertGreaterThan(sentences.count, 2)
+    }
+
+    func test_reflow_offsetsAddressLengthIdenticalReflowedText() {
+        // The recorded offsets are computed on the reflowed copy. Because
+        // reflow is length-preserving they also index the original block
+        // text, which is what the PDF highlight layer relies on.
+        let sentences = SentenceSegmenter.segmentSync([Self.wrappedBlock], reflowLineWraps: true)
+        let reflowed = LineReflow.reflow(Self.wrappedBlock.text) as NSString
+        XCTAssertEqual(reflowed.length, (Self.wrappedBlock.text as NSString).length)
+        for sentence in sentences {
+            let slice = reflowed.substring(with: NSRange(
+                location: sentence.offsetInBlock,
+                length: sentence.lengthInBlock
+            )).trimmingCharacters(in: .whitespacesAndNewlines)
+            XCTAssertEqual(slice, sentence.text)
+        }
+    }
+
+    func test_reflow_doesNotDisturbSingleLineSegmentation() {
+        let blocks = [DocumentBlock(text: "Hello there. How are you? Fine, thanks.", pageIndex: 0, offsetInPage: 0)]
+        let sentences = SentenceSegmenter.segmentSync(blocks, reflowLineWraps: true)
+        XCTAssertEqual(sentences.map(\.text), ["Hello there.", "How are you?", "Fine, thanks."])
+    }
+
+    func test_reflow_preservesParagraphBreakBetweenHeadingAndBody() {
+        // A blank line separates a heading from the body; the run of two
+        // breaks is preserved so they don't merge into one sentence.
+        let blocks = [DocumentBlock(text: "Introduction\n\nThe study began in earnest.", pageIndex: 0, offsetInPage: 0)]
+        let sentences = SentenceSegmenter.segmentSync(blocks, reflowLineWraps: true).map(\.text)
+        XCTAssertTrue(sentences.contains("Introduction"))
+        XCTAssertTrue(sentences.contains("The study began in earnest."))
+    }
+
     func test_chineseOffsets_roundTripInUTF16() {
         // 你好 is 2 UTF-16 code units, 。 is 1, so sentence offsets
         // in UTF-16 units must reconstruct the same substring.

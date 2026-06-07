@@ -14,18 +14,35 @@ enum SentenceSegmenter {
     /// still walk quickly (NLTokenizer is native code), but keeping
     /// it off the main actor matches the extractor and keeps the
     /// UI responsive during the `task(id:)` chain.
-    static func segment(_ blocks: [DocumentBlock]) async -> [Sentence] {
+    static func segment(
+        _ blocks: [DocumentBlock],
+        reflowLineWraps: Bool = false
+    ) async -> [Sentence] {
         await Task.detached(priority: .userInitiated) {
-            segmentSync(blocks)
+            segmentSync(blocks, reflowLineWraps: reflowLineWraps)
         }.value
     }
 
-    static func segmentSync(_ blocks: [DocumentBlock]) -> [Sentence] {
+    /// - Parameter reflowLineWraps: When true, intra-paragraph line
+    ///   wraps in each block are collapsed to spaces (via `LineReflow`)
+    ///   before tokenizing, so a sentence that spans several wrapped
+    ///   lines is recognized as one sentence instead of one fragment per
+    ///   line. Set by callers whose source is segregated by *visual*
+    ///   lines (PDF, OCR, text exported from a PDF). Because the reflow
+    ///   is length-preserving, the recorded UTF-16 offsets still address
+    ///   the original block text, so the highlight layer is unaffected.
+    static func segmentSync(
+        _ blocks: [DocumentBlock],
+        reflowLineWraps: Bool = false
+    ) -> [Sentence] {
         var sentences: [Sentence] = []
         let tokenizer = NLTokenizer(unit: .sentence)
 
         for (blockIndex, block) in blocks.enumerated() {
-            let text = block.text
+            // Reflow is length-preserving, so the NSRanges computed below
+            // are valid against the original block text too — the
+            // highlight layer needs no remapping.
+            let text = reflowLineWraps ? LineReflow.reflow(block.text) : block.text
             guard !text.isEmpty else { continue }
 
             tokenizer.string = text

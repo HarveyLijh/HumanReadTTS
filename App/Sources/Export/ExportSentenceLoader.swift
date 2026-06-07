@@ -53,7 +53,7 @@ enum ExportSentenceLoader {
             let blocks = await PDFTextExtractor.extract(
                 pdf, skipFigureCaptions: skipFigures
             )
-            return await SentenceSegmenter.segment(blocks)
+            return await SentenceSegmenter.segment(blocks, reflowLineWraps: true)
         case .markdown:
             do {
                 let raw = try String(contentsOf: url, encoding: .utf8)
@@ -97,7 +97,7 @@ enum ExportSentenceLoader {
                 let block = DocumentBlock(
                     text: raw, pageIndex: 0, offsetInPage: 0
                 )
-                return await SentenceSegmenter.segment([block])
+                return await SentenceSegmenter.segment([block], reflowLineWraps: true)
             } catch {
                 throw LoadError.textReadFailed(error.localizedDescription)
             }
@@ -112,7 +112,7 @@ enum ExportSentenceLoader {
                     languages: SpeechSettings.shared.ocrRecognitionLanguages
                 )
                 let block = DocumentBlock(text: text, pageIndex: 0, offsetInPage: 0)
-                return await SentenceSegmenter.segment([block])
+                return await SentenceSegmenter.segment([block], reflowLineWraps: true)
             } catch {
                 throw LoadError.imageReadFailed(error.localizedDescription)
             }

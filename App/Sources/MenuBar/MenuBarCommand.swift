@@ -162,7 +162,7 @@ final class MenuBarCommand {
     func readText(_ text: String) {
         Task { @MainActor in
             let block = DocumentBlock(text: text, pageIndex: 0, offsetInPage: 0)
-            let sentences = await SentenceSegmenter.segment([block])
+            let sentences = await SentenceSegmenter.segment([block], reflowLineWraps: true)
             player.load(sentences)
             player.togglePlayPause()
         }
