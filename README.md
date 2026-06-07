@@ -104,11 +104,13 @@ settings gear. Progressively collapses on narrow windows: drops the
 time, then voice label, then speed chip — transport and scrubber
 are always visible.
 
-### 📚 Three document formats
+### 📚 Five document formats
 **PDF** via PDFKit, **Markdown** via Foundation's attributed-string
 parser (preview + source views), **EPUB** via ZIPFoundation + your
-XHTML chapters. Sentence segmentation uses `NLTokenizer`; UTF-16
-offsets throughout, so click-to-start-from-word works natively.
+XHTML chapters, **DOCX** via a built-in OOXML reader, and **images**
+(PNG, JPG, HEIC, TIFF…) read through on-device OCR. Sentence
+segmentation uses `NLTokenizer`; UTF-16 offsets throughout, so
+click-to-start-from-word works natively.
 
 ### 🎙 Three voice engines
 - **System** — any AVSpeechSynthesis voice on your Mac. Bilingual
@@ -162,9 +164,11 @@ glance; toggling mid-read takes effect on the next sentence.
 ### 🌐 System integration
 - **Services menu** — highlight text in any app, choose
   **Services → Read with ReadAloudTTS**.
-- **Global hotkey** — ⌘⇧S reads your clipboard from anywhere.
+- **Global hotkeys** — ⌘⇧E reads the selection in any app (with a
+  clipboard fallback, and OCR when the clipboard holds an image);
+  ⌘⇧2 OCRs and reads a screenshot. Both rebindable in Settings.
 - **MenuBarExtra** — transport controls in the menu bar while a
-  document plays.
+  document plays, plus Read Selection and Read Screenshot Text.
 - **URL handlers** — `open -a ReadAloudTTS paper.pdf` and Finder
   double-click both route to the single existing reader window
   instead of spawning duplicates.
@@ -178,6 +182,41 @@ Local-only WPM tracking that feeds the transport's time estimates.
 Opt-out in **Settings → Analytics**; nothing ever leaves the
 device.
 
+### 🅰 Reading comfort & accessibility
+**Settings → Reading**, with live previews. Pick a body typeface —
+serif, system, sans, monospaced, or the bundled **OpenDyslexic** and
+**Atkinson Hyperlegible** — and tune size, line spacing, and letter
+spacing. Optional **leading-bold ("bionic") reading** anchors the eye
+on word beginnings. The playback highlight has a **color-blind-aware
+palette**. Two reading surfaces beyond System: **Sepia** (warm paper)
+and **Night** (dim, light-on-dark), plus a **line-focus reading
+ruler** that dims everything except the line under your pointer.
+
+### 🈺 Bilingual study tools
+Turn the reader into a study tool. **Option-double-click** (or
+right-click → Translate) any word to open a translator: on-device
+Apple Translation into your target language, hear it spoken, and
+**save it to your vocabulary** with the surrounding sentence as
+context. **Settings → Learning** lists every saved word and
+**exports them to Anki** (CSV with Front / Back / Context / language
+tag). Defaults tuned for English ⇄ Simplified Chinese.
+
+### 👁 Read anything on screen (OCR)
+Drop or open an **image** and ReadAloudTTS recognizes the text
+on-device with Vision — in proper reading order, so multi-column and
+title-over-body layouts don't zig-zag — then reads it like any other
+document. Can't select text in some app? Screenshot a region to the
+clipboard (**⌃⇧⌘4**) and trigger **Read Screenshot** to OCR and read
+it aloud. Recognition languages are configurable in **Settings →
+Shortcuts**.
+
+### 🎚 Now Playing, sleep timer & reading queue
+Reads publish to **Control Center / the Now Playing widget**, and the
+hardware media keys (F7/F8/F9) plus AirPods controls drive playback. A
+**sleep timer** auto-pauses after a set number of minutes or at the
+end of the current sentence, and a **reading queue** chains items with
+auto-advance. All in **Settings → Playback Controls**.
+
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -188,9 +227,14 @@ device.
 | `⌘ O` | Open File… |
 | `⌘ ⇧ E` | Export Audiobook… |
 | `⌘ ⇧ J` | Show Exports queue |
-| `⌘ ⇧ S` | Read Clipboard (global, from any app) |
-| `⌘ ⇧ R` | Read Clipboard (from the menubar item) |
 | `⌘ ,` | Open Settings |
+
+**Global shortcuts** — fire from any app, rebindable in **Settings → Shortcuts**:
+
+| Key | Action |
+| --- | --- |
+| `⌘ ⇧ E` | Read the selection in the frontmost app (falls back to the clipboard, and OCRs a clipboard image) |
+| `⌘ ⇧ 2` | OCR and read an image / screenshot on the clipboard |
 
 ## Roadmap
 
@@ -220,6 +264,22 @@ recommend.
 - Sandboxed + hardened Release builds; unsigned DMG distribution
   path works without the paid Apple Developer Program
 
+### ✅ Shipped since v0.7.1 — accessibility, bilingual & OCR wave
+
+- **Reading comfort** — typeface picker with bundled OpenDyslexic /
+  Atkinson Hyperlegible, size / line / letter spacing, leading-bold
+  reading, color-blind-aware highlight palette
+- **Reading themes** — Sepia and Night surfaces, plus a line-focus
+  reading ruler
+- **Tap-to-translate** — Option-double-click a word for on-device
+  translation, pronunciation, and save-to-vocabulary
+- **Vocabulary + Anki export** — a Learning tab that lists saved
+  words and exports them as Anki-importable CSV
+- **On-device OCR** — open images as documents and a Read-Screenshot
+  hotkey that OCRs a clipboard capture, with configurable languages
+- **Now Playing + media keys + sleep timer + reading queue**
+- **DOCX reading**
+
 ### 🚧 v0.8.x — Public-ready polish + the critical UX gaps
 
 Closing the most-visible deltas vs. Voice Dream / NaturalReader while
@@ -231,8 +291,6 @@ the app walks to v1.
 - **Bookmarks with notes** — name and save any number of positions
   per document (resume is one automatic bookmark; this adds manual
   ones), inline highlights on selected text, export to Markdown
-- **Sleep timer** — auto-pause after N minutes or at end of the
-  current chapter
 - **Per-document voice + speed memory** — remember which voice and
   speed you used on each document so a dense paper opens at 1.0×
   and a novel at 1.6× without re-setting
