@@ -17,6 +17,7 @@ struct ImageOCRReaderView: View {
     @State private var errorMessage: String = ""
     @State private var search = SearchState()
     @State private var searchMatches: [NSRange] = []
+    @State private var followState = ReaderFollowState()
 
     @Bindable private var readerSettings = ReaderSettings.shared
 
@@ -50,12 +51,16 @@ struct ImageOCRReaderView: View {
                             fontScale: readerSettings.fontScale,
                             typography: ReaderTypography(from: readerSettings),
                             readingTheme: readerSettings.readingTheme,
+                            followState: followState,
                             onReadFromOffset: handleReadFromOffset
                         )
                     }
                 }
                 .lineFocus(enabled: readerSettings.lineFocusEnabled,
                            bandHeight: readerSettings.lineFocusHeight)
+                .overlay(alignment: .bottom) {
+                    JumpToCurrentButton(followState: followState, player: player)
+                }
 
                 if search.isPresented, status == .ready {
                     SearchBar(
@@ -73,6 +78,9 @@ struct ImageOCRReaderView: View {
         }
         .task(id: url) {
             await load()
+        }
+        .onChange(of: player.state.isPlaying) { wasPlaying, isPlaying in
+            if !wasPlaying, isPlaying { followState.jumpToCurrent() }
         }
         .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
             if status == .ready { presentSearch() }
@@ -151,10 +159,12 @@ struct ImageOCRReaderView: View {
         guard let idx = ReaderHitTester.sentenceIndex(
             forOffset: offset, in: sentences
         ) else { return }
+        followState.jumpToCurrent()
         player.playFromSentence(idx)
     }
 
     private func load() async {
+        followState.resumeFollowing()
         status = .recognizing
         let started = ContinuousClock.now
         guard let image = NSImage(contentsOf: url),

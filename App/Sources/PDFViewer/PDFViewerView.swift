@@ -14,6 +14,7 @@ struct PDFViewerView: View {
     @State private var sentences: [Sentence] = []
     @State private var search = SearchState()
     @State private var searchSelections: [PDFSelection] = []
+    @State private var followState = ReaderFollowState()
 
     var body: some View {
         Group {
@@ -31,9 +32,13 @@ struct PDFViewerView: View {
                         spokenSubRange: player.spokenSubRange,
                         searchSelections: searchSelections,
                         currentSearchIndex: search.currentIndex,
+                        followState: followState,
                         onReadFromLocation: handleReadFromLocation
                     )
                     .overlay(alignment: .bottomLeading) { statusFooter(pageCount: document.pageCount) }
+                    .overlay(alignment: .bottom) {
+                        JumpToCurrentButton(followState: followState, player: player)
+                    }
 
                     if search.isPresented {
                         SearchBar(
@@ -63,6 +68,7 @@ struct PDFViewerView: View {
             }
         }
         .task(id: url) {
+            followState.resumeFollowing()
             loadResult = .loading
             blocks = []
             sentences = []
@@ -71,6 +77,9 @@ struct PDFViewerView: View {
             } else {
                 loadResult = .failed
             }
+        }
+        .onChange(of: player.state.isPlaying) { wasPlaying, isPlaying in
+            if !wasPlaying, isPlaying { followState.jumpToCurrent() }
         }
         .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
             presentSearch()
@@ -174,6 +183,7 @@ struct PDFViewerView: View {
             sentences: sentences,
             blocks: blocks
         ) else { return }
+        followState.jumpToCurrent()
         player.playFromSentence(idx)
     }
 
@@ -233,6 +243,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     let spokenSubRange: NSRange?
     let searchSelections: [PDFSelection]
     let currentSearchIndex: Int
+    let followState: ReaderFollowState
     let onReadFromLocation: (PDFClickLocation) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -240,6 +251,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     func makeNSView(context: Context) -> PDFView {
         let view = ClickablePDFView()
         view.onReadFromLocation = onReadFromLocation
+        view.onUserScroll = { [followState] in followState.userDidScroll() }
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
         view.backgroundColor = NSColor(Color.readAloudTTSSurface)
@@ -259,6 +271,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
     func updateNSView(_ nsView: PDFView, context: Context) {
         if let clickable = nsView as? ClickablePDFView {
             clickable.onReadFromLocation = onReadFromLocation
+            clickable.onUserScroll = { [followState] in followState.userDidScroll() }
         }
         if nsView.document !== document {
             removeHighlight(coordinator: context.coordinator)
@@ -269,6 +282,17 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         }
         applyHighlight(view: nsView, coordinator: context.coordinator)
         applySearchSelections(view: nsView, coordinator: context.coordinator)
+        handleJumpRequest(view: nsView, coordinator: context.coordinator)
+    }
+
+    /// Scroll back to the current sentence when the user taps "jump to
+    /// current". Bridged from SwiftUI via `followState.jumpToken`.
+    private func handleJumpRequest(view: PDFView, coordinator: Coordinator) {
+        guard coordinator.lastHandledJumpToken != followState.jumpToken else { return }
+        coordinator.lastHandledJumpToken = followState.jumpToken
+        guard let sentence = activeSentence,
+              let selection = selection(for: sentence) else { return }
+        view.go(to: selection)
     }
 
     /// Drives PDFView's native match highlight + scroll. Updates the
@@ -335,9 +359,13 @@ private struct PDFViewRepresentable: NSViewRepresentable {
                     }
                 }
                 // Only scroll on sentence change so the user's manual
-                // scroll-wheel use during playback isn't interrupted
-                // by every word tick from the aligner.
-                view.go(to: sentenceSelection)
+                // scroll-wheel use during playback isn't interrupted by
+                // every word tick from the aligner — and only while
+                // following, so a deliberate scroll-away stays put until
+                // the user taps "jump to current".
+                if followState.isFollowing {
+                    view.go(to: sentenceSelection)
+                }
             }
         }
 
@@ -431,6 +459,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         /// already mounted the highlight.
         var lastSearchSelectionIDs: [ObjectIdentifier] = []
         var lastCurrentSearchID: ObjectIdentifier?
+        var lastHandledJumpToken = 0
     }
 }
 
@@ -445,6 +474,10 @@ private struct PDFViewRepresentable: NSViewRepresentable {
 /// so the host can look up the sentence without any translation.
 private final class ClickablePDFView: PDFView {
     var onReadFromLocation: ((PDFClickLocation) -> Void)?
+    /// Fired when the user scrolls or pans the document by hand (not a
+    /// programmatic `go(to:)`), so the reader can drop out of follow
+    /// mode. Keyboard scrolling is not detected — a known v1 gap.
+    var onUserScroll: (() -> Void)?
     /// Set by the host when a document is (re)assigned so the next
     /// valid layout pass forces a refit. Separate from the zoom-lock
     /// below because loading a new document always wants to reset the
@@ -567,6 +600,12 @@ private final class ClickablePDFView: PDFView {
     }
 
     private func handleScroll(_ event: NSEvent) -> NSEvent? {
+        // A plain scroll over the document is the user taking manual
+        // control — let the reader stop following the highlight. Cmd+
+        // scroll is zoom, not a scroll, so it doesn't count.
+        if !event.modifierFlags.contains(.command), eventIsOverMe(event) {
+            onUserScroll?()
+        }
         guard event.modifierFlags.contains(.command), eventIsOverMe(event) else {
             return event
         }
@@ -600,6 +639,7 @@ private final class ClickablePDFView: PDFView {
         case .otherMouseDragged:
             guard let anchor = panAnchorWindowPoint,
                   let clipView = enclosingClipView else { return event }
+            onUserScroll?()
             let current = event.locationInWindow
             let dx = anchor.x - current.x
             // Clip view origin moves +y to scroll the document *down*

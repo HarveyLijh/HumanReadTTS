@@ -19,6 +19,7 @@ struct TextReaderView: View {
     @State private var errorMessage: String = ""
     @State private var search = SearchState()
     @State private var searchMatches: [NSRange] = []
+    @State private var followState = ReaderFollowState()
 
     @Bindable private var readerSettings = ReaderSettings.shared
 
@@ -48,12 +49,16 @@ struct TextReaderView: View {
                             fontScale: readerSettings.fontScale,
                             typography: ReaderTypography(from: readerSettings),
                             readingTheme: readerSettings.readingTheme,
+                            followState: followState,
                             onReadFromOffset: handleReadFromOffset
                         )
                     }
                 }
                 .lineFocus(enabled: readerSettings.lineFocusEnabled,
                            bandHeight: readerSettings.lineFocusHeight)
+                .overlay(alignment: .bottom) {
+                    JumpToCurrentButton(followState: followState, player: player)
+                }
 
                 if search.isPresented {
                     SearchBar(
@@ -71,6 +76,11 @@ struct TextReaderView: View {
         }
         .task(id: url) {
             await load()
+        }
+        .onChange(of: player.state.isPlaying) { wasPlaying, isPlaying in
+            // Pressing Play/Resume re-engages following and snaps back to
+            // the highlight, even if the current sentence hasn't advanced.
+            if !wasPlaying, isPlaying { followState.jumpToCurrent() }
         }
         .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
             presentSearch()
@@ -116,10 +126,12 @@ struct TextReaderView: View {
         guard let idx = ReaderHitTester.sentenceIndex(
             forOffset: offset, in: sentences
         ) else { return }
+        followState.jumpToCurrent()
         player.playFromSentence(idx)
     }
 
     private func load() async {
+        followState.resumeFollowing()
         let started = ContinuousClock.now
         do {
             // Try UTF-8 first; if the file is Latin-1 / UTF-16 the
@@ -220,6 +232,7 @@ struct PlainTextView: NSViewRepresentable {
     let fontScale: Double
     let typography: ReaderTypography
     let readingTheme: ReadingTheme
+    let followState: ReaderFollowState
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -231,6 +244,8 @@ struct PlainTextView: NSViewRepresentable {
         var lastScrolledSentenceIndex: Int?
         var lastSearchRanges: [NSRange] = []
         var lastCurrentSearchRange: NSRange?
+        let scrollObserver = ReaderScrollObserver()
+        var lastHandledJumpToken = 0
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -258,6 +273,9 @@ struct PlainTextView: NSViewRepresentable {
         )
 
         scroll.documentView = textView
+        context.coordinator.scrollObserver.attach(to: scroll) { [followState] in
+            followState.userDidScroll()
+        }
         return scroll
     }
 
@@ -303,6 +321,23 @@ struct PlainTextView: NSViewRepresentable {
 
         applyHighlight(to: tv, storage: storage, coordinator: context.coordinator)
         applySearchHighlights(storage: storage, textView: tv, coordinator: context.coordinator)
+        handleJumpRequest(textView: tv, storage: storage, coordinator: context.coordinator)
+    }
+
+    /// Scroll back to the current sentence when the user taps "jump to
+    /// current". Bridged from SwiftUI via `followState.jumpToken`.
+    private func handleJumpRequest(
+        textView: NSTextView,
+        storage: NSTextStorage,
+        coordinator: Coordinator
+    ) {
+        guard coordinator.lastHandledJumpToken != followState.jumpToken else { return }
+        coordinator.lastHandledJumpToken = followState.jumpToken
+        guard let sentence = activeSentence else { return }
+        let range = NSRange(location: sentence.offsetInBlock, length: sentence.lengthInBlock)
+        guard NSMaxRange(range) <= storage.length else { return }
+        coordinator.lastScrolledSentenceIndex = sentence.offsetInBlock
+        textView.scrollRangeToVisible(range)
     }
 
     private func applyHighlight(
@@ -363,7 +398,7 @@ struct PlainTextView: NSViewRepresentable {
         storage.endEditing()
 
         let currentIndex = sentence.offsetInBlock
-        if coordinator.lastScrolledSentenceIndex != currentIndex {
+        if followState.isFollowing, coordinator.lastScrolledSentenceIndex != currentIndex {
             coordinator.lastScrolledSentenceIndex = currentIndex
             textView.scrollRangeToVisible(sentenceRange)
         }

@@ -14,6 +14,7 @@ struct EPUBReaderView: View {
     @State private var sentences: [Sentence] = []
     @State private var loadFailed = false
     @State private var errorMessage: String = ""
+    @State private var followState = ReaderFollowState()
 
     @Bindable private var readerSettings = ReaderSettings.shared
 
@@ -38,13 +39,20 @@ struct EPUBReaderView: View {
                         activeSentence: activeSentence,
                         spokenSubRange: player.spokenSubRange,
                         fontScale: readerSettings.fontScale,
+                        followState: followState,
                         onReadFromOffset: handleReadFromOffset
                     )
                 }
             }
+            .overlay(alignment: .bottom) {
+                JumpToCurrentButton(followState: followState, player: player)
+            }
         }
         .task(id: url) {
             await load()
+        }
+        .onChange(of: player.state.isPlaying) { wasPlaying, isPlaying in
+            if !wasPlaying, isPlaying { followState.jumpToCurrent() }
         }
     }
 
@@ -78,10 +86,12 @@ struct EPUBReaderView: View {
         guard let idx = ReaderHitTester.sentenceIndex(
             forOffset: offset, in: sentences
         ) else { return }
+        followState.jumpToCurrent()
         player.playFromSentence(idx)
     }
 
     private func load() async {
+        followState.resumeFollowing()
         let started = ContinuousClock.now
         do {
             let attributed = try await EPUBLoader.load(url: url)
@@ -130,6 +140,7 @@ private struct EPUBTextView: NSViewRepresentable {
     let activeSentence: Sentence?
     let spokenSubRange: NSRange?
     let fontScale: Double
+    let followState: ReaderFollowState
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -138,6 +149,8 @@ private struct EPUBTextView: NSViewRepresentable {
         var lastSentenceRange: NSRange?
         var lastSubRange: NSRange?
         var lastScrolledSentenceIndex: Int?
+        let scrollObserver = ReaderScrollObserver()
+        var lastHandledJumpToken = 0
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -165,6 +178,9 @@ private struct EPUBTextView: NSViewRepresentable {
         )
 
         scroll.documentView = textView
+        context.coordinator.scrollObserver.attach(to: scroll) { [followState] in
+            followState.userDidScroll()
+        }
         return scroll
     }
 
@@ -202,6 +218,23 @@ private struct EPUBTextView: NSViewRepresentable {
         }
 
         applyHighlight(to: tv, storage: storage, coordinator: context.coordinator)
+        handleJumpRequest(textView: tv, storage: storage, coordinator: context.coordinator)
+    }
+
+    /// Scroll back to the current sentence when the user taps "jump to
+    /// current". Bridged from SwiftUI via `followState.jumpToken`.
+    private func handleJumpRequest(
+        textView: NSTextView,
+        storage: NSTextStorage,
+        coordinator: Coordinator
+    ) {
+        guard coordinator.lastHandledJumpToken != followState.jumpToken else { return }
+        coordinator.lastHandledJumpToken = followState.jumpToken
+        guard let sentence = activeSentence else { return }
+        let range = NSRange(location: sentence.offsetInBlock, length: sentence.lengthInBlock)
+        guard NSMaxRange(range) <= storage.length else { return }
+        coordinator.lastScrolledSentenceIndex = sentence.offsetInBlock
+        textView.scrollRangeToVisible(range)
     }
 
     /// Walks every `.font` run and rescales it by `target / current`.
@@ -288,7 +321,7 @@ private struct EPUBTextView: NSViewRepresentable {
         storage.endEditing()
 
         let currentIndex = sentence.offsetInBlock
-        if coordinator.lastScrolledSentenceIndex != currentIndex {
+        if followState.isFollowing, coordinator.lastScrolledSentenceIndex != currentIndex {
             coordinator.lastScrolledSentenceIndex = currentIndex
             textView.scrollRangeToVisible(sentenceRange)
         }

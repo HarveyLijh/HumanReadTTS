@@ -52,6 +52,7 @@ struct MarkdownReaderView: View {
     /// gestures aren't clobbered. Held in `@State` as a reference type
     /// so width writes don't trigger SwiftUI updates.
     @State private var figureWidths = FigureWidthCache()
+    @State private var followState = ReaderFollowState()
 
     @Bindable private var store = MarkdownDocumentStore.shared
     @Bindable private var readerSettings = ReaderSettings.shared
@@ -84,6 +85,7 @@ struct MarkdownReaderView: View {
                                 searchMatches: searchMatches,
                                 currentMatchIndex: search.currentIndex,
                                 readingTheme: readerSettings.readingTheme,
+                                followState: followState,
                                 onReadFromOffset: handleReadFromOffset
                             )
                         case .source:
@@ -98,6 +100,9 @@ struct MarkdownReaderView: View {
                 }
                 .lineFocus(enabled: readerSettings.lineFocusEnabled,
                            bandHeight: readerSettings.lineFocusHeight)
+                .overlay(alignment: .bottom) {
+                    JumpToCurrentButton(followState: followState, player: player)
+                }
 
                 if search.isPresented {
                     SearchBar(
@@ -115,6 +120,9 @@ struct MarkdownReaderView: View {
         }
         .task(id: url) {
             await load()
+        }
+        .onChange(of: player.state.isPlaying) { wasPlaying, isPlaying in
+            if !wasPlaying, isPlaying { followState.jumpToCurrent() }
         }
         .onChange(of: viewMode) { _, newMode in
             if newMode == .preview { refreshPreviewIfNeeded() }
@@ -198,10 +206,12 @@ struct MarkdownReaderView: View {
         guard let idx = ReaderHitTester.sentenceIndex(
             forOffset: offset, in: sentences
         ) else { return }
+        followState.jumpToCurrent()
         player.playFromSentence(idx)
     }
 
     private func load() async {
+        followState.resumeFollowing()
         let started = ContinuousClock.now
         do {
             let raw = try String(contentsOf: url, encoding: .utf8)
@@ -1283,6 +1293,7 @@ private struct MarkdownTextView: NSViewRepresentable {
     let searchMatches: [NSRange]
     let currentMatchIndex: Int
     let readingTheme: ReadingTheme
+    let followState: ReaderFollowState
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -1307,12 +1318,18 @@ private struct MarkdownTextView: NSViewRepresentable {
         /// when the query/options/match-set change.
         var lastSearchRanges: [NSRange] = []
         var lastCurrentSearchRange: NSRange?
+        let scrollObserver = ReaderScrollObserver()
+        var lastHandledJumpToken = 0
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> NSScrollView {
-        makeReadOnlyTextScrollView(onReadFromOffset: onReadFromOffset)
+        let scroll = makeReadOnlyTextScrollView(onReadFromOffset: onReadFromOffset)
+        context.coordinator.scrollObserver.attach(to: scroll) { [followState] in
+            followState.userDidScroll()
+        }
+        return scroll
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
@@ -1338,7 +1355,8 @@ private struct MarkdownTextView: NSViewRepresentable {
             storage: storage,
             coordinator: context.coordinator,
             sentence: activeSentence,
-            spokenSubRange: spokenSubRange
+            spokenSubRange: spokenSubRange,
+            isFollowing: followState.isFollowing
         )
 
         applySearchHighlights(
@@ -1348,6 +1366,24 @@ private struct MarkdownTextView: NSViewRepresentable {
             matches: searchMatches,
             currentIndex: currentMatchIndex
         )
+
+        handleJumpRequest(textView: tv, storage: storage, coordinator: context.coordinator)
+    }
+
+    /// Scroll back to the current sentence when the user taps "jump to
+    /// current". Bridged from SwiftUI via `followState.jumpToken`.
+    private func handleJumpRequest(
+        textView: NSTextView,
+        storage: NSTextStorage,
+        coordinator: Coordinator
+    ) {
+        guard coordinator.lastHandledJumpToken != followState.jumpToken else { return }
+        coordinator.lastHandledJumpToken = followState.jumpToken
+        guard let sentence = activeSentence else { return }
+        let range = NSRange(location: sentence.offsetInBlock, length: sentence.lengthInBlock)
+        guard NSMaxRange(range) <= storage.length else { return }
+        coordinator.lastScrolledSentenceIndex = sentence.offsetInBlock
+        textView.scrollRangeToVisible(range)
     }
 }
 
@@ -1566,7 +1602,8 @@ private func applyHighlightIncremental(
     storage: NSTextStorage,
     coordinator: MarkdownTextView.Coordinator,
     sentence: Sentence?,
-    spokenSubRange: NSRange?
+    spokenSubRange: NSRange?,
+    isFollowing: Bool
 ) {
     storage.beginEditing()
 
@@ -1623,7 +1660,7 @@ private func applyHighlightIncremental(
     // the aligner don't pull the viewport any more; the user's
     // manual scroll wheel / trackpad stays in charge.
     let currentIndex = sentence.offsetInBlock
-    if coordinator.lastScrolledSentenceIndex != currentIndex {
+    if isFollowing, coordinator.lastScrolledSentenceIndex != currentIndex {
         coordinator.lastScrolledSentenceIndex = currentIndex
         textView.scrollRangeToVisible(sentenceRange)
     }

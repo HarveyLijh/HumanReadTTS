@@ -17,6 +17,7 @@ struct DOCXReaderView: View {
     @State private var errorMessage: String = ""
     @State private var search = SearchState()
     @State private var searchMatches: [NSRange] = []
+    @State private var followState = ReaderFollowState()
 
     @Bindable private var readerSettings = ReaderSettings.shared
 
@@ -44,9 +45,13 @@ struct DOCXReaderView: View {
                             searchMatches: searchMatches,
                             currentMatchIndex: search.currentIndex,
                             fontScale: readerSettings.fontScale,
+                            followState: followState,
                             onReadFromOffset: handleReadFromOffset
                         )
                     }
+                }
+                .overlay(alignment: .bottom) {
+                    JumpToCurrentButton(followState: followState, player: player)
                 }
 
                 if search.isPresented {
@@ -65,6 +70,9 @@ struct DOCXReaderView: View {
         }
         .task(id: url) {
             await load()
+        }
+        .onChange(of: player.state.isPlaying) { wasPlaying, isPlaying in
+            if !wasPlaying, isPlaying { followState.jumpToCurrent() }
         }
         .onReceive(NotificationCenter.default.publisher(for: AppScene.findNotification)) { _ in
             presentSearch()
@@ -110,10 +118,12 @@ struct DOCXReaderView: View {
         guard let idx = ReaderHitTester.sentenceIndex(
             forOffset: offset, in: sentences
         ) else { return }
+        followState.jumpToCurrent()
         player.playFromSentence(idx)
     }
 
     private func load() async {
+        followState.resumeFollowing()
         let started = ContinuousClock.now
         do {
             let attributed = try await DOCXLoader.load(url: url)
@@ -201,6 +211,7 @@ private struct DOCXTextView: NSViewRepresentable {
     let searchMatches: [NSRange]
     let currentMatchIndex: Int
     let fontScale: Double
+    let followState: ReaderFollowState
     let onReadFromOffset: (Int) -> Void
 
     final class Coordinator {
@@ -211,6 +222,8 @@ private struct DOCXTextView: NSViewRepresentable {
         var lastScrolledSentenceIndex: Int?
         var lastSearchRanges: [NSRange] = []
         var lastCurrentSearchRange: NSRange?
+        let scrollObserver = ReaderScrollObserver()
+        var lastHandledJumpToken = 0
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -238,6 +251,9 @@ private struct DOCXTextView: NSViewRepresentable {
         )
 
         scroll.documentView = textView
+        context.coordinator.scrollObserver.attach(to: scroll) { [followState] in
+            followState.userDidScroll()
+        }
         return scroll
     }
 
@@ -271,6 +287,23 @@ private struct DOCXTextView: NSViewRepresentable {
 
         applyHighlight(to: tv, storage: storage, coordinator: context.coordinator)
         applySearchHighlights(storage: storage, textView: tv, coordinator: context.coordinator)
+        handleJumpRequest(textView: tv, storage: storage, coordinator: context.coordinator)
+    }
+
+    /// Scroll back to the current sentence when the user taps "jump to
+    /// current". Bridged from SwiftUI via `followState.jumpToken`.
+    private func handleJumpRequest(
+        textView: NSTextView,
+        storage: NSTextStorage,
+        coordinator: Coordinator
+    ) {
+        guard coordinator.lastHandledJumpToken != followState.jumpToken else { return }
+        coordinator.lastHandledJumpToken = followState.jumpToken
+        guard let sentence = activeSentence else { return }
+        let range = NSRange(location: sentence.offsetInBlock, length: sentence.lengthInBlock)
+        guard NSMaxRange(range) <= storage.length else { return }
+        coordinator.lastScrolledSentenceIndex = sentence.offsetInBlock
+        textView.scrollRangeToVisible(range)
     }
 
     private func applyFontScale(
@@ -347,7 +380,7 @@ private struct DOCXTextView: NSViewRepresentable {
         storage.endEditing()
 
         let currentIndex = sentence.offsetInBlock
-        if coordinator.lastScrolledSentenceIndex != currentIndex {
+        if followState.isFollowing, coordinator.lastScrolledSentenceIndex != currentIndex {
             coordinator.lastScrolledSentenceIndex = currentIndex
             textView.scrollRangeToVisible(sentenceRange)
         }
