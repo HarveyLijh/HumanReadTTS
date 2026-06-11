@@ -74,6 +74,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
             let isPlus = withMods.contains("+") || raw == "=" || raw == "+"
             let isMinus = withMods.contains("-") || raw == "-" || raw == "_"
             let isZero = withMods == "0" || raw == "0"
+            let isFit = withMods == "9" || raw == "9"
 
             // Don't steal events from any non-reader text editor. The
             // markdown reader and scratchpad use NSTextView, but
@@ -97,6 +98,12 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
             if isZero {
                 NotificationCenter.default.post(
                     name: AppScene.resetFontNotification, object: nil
+                )
+                return nil
+            }
+            if isFit {
+                NotificationCenter.default.post(
+                    name: AppScene.zoomToFitNotification, object: nil
                 )
                 return nil
             }

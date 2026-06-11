@@ -262,9 +262,9 @@ private struct PDFViewRepresentable: NSViewRepresentable {
         // the document is assigned. In a split view the detail column
         // often has 0-width at makeNSView time, so PDFKit picks a
         // fit-scale that leaves the page clipped when the view
-        // finally resizes. `needsInitialFit` lets the subclass re-run
-        // the fit once real bounds arrive.
-        view.needsInitialFit = true
+        // finally resizes. `prepareForNewDocument()` lets the subclass
+        // re-run the fit once real bounds arrive, then hold it.
+        view.prepareForNewDocument()
         return view
     }
 
@@ -277,7 +277,7 @@ private struct PDFViewRepresentable: NSViewRepresentable {
             removeHighlight(coordinator: context.coordinator)
             nsView.document = document
             if let clickable = nsView as? ClickablePDFView {
-                clickable.needsInitialFit = true
+                clickable.prepareForNewDocument()
             }
         }
         applyHighlight(view: nsView, coordinator: context.coordinator)
@@ -478,17 +478,25 @@ private final class ClickablePDFView: PDFView {
     /// programmatic `go(to:)`), so the reader can drop out of follow
     /// mode. Keyboard scrolling is not detected — a known v1 gap.
     var onUserScroll: (() -> Void)?
-    /// Set by the host when a document is (re)assigned so the next
-    /// valid layout pass forces a refit. Separate from the zoom-lock
-    /// below because loading a new document always wants to reset the
-    /// fit, even if the user had zoomed in on the previous one.
-    var needsInitialFit: Bool = false
+    /// True while the viewer is still settling on its one-time
+    /// fit-to-width for the current document. Set when a document is
+    /// (re)assigned and cleared once layout settles (or the user zooms
+    /// manually). Mirrors Preview: a document fits once on open, then
+    /// the zoom is held — resizing the window reveals more/less of the
+    /// page but never rescales it.
+    private var needsInitialFit: Bool = false
 
-    /// Turned on by explicit user zoom (⌘+wheel) and cleared by
-    /// `restoreDefaultLook()`. While off, every width change re-runs
-    /// the fit-to-width computation; this is the piece that keeps the
-    /// page aligned after the NavigationSplitView sidebar animates in.
+    /// Turned on by explicit user zoom (pinch, ⌘+wheel, ⌘+/-, Actual
+    /// Size) and cleared by `zoomToFit()`. While the initial fit is
+    /// still settling, this also short-circuits the auto-fit so a
+    /// pinch mid-animation sticks immediately.
     private var userControlsZoom = false
+
+    /// Re-armed on every auto-fit during the initial settling window.
+    /// The trailing fire commits the fit (clears `needsInitialFit`),
+    /// so we ride the NavigationSplitView sidebar animation and lock
+    /// only once the width stops changing.
+    private var initialFitSettleToken = 0
 
     private var pendingMenuLocation: PDFClickLocation?
     private var panAnchorWindowPoint: NSPoint?
@@ -496,6 +504,7 @@ private final class ClickablePDFView: PDFView {
     private var pushedPanCursor = false
     private var lastFitWidth: CGFloat = 0
     private var scrollMonitor: Any?
+    private var magnifyMonitor: Any?
     private var mouseMonitor: Any?
     private var keyMonitor: Any?
     private var notificationObservers: [NSObjectProtocol] = []
@@ -533,6 +542,16 @@ private final class ClickablePDFView: PDFView {
             guard let self else { return event }
             return self.handleScroll(event)
         }
+        // Trackpad pinch. PDFKit would otherwise apply the gesture to
+        // `scaleFactor` transiently without flipping `userControlsZoom`,
+        // so the next layout pass snapped it back to fit. Routing it
+        // through `zoom(by:around:)` makes pinch lock and stick like
+        // Preview's.
+        magnifyMonitor = NSEvent.addLocalMonitorForEvents(matching: .magnify) {
+            [weak self] event in
+            guard let self else { return event }
+            return self.handleMagnify(event)
+        }
         let mouseMask: NSEvent.EventTypeMask = [
             .otherMouseDown, .otherMouseDragged, .otherMouseUp
         ]
@@ -567,16 +586,26 @@ private final class ClickablePDFView: PDFView {
                 object: nil, queue: queue
             ) { [weak self] _ in self?.zoomFromKeyboard(factor: 1.0 / Self.zoomStep) }
         )
+        // ⌘0 is "Actual Size" (100%) for PDFs, matching Preview;
+        // ⌘9 is "Zoom to Fit". The prose readers still read ⌘0 as
+        // "reset font size" via the same notification.
         notificationObservers.append(
             center.addObserver(
                 forName: AppScene.resetFontNotification,
                 object: nil, queue: queue
-            ) { [weak self] _ in self?.restoreDefaultLook() }
+            ) { [weak self] _ in self?.actualSize() }
+        )
+        notificationObservers.append(
+            center.addObserver(
+                forName: AppScene.zoomToFitNotification,
+                object: nil, queue: queue
+            ) { [weak self] _ in self?.zoomToFit() }
         )
     }
 
     private func removeEventMonitors() {
         if let m = scrollMonitor { NSEvent.removeMonitor(m); scrollMonitor = nil }
+        if let m = magnifyMonitor { NSEvent.removeMonitor(m); magnifyMonitor = nil }
         if let m = mouseMonitor { NSEvent.removeMonitor(m); mouseMonitor = nil }
         if let m = keyMonitor { NSEvent.removeMonitor(m); keyMonitor = nil }
         for token in notificationObservers {
@@ -619,6 +648,18 @@ private final class ClickablePDFView: PDFView {
         let viewPoint = convert(event.locationInWindow, from: nil)
         zoom(by: factor, around: viewPoint)
         return nil  // consume so PDFView doesn't also scroll
+    }
+
+    /// Trackpad pinch. `event.magnification` is a per-tick delta
+    /// (~±0.01–0.1), so `1 + magnification` is the multiplicative
+    /// factor for that tick. Anchored at the pinch centroid so the
+    /// content under the fingers stays put.
+    private func handleMagnify(_ event: NSEvent) -> NSEvent? {
+        guard eventIsOverMe(event) else { return event }
+        guard abs(event.magnification) > 0.0001 else { return nil }
+        let viewPoint = convert(event.locationInWindow, from: nil)
+        zoom(by: 1 + event.magnification, around: viewPoint)
+        return nil
     }
 
     private func handleMouse(_ event: NSEvent) -> NSEvent? {
@@ -672,7 +713,7 @@ private final class ClickablePDFView: PDFView {
         guard event.keyCode == 53, isFirstResponderSelfOrDescendant() else {
             return event
         }
-        restoreDefaultLook()
+        zoomToFit()
         return nil
     }
 
@@ -691,25 +732,41 @@ private final class ClickablePDFView: PDFView {
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         // SwiftUI sets the frame directly rather than marking the
-        // view dirty, so `layout()` isn't reliably called. Drive the
-        // fit-to-width recomputation off every real width change,
-        // because `autoScales` frequently misses the post-init width
-        // shrink when the NavigationSplitView sidebar animates in.
+        // view dirty, so `layout()` isn't reliably called. We only
+        // auto-fit during the initial settling window: once the fit
+        // is committed (or the user has zoomed), resizing the window
+        // holds the current scale — it just reveals more/less of the
+        // page, like Preview.
         guard newSize.width > 1,
               newSize.height > 1,
               document != nil,
+              needsInitialFit,
               !userControlsZoom else { return }
-        needsInitialFit = false
         // Deferred so PDFKit finishes the in-flight frame propagation
         // before we read `scaleFactorForSizeToFit`; reading it too
         // early returns the old fit scale against the old bounds.
         DispatchQueue.main.async { [weak self] in
             self?.applyFitToWidth()
         }
+        scheduleInitialFitCommit()
+    }
+
+    /// Re-armed on every settling resize. Once resizes stop for the
+    /// debounce window, commit the fit so subsequent resizes hold the
+    /// scale. The NavigationSplitView sidebar animation fires a burst
+    /// of resizes on open; each re-arms this, so we lock only after
+    /// the layout has stopped moving.
+    private func scheduleInitialFitCommit() {
+        initialFitSettleToken += 1
+        let token = initialFitSettleToken
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self, token == self.initialFitSettleToken else { return }
+            self.needsInitialFit = false
+        }
     }
 
     private func applyFitToWidth() {
-        guard !userControlsZoom, document != nil else { return }
+        guard document != nil else { return }
         let fit = scaleFactorForSizeToFit
         guard fit > 0 else { return }
         // `autoScales` has to be off before manually setting
@@ -717,6 +774,15 @@ private final class ClickablePDFView: PDFView {
         autoScales = false
         scaleFactor = fit
         lastFitWidth = bounds.width
+    }
+
+    /// Reset the fit state for a freshly (re)assigned document so it
+    /// fits once on open regardless of any zoom the previous document
+    /// was left at.
+    func prepareForNewDocument() {
+        needsInitialFit = true
+        userControlsZoom = false
+        initialFitSettleToken += 1
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -799,8 +865,17 @@ private final class ClickablePDFView: PDFView {
         guard fitScale > 0 else { return }
         let minScale = fitScale * Self.minZoomMultiplier
         let maxScale = fitScale * Self.maxZoomMultiplier
+        let newScale = max(minScale, min(maxScale, scaleFactor * factor))
+        applyScale(newScale, around: viewPoint)
+    }
+
+    /// Set an absolute scale while keeping the document point under
+    /// `viewPoint` fixed. Shared by relative zoom (pinch / ⌘+wheel /
+    /// ⌘+ / ⌘-) and absolute targets (Actual Size). Flips
+    /// `userControlsZoom` so resizing the window thereafter holds the
+    /// scale instead of refitting.
+    private func applyScale(_ newScale: CGFloat, around viewPoint: NSPoint) {
         let oldScale = scaleFactor
-        let newScale = max(minScale, min(maxScale, oldScale * factor))
         guard abs(newScale - oldScale) > 0.0001 else { return }
 
         guard let clipView = enclosingClipView else {
@@ -856,9 +931,13 @@ private final class ClickablePDFView: PDFView {
         clipView.enclosingScrollView?.reflectScrolledClipView(clipView)
     }
 
-    private func restoreDefaultLook() {
+    /// Fit the page to the view width, then hold (⌘9 / Esc). Keeps the
+    /// reader's current page anchored and resets horizontal pan.
+    /// Clears `userControlsZoom` and commits the fit so a later resize
+    /// holds this scale instead of refitting.
+    private func zoomToFit() {
         // Remember the page the user is currently looking at, so we
-        // can keep their reading position after the zoom reset.
+        // can keep their reading position after the fit.
         let anchorPoint = convert(
             NSPoint(x: bounds.midX, y: bounds.midY),
             from: nil
@@ -867,6 +946,11 @@ private final class ClickablePDFView: PDFView {
 
         userControlsZoom = false
         applyFitToWidth()
+        // Commit immediately: the fit was applied just now, so further
+        // resizes should hold it rather than re-enter the settling
+        // window. A fresh document still refits via prepareForNewDocument().
+        needsInitialFit = false
+        initialFitSettleToken += 1
 
         // Reset horizontal pan to 0 and keep the vertical position
         // aligned to the anchor page the user was reading. Skipping
@@ -881,6 +965,13 @@ private final class ClickablePDFView: PDFView {
             clipView.scroll(to: origin)
             clipView.enclosingScrollView?.reflectScrolledClipView(clipView)
         }
+    }
+
+    /// Actual Size — render the page at 100% native scale (⌘0),
+    /// matching Preview. Anchored on the view center.
+    private func actualSize() {
+        let center = NSPoint(x: bounds.midX, y: bounds.midY)
+        applyScale(1.0, around: center)
     }
 
     private func pdfLocation(for event: NSEvent) -> PDFClickLocation? {

@@ -20,6 +20,7 @@ struct AppScene: Scene {
     static let increaseFontNotification = Notification.Name("app.readaloudtts.mac.increaseFont")
     static let decreaseFontNotification = Notification.Name("app.readaloudtts.mac.decreaseFont")
     static let resetFontNotification = Notification.Name("app.readaloudtts.mac.resetFont")
+    static let zoomToFitNotification = Notification.Name("app.readaloudtts.mac.zoomToFit")
 
     var body: some Scene {
         WindowGroup("ReadAloudTTS") {
@@ -152,6 +153,17 @@ struct AppScene: Scene {
                     )
                 }
                 .keyboardShortcut("0", modifiers: [.command])
+
+                // PDF-only: fit the page to the view width. Prose
+                // readers don't observe this notification, so the
+                // item is a no-op there (and PDFKit reads ⌘0 as
+                // "Actual Size" to match Preview).
+                Button("Zoom to Fit") {
+                    NotificationCenter.default.post(
+                        name: AppScene.zoomToFitNotification, object: nil
+                    )
+                }
+                .keyboardShortcut("9", modifiers: [.command])
             }
 
             CommandGroup(replacing: .help) {
