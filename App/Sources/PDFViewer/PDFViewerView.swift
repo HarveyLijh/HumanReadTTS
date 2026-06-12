@@ -503,6 +503,11 @@ private final class ClickablePDFView: PDFView {
     private var panStartClipOrigin: NSPoint = .zero
     private var pushedPanCursor = false
     private var lastFitWidth: CGFloat = 0
+    /// `NSEvent.timestamp` (monotonic seconds since boot) of the last
+    /// Escape press, so a *double* tap of Esc triggers Zoom to Fit
+    /// while a single tap is left alone.
+    private var lastEscTimestamp: TimeInterval = 0
+    private static let escDoubleTapWindow: TimeInterval = 0.4
     private var scrollMonitor: Any?
     private var magnifyMonitor: Any?
     private var mouseMonitor: Any?
@@ -713,8 +718,16 @@ private final class ClickablePDFView: PDFView {
         guard event.keyCode == 53, isFirstResponderSelfOrDescendant() else {
             return event
         }
-        zoomToFit()
-        return nil
+        // Require a double-tap of Esc to Zoom to Fit, so a stray single
+        // press doesn't yank the user out of a deliberate zoom. The
+        // first tap just arms the window; the second within it fits.
+        if event.timestamp - lastEscTimestamp <= Self.escDoubleTapWindow {
+            lastEscTimestamp = 0
+            zoomToFit()
+            return nil
+        }
+        lastEscTimestamp = event.timestamp
+        return event
     }
 
     private func isFirstResponderSelfOrDescendant() -> Bool {
