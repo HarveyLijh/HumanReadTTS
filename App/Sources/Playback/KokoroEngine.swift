@@ -82,6 +82,68 @@ final class KokoroEngine {
 
     private init() {}
 
+    // MARK: MLX memory
+
+    /// Cap for MLX's Metal buffer-reuse pool. MLX never returns freed
+    /// intermediates (BERT/LSTM/prosody/iSTFT tensors) straight to the
+    /// OS — it parks them in a reuse pool whose *default* ceiling is
+    /// ~1.5× the device's recommended working-set size, i.e. tens of GB
+    /// on a 32–64 GB Mac. Uncapped, the pool ratchets up to the
+    /// worst-case synthesis working set and never shrinks, which shows
+    /// up as a multi-GB resident footprint that never falls. A small
+    /// reuse budget keeps the speed benefit while bounding the tail;
+    /// the MLX maintainers note the perf cost of a low limit is minor.
+    private static let mlxCacheLimitBytes = 512 * 1024 * 1024
+
+    private static var didConfigureMLXMemory = false
+
+    /// Bound the MLX cache once, before the first model load. Idempotent.
+    private static func configureMLXMemoryOnce() {
+        guard !didConfigureMLXMemory else { return }
+        didConfigureMLXMemory = true
+        let previous = MLX.Memory.cacheLimit
+        MLX.Memory.cacheLimit = mlxCacheLimitBytes
+        log.info("MLX cache limit set to \(mlxCacheLimitBytes / (1024 * 1024))MB (was \(previous / (1024 * 1024))MB)")
+    }
+
+    /// Immediately hand MLX's cached buffers back to the OS. The cache
+    /// limit bounds growth but only takes effect on the next
+    /// deallocation, so this forces an immediate drop — call it when
+    /// playback stops so resident memory falls back toward the model's
+    /// live working set. No-op unless the model is actually loaded
+    /// (otherwise there is no MLX cache and we'd needlessly spin up
+    /// Metal just to clear nothing).
+    func releaseCache() {
+        guard state == .ready else { return }
+        MLX.Memory.clearCache()
+        Self.logMemory("after clearCache")
+    }
+
+    /// Fully release the model so its ~650MB of weights leave resident
+    /// memory — used when the user switches to a voice served by a
+    /// different engine, so we don't keep Kokoro loaded for a session
+    /// that's now on Qwen or a system voice. An in-flight synth holds
+    /// its own captured `tts`/voice references, so dropping ours here
+    /// is safe mid-stream; the model deallocates once that task ends.
+    /// `clearCache()` then returns the freed buffers to the OS.
+    func unload() {
+        guard state == .ready else { return }
+        tts = nil
+        voiceArrays = [:]
+        state = .idle
+        MLX.Memory.clearCache()
+        Self.logMemory("after unload")
+    }
+
+    /// Logs MLX's active (live weights + in-flight tensors) vs cached
+    /// (reclaimable) resident memory. Lets us confirm the cap is
+    /// holding and tell cache growth apart from a real leak.
+    private static func logMemory(_ label: String) {
+        let s = MLX.Memory.snapshot()
+        let mb = { (bytes: Int) in bytes / (1024 * 1024) }
+        log.info("MLX memory [\(label, privacy: .public)] active=\(mb(s.activeMemory))MB cache=\(mb(s.cacheMemory))MB peak=\(mb(s.peakMemory))MB")
+    }
+
     /// Load the model + voices if the files are present on disk
     /// and we haven't loaded already. Cheap when state is already
     /// `.ready`. Run synchronously inside the async function but
@@ -99,6 +161,7 @@ final class KokoroEngine {
         }
 
         state = .loading
+        Self.configureMLXMemoryOnce()
         Self.log.info("loading Kokoro model from \(ModelStorage.directory(for: entry).path, privacy: .public)")
         let started = ContinuousClock.now
 
@@ -123,6 +186,7 @@ final class KokoroEngine {
 
             let elapsed = ContinuousClock.now - started
             Self.log.info("Kokoro ready: \(self.voices.count) voices in \(elapsed, privacy: .public)")
+            Self.logMemory("after load")
         } catch {
             state = .failed(message: error.localizedDescription)
             Self.log.error("Kokoro load failed: \(error.localizedDescription, privacy: .public)")

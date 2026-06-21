@@ -12,6 +12,7 @@ import KeyboardShortcuts
 final class AppDelegateShim: NSObject, NSApplicationDelegate {
     private var servicesProvider: ServicesProvider?
     private var fontShortcutMonitor: Any?
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Register the bundled SIL-OFL reading faces (OpenDyslexic,
@@ -42,6 +43,24 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         NowPlayingController.shared.activate()
 
         installFontShortcutMonitor()
+        installMemoryPressureHandler()
+    }
+
+    /// Under system memory pressure, hand MLX's reclaimable buffer
+    /// cache back to the OS. This frees only unused cached buffers (not
+    /// live model weights), so it's safe mid-playback — we stop hoarding
+    /// without interrupting reading. The cache otherwise sits at the
+    /// session's high-water mark until playback stops.
+    private func installMemoryPressureHandler() {
+        let source = DispatchSource.makeMemoryPressureSource(
+            eventMask: [.warning, .critical],
+            queue: .main
+        )
+        source.setEventHandler {
+            Task { @MainActor in KokoroEngine.shared.releaseCache() }
+        }
+        source.resume()
+        memoryPressureSource = source
     }
 
     /// Local keyDown monitor that fires zoom / font-size notifications

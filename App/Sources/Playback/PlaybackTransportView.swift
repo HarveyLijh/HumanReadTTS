@@ -46,11 +46,33 @@ struct PlaybackTransportView: View {
             Spacer(minLength: 0)
         }
         .task {
-            async let k: Void = KokoroEngine.shared.loadIfNeeded()
-            async let q: Void = QwenEngine.shared.loadIfNeeded()
-            _ = await (k, q)
-            kokoroReady = true
-            qwenReady = true
+            // Load only the engine the *current* voice needs — not
+            // both. Opening any document used to eagerly materialize
+            // BOTH Kokoro (MLX, ~650MB) and Qwen (CoreML, ~1GB) in
+            // parallel regardless of the selected voice, stacking
+            // gigabytes for an engine the user might never touch. The
+            // other engine loads lazily: when the voice picker opens
+            // (it needs each engine ready to list voices) or on first
+            // play of one of its voices.
+            await loadEngineForCurrentVoice()
+        }
+        .onChange(of: settings.voiceIdentifier) { _, _ in
+            // Pre-warm the engine behind a freshly picked voice so the
+            // first sentence doesn't stall on a cold model load.
+            Task { await loadEngineForCurrentVoice() }
+        }
+        .onChange(of: showingVoicePopover) { _, shown in
+            // The picker lists each engine's voices, which needs the
+            // engine loaded. Warm both — but only when the user
+            // actually opens the menu, far rarer than every doc open.
+            guard shown else { return }
+            Task {
+                async let k: Void = KokoroEngine.shared.loadIfNeeded()
+                async let q: Void = QwenEngine.shared.loadIfNeeded()
+                _ = await (k, q)
+                kokoroReady = true
+                qwenReady = true
+            }
         }
         .onChange(of: settings.skipRules) { _, _ in
             // Any toggle / edit of skip rules must invalidate the
@@ -60,6 +82,21 @@ struct PlaybackTransportView: View {
             // restarted. The current sentence already being spoken
             // stays as-is (spec: "applies at next sentence").
             player.invalidateNeuralPrefetch()
+        }
+    }
+
+    /// Loads (only) the engine that the currently selected voice
+    /// routes to. System / AVSpeech voices need no model, so neither
+    /// neural engine is touched. Idempotent — `loadIfNeeded()`
+    /// early-returns once an engine is ready or loading.
+    private func loadEngineForCurrentVoice() async {
+        let voiceID = settings.voiceIdentifier ?? ""
+        if voiceID.hasPrefix("kokoro:") {
+            await KokoroEngine.shared.loadIfNeeded()
+            kokoroReady = true
+        } else if voiceID.hasPrefix("qwen:") {
+            await QwenEngine.shared.loadIfNeeded()
+            qwenReady = true
         }
     }
 

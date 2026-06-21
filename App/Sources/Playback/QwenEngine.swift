@@ -89,7 +89,13 @@ final class QwenEngine {
                 model: .qwen3TTS_0_6b,
                 modelFolder: modelFolder,
                 verbose: false,
-                prewarm: true,
+                // prewarm runs an extra warm-up forward pass at load,
+                // doubling the CoreML/ANE compilation of the large
+                // code_decoder/text_projector graphs and inflating the
+                // on-open memory peak. We trade a slightly slower first
+                // sentence for a smaller spike; `load: true` still
+                // materializes the weights so playback is ready.
+                prewarm: false,
                 load: true,
                 download: false
             )
@@ -101,6 +107,18 @@ final class QwenEngine {
             state = .failed(message: error.localizedDescription)
             Self.log.error("Qwen3-TTS load failed: \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    /// Release the ~1GB of CoreML weights when the user switches to a
+    /// voice served by a different engine. Voices stay listed (the
+    /// catalog is static), so the picker still shows them; the model
+    /// reloads lazily on the next Qwen synth.
+    func unload() async {
+        guard state == .ready else { return }
+        await tts?.unloadModels()
+        tts = nil
+        state = .idle
+        Self.log.info("Qwen3-TTS unloaded")
     }
 
     /// Synthesize `text` as 24 kHz mono PCM. `language` is an ISO

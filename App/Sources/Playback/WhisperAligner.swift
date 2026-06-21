@@ -80,7 +80,11 @@ final class WhisperAligner {
             let config = WhisperKitConfig(
                 modelFolder: modelFolder.path,
                 verbose: false,
-                prewarm: true,
+                // Skip the warm-up forward pass: it doubles CoreML/ANE
+                // compilation at load and inflates the on-open peak. The
+                // first alignment pays the warm-up instead, which is
+                // off the audio path (highlights catch up a beat later).
+                prewarm: false,
                 load: true,
                 download: false
             )
@@ -90,6 +94,18 @@ final class WhisperAligner {
             state = .failed(message: error.localizedDescription)
             Self.log.error("Whisper load failed: \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    /// Release the Whisper model. Called when the user switches to a
+    /// system voice (no neural playback → no forced alignment), so the
+    /// alignment model doesn't linger resident for the rest of the
+    /// session. Reloads lazily on the next neural sentence.
+    func unload() async {
+        guard state == .ready else { return }
+        await pipeline?.unloadModels()
+        pipeline = nil
+        state = .idle
+        Self.log.info("Whisper unloaded")
     }
 
     /// Align `samples` (mono Float32 PCM at any common rate) to the

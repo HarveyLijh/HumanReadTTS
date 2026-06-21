@@ -182,6 +182,10 @@ final class SpeechPlayer {
         prefetchedQwen.removeAll()
         alignmentTask?.cancel()
         alignmentTask = nil
+        // Hand MLX's cached synthesis buffers back to the OS now that
+        // playback is over, so resident memory drops instead of sitting
+        // at the reading high-water mark for the rest of the session.
+        KokoroEngine.shared.releaseCache()
     }
 
     /// Seek to `index` but stay paused. Used to restore the user's
@@ -236,6 +240,7 @@ final class SpeechPlayer {
         let previous = settings.voiceIdentifier
         guard previous != identifier else { return }
         settings.voiceIdentifier = identifier
+        Self.unloadEngines(notNeededBy: identifier)
 
         guard let index = state.sentenceIndex else {
             // Idle — no sentence to restart; persisted value will be
@@ -789,10 +794,38 @@ final class SpeechPlayer {
 
     // MARK: types
 
+    /// Free any neural engine the newly-selected voice no longer needs,
+    /// so switching (e.g. Qwen→Kokoro, or →a system voice) doesn't
+    /// leave the old model's weights resident for the rest of the
+    /// session. Whisper alignment is shared by both neural engines, so
+    /// it's released only when switching to a system voice. The unloads
+    /// run after the switch so they never delay the new voice starting.
+    private static func unloadEngines(notNeededBy identifier: String?) {
+        let keep = Engine(for: identifier)
+        Task { @MainActor in
+            if keep != .kokoro { KokoroEngine.shared.unload() }
+            if keep != .qwen { await QwenEngine.shared.unload() }
+            if keep == .system { await WhisperAligner.shared.unload() }
+        }
+    }
+
     private enum Engine {
         case system
         case kokoro
         case qwen
+
+        /// Which engine a voice identifier routes to, mirroring the
+        /// prefix dispatch in `speakCurrent()`.
+        init(for voiceID: String?) {
+            let id = voiceID ?? ""
+            if id.hasPrefix("kokoro:") {
+                self = .kokoro
+            } else if id.hasPrefix("qwen:") {
+                self = .qwen
+            } else {
+                self = .system
+            }
+        }
     }
 
     // MARK: delegate
