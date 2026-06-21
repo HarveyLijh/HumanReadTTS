@@ -14,14 +14,10 @@ struct ShortcutsSettingsView: View {
                     "Read selection from anywhere:",
                     name: .readSelection
                 )
-                KeyboardShortcuts.Recorder(
-                    "Read a screenshot (OCR):",
-                    name: .readScreenshot
-                )
             } header: {
                 Text("Global Shortcuts")
             } footer: {
-                Text("Read selection (default ⌘⇧E) speaks your current selection, or your clipboard if that's blocked. Read a screenshot (default ⌘⇧2) runs OCR on an image on the clipboard, so you can screenshot an area with ⌃⇧⌘4 and hear it.")
+                Text("Read selection (default ⌘⇧E) speaks your current selection, or your clipboard if that's blocked.")
                     .foregroundStyle(.secondary)
             }
 
@@ -44,7 +40,7 @@ struct ShortcutsSettingsView: View {
             } header: {
                 Text("Image OCR Languages")
             } footer: {
-                Text("Languages to look for when reading an image or screenshot. Pick the scripts you read; fewer, well-chosen languages recognize faster and more accurately. With none selected, the system chooses automatically.")
+                Text("Languages to look for when reading an image. Pick the scripts you read; fewer, well-chosen languages recognize faster and more accurately. With none selected, the system chooses automatically.")
                     .foregroundStyle(.secondary)
             }
 

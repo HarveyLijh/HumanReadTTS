@@ -17,14 +17,6 @@ extension KeyboardShortcuts.Name {
         "readSelection",
         default: .init(.e, modifiers: [.command, .shift])
     )
-
-    /// Read text out of an image on the clipboard via OCR. Pairs with the
-    /// system region screenshot (⌃⇧⌘4 copies to the clipboard): grab a
-    /// screenshot, then press this to hear it. Default ⌘⇧2.
-    static let readScreenshot = Self(
-        "readScreenshot",
-        default: .init(.two, modifiers: [.command, .shift])
-    )
 }
 
 /// Decides *what to read* when the global hotkey fires, and owns the

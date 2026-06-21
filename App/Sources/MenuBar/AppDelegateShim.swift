@@ -32,12 +32,6 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
             Task { @MainActor in MenuBarCommand.shared.readSelectionOrClipboard() }
         }
 
-        // Read a screenshot: OCR an image sitting on the clipboard (e.g.
-        // from ⌃⇧⌘4) and speak it. Default ⌘⇧2, rebindable in Settings.
-        KeyboardShortcuts.onKeyUp(for: .readScreenshot) {
-            Task { @MainActor in MenuBarCommand.shared.readClipboardImage() }
-        }
-
         // Publish reads to Control Center / lock screen / media keys and
         // wire the hardware transport (play/pause/next/prev/stop).
         NowPlayingController.shared.activate()

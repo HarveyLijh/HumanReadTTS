@@ -63,12 +63,6 @@ final class MenuBarCommand {
             }
 
             guard let text = outcome.text else {
-                // No selection or clipboard text — but a screenshot or copied
-                // image on the clipboard can still be read via OCR.
-                if let image = Self.clipboardImage() {
-                    ocrAndRead(image)
-                    return
-                }
                 ReadHUD.shared.show(
                     message: "Nothing to read — select some text or copy it first.",
                     systemImage: "text.badge.xmark",
@@ -89,60 +83,6 @@ final class MenuBarCommand {
                 dismissAfter: 3.0
             )
         }
-    }
-
-    /// Read an image sitting on the clipboard via OCR. Pairs with the
-    /// system region screenshot (⌃⇧⌘4 copies the shot to the clipboard):
-    /// grab a region, press the Read-Screenshot hotkey, and hear it.
-    func readClipboardImage() {
-        guard let image = Self.clipboardImage() else {
-            ReadHUD.shared.show(
-                message: "No image on the clipboard. Try ⌃⇧⌘4 to screenshot an area first.",
-                systemImage: "text.viewfinder",
-                showStop: false,
-                dismissAfter: 2.5
-            )
-            return
-        }
-        ocrAndRead(image)
-    }
-
-    /// OCR `image` off the main actor, then read what it finds. Shows a
-    /// recognizing HUD up front since OCR isn't instant.
-    private func ocrAndRead(_ image: CGImage) {
-        ReadHUD.shared.show(
-            message: "Recognizing text…",
-            systemImage: "text.viewfinder",
-            showStop: false,
-            dismissAfter: nil
-        )
-        Task { @MainActor in
-            do {
-                let text = try await OCRService.shared.recognizeText(
-                    in: image,
-                    languages: SpeechSettings.shared.ocrRecognitionLanguages
-                )
-                readText(text)
-                ReadHUD.shared.show(
-                    message: hudPreview(text),
-                    showStop: true,
-                    dismissAfter: 3.0
-                )
-            } catch {
-                ReadHUD.shared.show(
-                    message: "No readable text in that image.",
-                    systemImage: "text.badge.xmark",
-                    showStop: false,
-                    dismissAfter: 2.0
-                )
-            }
-        }
-    }
-
-    /// The clipboard's image as a CGImage, or nil when none is present.
-    private static func clipboardImage() -> CGImage? {
-        guard let image = NSImage(pasteboard: .general) else { return nil }
-        return image.cgImage(forProposedRect: nil, context: nil, hints: nil)
     }
 
     /// Read the current clipboard. If it contains plain text,
