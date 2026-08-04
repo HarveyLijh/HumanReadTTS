@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReadAloudTTS — User Manual</title>
-<link rel="icon" type="image/png" href="assets/readaloudtts-icon.png">
+<title>HumanReadTTS — User Manual</title>
+<meta name="description" content="A step-by-step manual for installing HumanReadTTS and using it to read your documents aloud on a Mac. No technical background required.">
+<link rel="icon" type="image/png" href="assets/humanreadtts-icon.png">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -44,7 +45,7 @@
 
   .layout { display: flex; min-height: 100vh; }
 
-  /* ─────────────── Sidebar ─────────────── */
+  /* Sidebar */
   .sidebar {
     width: 272px;
     flex-shrink: 0;
@@ -80,7 +81,7 @@
   }
   .sidebar a:hover { color: var(--ink); background: var(--surface); border-left-color: var(--accent); }
 
-  /* ─────────────── Main ─────────────── */
+  /* Main */
   .main { flex: 1; max-width: 920px; padding: 56px 64px 96px; }
 
   .eyebrow {
@@ -98,6 +99,7 @@
     border-bottom: 2px solid var(--rule);
     display: flex; align-items: center; gap: 10px;
     letter-spacing: -0.005em;
+    scroll-margin-top: 20px;
   }
   h3.sub-heading { font-size: 17px; font-weight: 700; color: var(--ink); margin: 30px 0 10px; }
   p { color: var(--ink-soft); margin-bottom: 14px; }
@@ -109,7 +111,17 @@
   ul, ol { color: var(--ink-soft); padding-left: 20px; margin-bottom: 14px; }
   li { margin-bottom: 5px; }
 
-  /* ─────────────── Step list ─────────────── */
+  /* Download button */
+  .dl-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 24px 0 10px; }
+  .dl-btn {
+    display: inline-block; background: var(--accent); color: #0b1114;
+    font-weight: 750; font-size: 15px; padding: 12px 24px; border-radius: 9px;
+    box-shadow: 0 4px 16px rgba(61, 207, 194, 0.22);
+  }
+  .dl-btn:hover { background: var(--accent-ink); text-decoration: none; }
+  .dl-meta { font-size: 13.5px; color: var(--muted); }
+
+  /* Step list */
   .steps { margin: 22px 0; }
   .step { display: flex; gap: 16px; margin-bottom: 26px; align-items: flex-start; }
   .step-num {
@@ -125,7 +137,7 @@
   .step-body .step-title { font-weight: 700; color: var(--ink); font-size: 16px; margin-bottom: 3px; }
   .step-body p { color: var(--ink-soft); font-size: 15px; margin-bottom: 6px; }
 
-  /* ─────────────── Screenshots ─────────────── */
+  /* Screenshots */
   .screenshot {
     margin: 22px 0 28px;
     max-width: 680px;
@@ -143,25 +155,29 @@
     font-size: 13px;
     color: var(--muted);
   }
-  .screenshot.shot-panel  { max-width: 520px; }
+  .screenshot.shot-panel  { max-width: 560px; }
   .screenshot.shot-narrow { max-width: 280px; }
+  .screenshot.shot-wide   { max-width: 780px; }
   .step .screenshot { margin-left: 50px; }
 
-  /* placeholder card for screenshots not yet captured */
+  /* Placeholder card for screenshots not yet captured */
   .shot-todo {
     margin: 22px 0 28px;
     border: 1px dashed var(--rule);
     border-radius: 12px;
-    padding: 28px 22px;
+    padding: 22px;
     background: repeating-linear-gradient(135deg, var(--bg-soft) 0 8px, var(--surface) 8px 16px);
     color: var(--muted);
     font-size: 13.5px;
     line-height: 1.55;
+    max-width: 680px;
   }
-  .shot-todo strong { color: var(--ink-soft); display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .shot-todo > strong:first-child { color: var(--ink-soft); display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .shot-todo strong { color: var(--ink-soft); font-weight: 650; }
   .shot-todo code { background: var(--code-wash); }
+  .step .shot-todo { margin-left: 50px; }
 
-  /* ─────────────── Callouts ─────────────── */
+  /* Callouts */
   .callout {
     border-radius: 10px; padding: 14px 18px; margin: 18px 0;
     display: flex; gap: 12px; align-items: flex-start;
@@ -180,7 +196,7 @@
   .callout.info { background: var(--info-wash);   border: 1px solid var(--info-rule); }
   .callout.info .callout-label { background: rgba(89, 158, 232, 0.22); color: var(--info-ink); }
 
-  /* ─────────────── TOC card ─────────────── */
+  /* Contents card */
   .toc-card {
     background: var(--surface); border-radius: 12px; padding: 26px 30px;
     border: 1px solid var(--rule);
@@ -191,22 +207,26 @@
   .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
   .toc-link { color: var(--accent); text-decoration: none; font-size: 14px; padding: 3px 0; display: block; }
   .toc-link:hover { text-decoration: underline; }
+  .toc-link .n { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 7px; }
 
-  /* ─────────────── Tables ─────────────── */
-  table { width: 100%; border-collapse: collapse; margin: 18px 0 24px; font-size: 14.5px; }
+  /* Tables */
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0 24px; font-size: 14.5px; min-width: 420px; }
   table th, table td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
   table th { font-weight: 700; color: var(--ink); background: var(--surface); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
   table td { color: var(--ink-soft); vertical-align: top; }
-  kbd { font-family: 'SF Mono', Consolas, monospace; background: var(--kbd-bg); border-radius: 4px; padding: 2px 7px; font-size: 12.5px; color: var(--ink); border: 1px solid var(--kbd-rule); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+  kbd { font-family: 'SF Mono', Consolas, monospace; background: var(--kbd-bg); border-radius: 4px; padding: 2px 7px; font-size: 12.5px; color: var(--ink); border: 1px solid var(--kbd-rule); box-shadow: 0 1px 0 rgba(0,0,0,0.4); white-space: nowrap; }
   code { background: var(--code-wash); border-radius: 4px; padding: 2px 6px; font-size: 13px; font-family: 'SF Mono', Consolas, monospace; color: var(--ink); border: 1px solid var(--rule-soft); }
+  pre { background: var(--code-wash); border: 1px solid var(--rule-soft); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre code { background: none; border: none; padding: 0; font-size: 12.5px; line-height: 1.6; }
 
-  /* ─────────────── FAQ ─────────────── */
+  /* FAQ and glossary */
   .faq-item { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px dashed var(--rule); }
   .faq-item:last-child { border-bottom: none; }
   .faq-q { font-weight: 700; color: var(--ink); margin-bottom: 6px; font-size: 15.5px; }
   .faq-a { color: var(--ink-soft); font-size: 15px; }
-
-  hr.section-break { border: none; border-top: 1px solid var(--rule); margin: 56px 0; }
+  dl.glossary dt { font-weight: 700; color: var(--ink); margin-top: 16px; font-size: 15px; }
+  dl.glossary dd { color: var(--ink-soft); font-size: 15px; margin-left: 0; }
 
   footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
   footer a { color: var(--accent); }
@@ -214,420 +234,864 @@
 
   @media (max-width: 920px) {
     .sidebar { display: none; }
-    .main { padding: 32px 24px 72px; }
+    .main { padding: 32px 22px 72px; max-width: 100%; }
     .toc-grid { grid-template-columns: 1fr; }
-    .step .screenshot { margin-left: 0; }
+    .step .screenshot, .step .shot-todo { margin-left: 0; }
+    h1.page-title { font-size: 29px; }
   }
 </style>
 </head>
 <body>
 <div class="layout">
 
-  <!-- ───────── Sidebar ───────── -->
   <nav class="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/readaloudtts-icon.png" alt="ReadAloudTTS">
+      <img src="assets/humanreadtts-icon.png" alt="HumanReadTTS">
       <div>
-        <div class="tag">ReadAloudTTS</div>
+        <div class="tag">HumanReadTTS</div>
         <h1>User Manual</h1>
-        <p>v0.7.1 · macOS 15 · Apple Silicon</p>
+        <p>v0.7.2 &middot; macOS 15 &middot; Apple Silicon</p>
       </div>
     </div>
 
     <div class="sidebar-section">Getting Started</div>
     <a href="#quick-start">Quick Start</a>
-    <a href="#install">Install</a>
-    <a href="#first-launch">First Launch</a>
+    <a href="#install">Installing the App</a>
+    <a href="#first-launch">The First Launch</a>
 
     <div class="sidebar-section">Reading</div>
-    <a href="#open-docs">Opening Documents</a>
-    <a href="#transport">The Transport HUD</a>
-    <a href="#highlighting">Highlighting &amp; Click-to-Read</a>
-    <a href="#resume">Resume Position</a>
+    <a href="#open-docs">Opening a Document</a>
+    <a href="#transport">The Playback Bar</a>
+    <a href="#highlighting">Highlighting and Click-to-Read</a>
+    <a href="#resume">Picking Up Where You Left Off</a>
+    <a href="#zoom">Zoom, Fit and Search</a>
 
     <div class="sidebar-section">Voices</div>
-    <a href="#voices">Voice Engines</a>
-    <a href="#models">Downloading Models</a>
-    <a href="#bilingual">Bilingual Auto-Switch</a>
-    <a href="#pronunciation">Pronunciation Overrides</a>
+    <a href="#voices">Choosing a Voice</a>
+    <a href="#models">Downloading Better Voices</a>
+    <a href="#bilingual">English and Chinese Together</a>
+    <a href="#pronunciation">Fixing Mispronounced Words</a>
+
+    <div class="sidebar-section">Comfort and Access</div>
+    <a href="#comfort">Making Text Easier to Read</a>
+    <a href="#themes">Page Colours and Line Focus</a>
+
+    <div class="sidebar-section">Study Tools</div>
+    <a href="#translate">Translating a Word</a>
+    <a href="#vocabulary">Your Vocabulary List</a>
+
+    <div class="sidebar-section">More Ways to Read</div>
+    <a href="#ocr">Reading Text in Images</a>
+    <a href="#anywhere">Reading From Any App</a>
+    <a href="#nowplaying">Media Keys and Sleep Timer</a>
 
     <div class="sidebar-section">Customise</div>
-    <a href="#skip-rules">Skip Rules</a>
+    <a href="#skip-rules">Skipping Citations and Clutter</a>
     <a href="#shortcuts">Keyboard Shortcuts</a>
-    <a href="#services">Services &amp; Menubar</a>
 
     <div class="sidebar-section">Export</div>
-    <a href="#audiobook">Audiobook Export</a>
+    <a href="#audiobook">Saving as an Audio File</a>
 
     <div class="sidebar-section">Reference</div>
-    <a href="#faq">FAQ</a>
+    <a href="#faq">Questions and Answers</a>
+    <a href="#glossary">Glossary</a>
     <a href="#privacy">Privacy</a>
   </nav>
 
-  <!-- ───────── Main ───────── -->
   <main class="main">
 
-    <p class="eyebrow">ReadAloudTTS · User Manual</p>
-    <h1 class="page-title">Welcome to ReadAloudTTS.</h1>
-    <p class="page-subtitle">A step-by-step guide to reading papers, notes, and books with ReadAloudTTS — macOS 15 and up, Apple Silicon, no account, no subscription, your documents never leave your Mac.</p>
+    <div class="eyebrow">HumanReadTTS</div>
+    <h1 class="page-title">User Manual</h1>
+    <p class="page-subtitle">
+      A step-by-step guide to installing HumanReadTTS and using it to read your
+      documents aloud, from your first download through to saving a chapter as
+      an audio file. No technical background required.
+    </p>
+
+    <div class="dl-row">
+      <a class="dl-btn" href="https://github.com/HarveyLijh/HumanReadTTS/releases/latest">Download HumanReadTTS</a>
+      <span class="dl-meta">Free and open source &middot; macOS 15 or later &middot; Apple Silicon Mac</span>
+    </div>
 
     <div class="toc-card">
       <h2>Contents</h2>
       <div class="toc-grid">
-        <a href="#quick-start" class="toc-link">Quick Start (3 minutes)</a>
-        <a href="#install" class="toc-link">1. Install</a>
-        <a href="#first-launch" class="toc-link">2. First Launch</a>
-        <a href="#open-docs" class="toc-link">3. Opening Documents</a>
-        <a href="#transport" class="toc-link">4. The Transport HUD</a>
-        <a href="#highlighting" class="toc-link">5. Highlighting &amp; Click-to-Read</a>
-        <a href="#resume" class="toc-link">6. Resume Position</a>
-        <a href="#voices" class="toc-link">7. Voice Engines</a>
-        <a href="#models" class="toc-link">8. Downloading Models</a>
-        <a href="#bilingual" class="toc-link">9. Bilingual Auto-Switch</a>
-        <a href="#pronunciation" class="toc-link">10. Pronunciation Overrides</a>
-        <a href="#skip-rules" class="toc-link">11. Skip Rules</a>
-        <a href="#shortcuts" class="toc-link">12. Keyboard Shortcuts</a>
-        <a href="#services" class="toc-link">13. Services &amp; Menubar</a>
-        <a href="#audiobook" class="toc-link">14. Audiobook Export</a>
-        <a href="#faq" class="toc-link">15. FAQ</a>
-        <a href="#privacy" class="toc-link">16. Privacy</a>
+        <a class="toc-link" href="#quick-start"><span class="n">1</span>Quick Start</a>
+        <a class="toc-link" href="#install"><span class="n">2</span>Installing the App</a>
+        <a class="toc-link" href="#first-launch"><span class="n">3</span>The First Launch</a>
+        <a class="toc-link" href="#open-docs"><span class="n">4</span>Opening a Document</a>
+        <a class="toc-link" href="#transport"><span class="n">5</span>The Playback Bar</a>
+        <a class="toc-link" href="#highlighting"><span class="n">6</span>Highlighting and Click-to-Read</a>
+        <a class="toc-link" href="#resume"><span class="n">7</span>Picking Up Where You Left Off</a>
+        <a class="toc-link" href="#zoom"><span class="n">8</span>Zoom, Fit and Search</a>
+        <a class="toc-link" href="#voices"><span class="n">9</span>Choosing a Voice</a>
+        <a class="toc-link" href="#models"><span class="n">10</span>Downloading Better Voices</a>
+        <a class="toc-link" href="#bilingual"><span class="n">11</span>English and Chinese Together</a>
+        <a class="toc-link" href="#pronunciation"><span class="n">12</span>Fixing Mispronounced Words</a>
+        <a class="toc-link" href="#comfort"><span class="n">13</span>Making Text Easier to Read</a>
+        <a class="toc-link" href="#themes"><span class="n">14</span>Page Colours and Line Focus</a>
+        <a class="toc-link" href="#translate"><span class="n">15</span>Translating a Word</a>
+        <a class="toc-link" href="#vocabulary"><span class="n">16</span>Your Vocabulary List</a>
+        <a class="toc-link" href="#ocr"><span class="n">17</span>Reading Text in Images</a>
+        <a class="toc-link" href="#anywhere"><span class="n">18</span>Reading From Any App</a>
+        <a class="toc-link" href="#nowplaying"><span class="n">19</span>Media Keys and Sleep Timer</a>
+        <a class="toc-link" href="#skip-rules"><span class="n">20</span>Skipping Citations and Clutter</a>
+        <a class="toc-link" href="#shortcuts"><span class="n">21</span>Keyboard Shortcuts</a>
+        <a class="toc-link" href="#audiobook"><span class="n">22</span>Saving as an Audio File</a>
+        <a class="toc-link" href="#faq"><span class="n">23</span>Questions and Answers</a>
+        <a class="toc-link" href="#glossary"><span class="n">24</span>Glossary</a>
+        <a class="toc-link" href="#privacy"><span class="n">25</span>Privacy</a>
       </div>
     </div>
 
-    <!-- ───────── Quick Start ───────── -->
-    <h2 class="section-heading" id="quick-start">Quick Start</h2>
-    <p class="lead">If you want to hear your first paper in three minutes, follow these four steps. The rest of the manual explains each piece in detail.</p>
+    <!-- 1 -->
+    <h2 class="section-heading" id="quick-start">1. Quick Start</h2>
+    <p class="lead">
+      If you want to hear something read aloud in the next two minutes, these
+      three steps are all you need. The rest of the manual explains each part
+      in more detail.
+    </p>
 
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-title">Install ReadAloudTTS.</div>
-          <p>Download the latest <code>.dmg</code> from <a href="https://github.com/HarveyLijh/ReadAloudTTS/releases">Releases</a>, mount it, drag <strong>ReadAloudTTS</strong> into <code>/Applications</code>.</p>
+          <div class="step-title">Download and install</div>
+          <p>
+            Download the app, open the file you downloaded, and drag the
+            HumanReadTTS icon onto the Applications folder shown next to it.
+            Full details, including the warning macOS shows the first time, are
+            in <a href="#install">Installing the App</a>.
+          </p>
         </div>
       </div>
+
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-title">Open a document.</div>
-          <p>Launch ReadAloudTTS and drop any PDF, Markdown, or EPUB onto the window — or press <kbd>⌘O</kbd>. ReadAloudTTS ships with a short sample document; the welcome tour offers to open it for you.</p>
+          <div class="step-title">Open a document</div>
+          <p>
+            Drag a PDF, Word file, EPUB, Markdown file, or plain text file onto
+            the HumanReadTTS window. You can also click <strong>Open</strong> in
+            the top-left corner, or press <kbd>Command</kbd> + <kbd>O</kbd>.
+          </p>
         </div>
       </div>
-      <div class="screenshot">
-        <img src="assets/reader-window.png" alt="ReadAloudTTS reader window with a sample PDF loaded, showing the library sidebar, the document, and the transport HUD at the bottom">
-        <div class="caption">The reader window: library sidebar on the left, document in the middle, transport HUD docked at the bottom.</div>
-      </div>
+
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <div class="step-title">Press Space.</div>
-          <p>The capsule at the bottom of the window is the transport HUD. Space starts reading; the active sentence is washed in amber and the current word pulses brighter.</p>
+          <div class="step-title">Press the space bar</div>
+          <p>
+            Reading starts from the beginning. Press the space bar again to
+            pause. To start somewhere else instead, double-click any word in the
+            document and reading begins from there.
+          </p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-body">
-          <div class="step-title">Right-click any word.</div>
-          <p>Pick <strong>Read from here</strong> to jump playback. Close the window mid-read — ReadAloudTTS restores the exact sentence on next launch.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="callout tip">
-      <span class="callout-label">Bundled demo</span>
-      <p>The first-run welcome tour offers a sample <strong>WelcomeSample.pdf</strong> that exercises every PDF feature — multi-column layout, numeric and author-year citations, a figure caption, and a bilingual EN+中文 paragraph. It's the fastest way to hear clean output on all the tricky cases.</p>
-    </div>
-
-    <hr class="section-break">
-
-    <!-- ───────── Install ───────── -->
-    <h2 class="section-heading" id="install">1. Install</h2>
-
-    <h3 class="sub-heading">Using the DMG</h3>
-    <p>Grab the latest <code>.dmg</code> from the <a href="https://github.com/HarveyLijh/ReadAloudTTS/releases">Releases page</a>, mount it, and drag <strong>ReadAloudTTS</strong> into <code>/Applications</code>.</p>
-
-    <div class="callout warn">
-      <span class="callout-label">Gatekeeper</span>
-      <p>ReadAloudTTS is unsigned until v0.8.x ships notarised builds. First launch: <strong>right-click the app → Open</strong>. macOS asks once; afterwards plain double-click works. Alternatively drop the quarantine flag from Terminal:<br><code>xattr -dr com.apple.quarantine /Applications/ReadAloudTTS.app</code></p>
-    </div>
-
-    <h3 class="sub-heading">Homebrew</h3>
-    <p>A Homebrew Cask (<code>brew install --cask readaloudtts</code>) lands in v0.8.x once the release cadence stabilises.</p>
-
-    <h3 class="sub-heading">Build from source</h3>
-    <p>If you have Xcode 16 and the macOS 15 SDK:</p>
-    <p><code>git clone https://github.com/HarveyLijh/ReadAloudTTS.git &amp;&amp; cd ReadAloudTTS &amp;&amp; open ReadAloudTTS.xcodeproj</code></p>
-    <p>No Tuist, no XcodeGen, no code-generation step — the <code>.xcodeproj</code> is hand-maintained. <code>Scripts/build.sh</code> also runs without Xcode if all you have is the Command Line Tools.</p>
-
-    <!-- ───────── First Launch ───────── -->
-    <h2 class="section-heading" id="first-launch">2. First Launch</h2>
-    <p>The first time you open ReadAloudTTS, a brief welcome tour highlights the library sidebar, the transport HUD, and the drop target, and offers to load the bundled sample PDF. You can reopen the tour any time from <strong>Settings → Playback → Show Welcome Tour…</strong>.</p>
-    <p>Neural voices — <strong>Kokoro</strong> for English and <strong>Qwen3-TTS</strong> for bilingual EN+ZH — are downloaded on demand from <strong>Settings → Models</strong>. The download happens once, directly from mirrors, and the files live in your sandboxed Application Support directory.</p>
-
-    <div class="callout info">
-      <span class="callout-label">Zero-cloud</span>
-      <p>After models are downloaded, ReadAloudTTS never talks to the network again during normal use. You can verify with Little Snitch or the macOS Firewall.</p>
-    </div>
-
-    <hr class="section-break">
-
-    <!-- ───────── Open Docs ───────── -->
-    <h2 class="section-heading" id="open-docs">3. Opening Documents</h2>
-    <p>ReadAloudTTS reads three document families natively, with no preconfiguration:</p>
-
-    <table>
-      <thead><tr><th style="width: 28%">Format</th><th>How it's parsed</th></tr></thead>
-      <tbody>
-        <tr><td><strong>PDF</strong> <code>.pdf</code></td><td>PDFKit with a research-aware post-processor: multi-column layouts, numeric and author-year citations, figure and table captions are stripped from speech (but stay visible in the viewer).</td></tr>
-        <tr><td><strong>Markdown</strong> <code>.md</code></td><td>Foundation's attributed-string parser with a segmented <em>Raw / Preview</em> toggle. Clicking a word in Preview starts playback at that word.</td></tr>
-        <tr><td><strong>EPUB</strong> <code>.epub</code></td><td>ZIPFoundation unzips the container; XHTML chapters are concatenated in spine order and segmented by <code>NLTokenizer</code>.</td></tr>
-      </tbody>
-    </table>
-
-    <p>There are four ways to open a document:</p>
-    <ol>
-      <li>Drag into the ReadAloudTTS window or the ReadAloudTTS icon in the Dock.</li>
-      <li><kbd>⌘O</kbd> → browse.</li>
-      <li>Finder → right-click → <em>Open With → ReadAloudTTS</em> (or double-click if ReadAloudTTS is the default handler for that type).</li>
-      <li>Command line: <code>open -a ReadAloudTTS paper.pdf</code></li>
-    </ol>
-
-    <p>Opening a new document while one is already loaded re-uses the existing window. ReadAloudTTS never spawns duplicate reader windows.</p>
-
-    <!-- ───────── Transport HUD ───────── -->
-    <h2 class="section-heading" id="transport">4. The Transport HUD</h2>
-    <p>The capsule at the bottom of the window carries every playback control at arm's length. It collapses progressively on narrow windows — time drops first, then the voice label, then the speed chip — but the transport and scrubber are always visible.</p>
-
-    <div class="screenshot">
-      <img src="assets/transport-hud.png" alt="Transport HUD capsule at the bottom of the reader window with prev/play/next, scrubber, time, skip counter, speed, and voice chips">
-      <div class="caption">The HUD in full. From left: prev / play / next, time readout, skip-rules counter (✂&nbsp;N), speed chip, voice chip, settings gear. The document stats tag floats above-left.</div>
-    </div>
-
-    <h3 class="sub-heading">Skip-rules counter</h3>
-    <p>The small scissors pill shows the number of currently active regex skip rules (see §11). Tap it to open <strong>Settings → Skip Rules</strong>; toggles take effect at the next sentence boundary, so you don't lose your place.</p>
-
-    <h3 class="sub-heading">Speed chip</h3>
-    <p>Press <kbd>⌘]</kbd> to speed up by 0.1× and <kbd>⌘[</kbd> to slow down. Range: 0.5× to 4.0×. Neural voices (Kokoro, Qwen3) apply rate via time-stretching so pitch stays natural.</p>
-
-    <h3 class="sub-heading">Voice chip</h3>
-    <p>Click the voice label to swap voice or engine. ReadAloudTTS restarts the current sentence on the new voice and flashes an undo toast with a 4-second timer.</p>
-
-    <div class="callout tip">
-      <span class="callout-label">Engine fallback</span>
-      <p>If a neural engine fails mid-read (model missing, out of memory), the chip flips to a system-voice icon and a banner appears for 2 seconds. The chip heals automatically when the next synthesis succeeds — no manual recovery needed.</p>
-    </div>
-
-    <!-- ───────── Highlighting ───────── -->
-    <h2 class="section-heading" id="highlighting">5. Highlighting &amp; Click-to-Read</h2>
-    <p>Two layers of highlight move in sync with audio:</p>
-    <ul>
-      <li><strong>Active sentence</strong> — soft amber wash that auto-scrolls to stay visible.</li>
-      <li><strong>Active word</strong> — brighter block driven by <code>AVSpeechSynthesizer.willSpeakRange</code> for system voices, or by Whisper forced alignment for neural voices.</li>
-    </ul>
-
-    <p><strong>Double-click</strong> any word in any viewer to jump playback there. <strong>Right-click</strong> opens a contextual menu with <em>Read from here</em> and <em>Read from here to end</em>. Manual scroll is respected — ReadAloudTTS only auto-scrolls on sentence changes, never on word ticks.</p>
-
-    <!-- ───────── Resume ───────── -->
-    <h2 class="section-heading" id="resume">6. Resume Position</h2>
-    <p>Closing ReadAloudTTS mid-read is safe. The paused cursor is stored per document; on next launch, reopening that document restores the exact sentence you stopped on. Press <kbd>Space</kbd> to continue.</p>
-    <p>Per-document voice and speed memory lands in v0.8.x — a dense paper will open at 1.0× while a novel opens at 1.6× without re-setting.</p>
-
-    <hr class="section-break">
-
-    <!-- ───────── Voices ───────── -->
-    <h2 class="section-heading" id="voices">7. Voice Engines</h2>
-    <p>ReadAloudTTS ships three engines. All run locally on your Mac.</p>
-
-    <table>
-      <thead><tr><th style="width: 20%">Engine</th><th>Voices</th><th>Download</th><th>Best for</th></tr></thead>
-      <tbody>
-        <tr><td><strong>System</strong></td><td>Any AVSpeechSynthesis voice on your Mac</td><td>None — uses built-in macOS voices</td><td>Fast preview, very long documents, battery runs</td></tr>
-        <tr><td><strong>Kokoro</strong></td><td>28 English voices (US + UK, M + F)</td><td>~340 MB, once</td><td>Studio-quality English reading</td></tr>
-        <tr><td><strong>Qwen3-TTS</strong></td><td>6 bilingual EN+ZH speakers</td><td>~1 GB, once</td><td>Chinese content, bilingual papers</td></tr>
-      </tbody>
-    </table>
-
-    <div class="screenshot shot-panel">
-      <img src="assets/settings-playback.png" alt="Settings → Playback: Voice picker, speed/pitch sliders, research-PDF toggles">
-      <div class="caption">Settings → Playback. Voice picker at top; speed and pitch below; research-PDF toggles for author-year citations and figure/table captions.</div>
     </div>
 
     <div class="callout tip">
       <span class="callout-label">Tip</span>
-      <p>If you want a neural voice to read Chinese and an English voice to read English automatically, leave the voice picker on <strong>Auto</strong> and the bilingual auto-switch handles per-sentence handoff for you.</p>
+      <p>
+        Everything happens on your Mac. Your documents are never uploaded
+        anywhere, so you can read confidential drafts and unpublished papers
+        without worrying about where the text goes.
+      </p>
     </div>
 
-    <!-- ───────── Models ───────── -->
-    <h2 class="section-heading" id="models">8. Downloading Models</h2>
-    <p><strong>Settings → Models</strong> lists the three optional model packages and their install state. Click <strong>Install</strong> to download; click <strong>Remove</strong> to reclaim the disk space if you're not using that engine.</p>
+    <!-- 2 -->
+    <h2 class="section-heading" id="install">2. Installing the App</h2>
+    <p>
+      HumanReadTTS runs on Macs with Apple Silicon (the M1, M2, M3, M4 chips and
+      later) running macOS 15 or newer. If you bought your Mac in 2021 or later,
+      it almost certainly qualifies. To check, click the Apple menu in the
+      top-left of your screen and choose <strong>About This Mac</strong>.
+    </p>
 
-    <div class="screenshot shot-panel">
-      <img src="assets/settings-models.png" alt="Settings → Models: Kokoro, Qwen3-TTS, and Whisper Base with install states and sizes">
-      <div class="caption">Kokoro (English), Qwen3-TTS (bilingual), and Whisper Base (forced alignment for word highlighting).</div>
+    <div class="dl-row">
+      <a class="dl-btn" href="https://github.com/HarveyLijh/HumanReadTTS/releases/latest">Download the latest version</a>
     </div>
 
-    <p>Whisper Base is optional but recommended — without it, neural voices still speak fine, but word-level highlighting falls back to coarser sentence-level highlighting.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Download the installer</div>
+          <p>
+            The download button takes you to the releases page. Under the newest
+            version, click the file ending in <code>.dmg</code>. It will land in
+            your Downloads folder.
+          </p>
+        </div>
+      </div>
 
-    <!-- ───────── Bilingual ───────── -->
-    <h2 class="section-heading" id="bilingual">9. Bilingual Auto-Switch</h2>
-    <p>Bilingual auto-switch is on by default. ReadAloudTTS runs <code>NLLanguageRecognizer</code> on every sentence and hands off between engines — an English paragraph followed by a Chinese one transitions seamlessly at the sentence boundary.</p>
-    <p>Toggle it in the Playback settings. When off, every sentence is read in the selected voice regardless of language; mispronunciations in the wrong language are common, so leave it on unless your document is monolingual and you want a specific engine.</p>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Open it and drag the app across</div>
+          <p>
+            Double-click the downloaded <code>.dmg</code> file. A window opens
+            showing the HumanReadTTS icon next to a shortcut to your Applications
+            folder. Drag the icon onto that folder.
+          </p>
+          <div class="shot-todo">
+            <strong>Screenshot to add</strong>
+            The opened disk image window, showing the HumanReadTTS icon on the
+            left and the Applications folder shortcut on the right, with an
+            arrow between them. Capture at the default window size.
+          </div>
+        </div>
+      </div>
 
-    <!-- ───────── Pronunciation ───────── -->
-    <h2 class="section-heading" id="pronunciation">10. Pronunciation Overrides</h2>
-    <p>If a voice consistently mispronounces a technical term — an author's name, an acronym, a Chinese toponym — add it to <strong>Settings → Pronunciation</strong>. Overrides are phonetic substitutions applied before the text reaches the synthesizer, and they work across every engine.</p>
-
-    <div class="screenshot shot-panel">
-      <img src="assets/settings-pronunciation.png" alt="Settings → Pronunciation dictionary with an Add-term form">
-      <div class="caption">Enter the term on the left, the spoken pronunciation on the right. Matches are case-insensitive and whole-word.</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Open it for the first time</div>
+          <p>
+            Go to your Applications folder, hold <kbd>Control</kbd> and click the
+            HumanReadTTS icon, then choose <strong>Open</strong> from the menu
+            that appears. A warning box appears saying the developer cannot be
+            verified. Click <strong>Open</strong> again.
+          </p>
+          <div class="shot-todo">
+            <strong>Screenshot to add</strong>
+            The macOS warning dialog on first launch, with the
+            <strong>Open</strong> button visible. Capture the dialog only, not
+            the whole screen.
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="callout tip">
-      <span class="callout-label">Example</span>
-      <p>Replace <code>LaTeX</code> → <code>Lah-tek</code>, <code>Vaswani</code> → <code>Vuh-swah-nee</code>, <code>PDF</code> → <code>P D F</code> (with spaces, to force letter-by-letter reading).</p>
-    </div>
-
-    <hr class="section-break">
-
-    <!-- ───────── Skip Rules ───────── -->
-    <h2 class="section-heading" id="skip-rules">11. Skip Rules</h2>
-    <p>Skip rules are regex patterns stripped from the text before the synthesizer speaks it. They are the single most powerful tool for making research papers listenable.</p>
-    <p>ReadAloudTTS ships with four enabled-by-default built-ins:</p>
-
-    <table>
-      <thead><tr><th style="width: 30%">Rule</th><th>Matches</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Author-year citations</strong></td><td><code>(Smith et al., 2020)</code>, <code>(Jones, 2021)</code></td></tr>
-        <tr><td><strong>Numeric citations</strong></td><td><code>[1]</code>, <code>[1, 2]</code>, <code>[1–3]</code></td></tr>
-        <tr><td><strong>LaTeX cite commands</strong></td><td><code>\cite{…}</code>, <code>\citep{…}</code>, <code>\ref{…}</code>, <code>\label{…}</code></td></tr>
-        <tr><td><strong>Inline cite markers</strong></td><td><code>cite:key</code>, <code>\bcite\S+</code></td></tr>
-      </tbody>
-    </table>
-
-    <div class="screenshot shot-panel">
-      <img src="assets/settings-skip-rules.png" alt="Settings → Skip Rules: four built-in rules, each with a Name, Regex pattern, toggle, and an Add-rule form below">
-      <div class="caption">Each rule has a name, a regex, and a toggle. The <em>Try it on a sentence</em> box at the bottom shows what ReadAloudTTS will actually say after stripping.</div>
-    </div>
-
-    <p>Add your own with the <strong>Name</strong> / <strong>Regex pattern</strong> / <strong>Add</strong> row. Invalid regexes are silently ignored at speak time — they're flagged in the list but never crash playback. Toggling any rule mid-read takes effect at the next sentence boundary.</p>
 
     <div class="callout warn">
-      <span class="callout-label">Heads-up</span>
-      <p>If a sentence disappears entirely, a skip rule probably matched the whole thing. Paste it into the <em>Try it on a sentence</em> box and disable rules one by one until it reappears.</p>
+      <span class="callout-label">Important</span>
+      <p>
+        You only have to do the Control-click step once. After that, opening
+        HumanReadTTS works like any other app. If you double-click it the very
+        first time instead of Control-clicking, macOS refuses to open it at all
+        and does not offer an Open button, which is why the extra step matters.
+      </p>
     </div>
 
-    <!-- ───────── Shortcuts ───────── -->
-    <h2 class="section-heading" id="shortcuts">12. Keyboard Shortcuts</h2>
-    <table>
-      <thead><tr><th style="width: 30%">Shortcut</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td><kbd>Space</kbd></td><td>Play / Pause</td></tr>
-        <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Previous / Next sentence</td></tr>
-        <tr><td><kbd>⌘]</kbd> / <kbd>⌘[</kbd></td><td>Speed up / slow down (0.1 step)</td></tr>
-        <tr><td><kbd>⌘O</kbd></td><td>Open File…</td></tr>
-        <tr><td><kbd>⌘⇧E</kbd></td><td>Export Audiobook…</td></tr>
-        <tr><td><kbd>⌘⇧J</kbd></td><td>Show Exports queue</td></tr>
-        <tr><td><kbd>⌘⇧S</kbd></td><td>Read Clipboard (global, from any app)</td></tr>
-        <tr><td><kbd>⌘⇧R</kbd></td><td>Read Clipboard (from the menubar item)</td></tr>
-        <tr><td><kbd>⌘,</kbd></td><td>Open Settings</td></tr>
-        <tr><td><kbd>⌘⇧F</kbd></td><td>Fit to window width (PDF)</td></tr>
-        <tr><td><kbd>⌘+</kbd> / <kbd>⌘–</kbd></td><td>Zoom in / out (PDF) — also <kbd>⌘-scroll</kbd></td></tr>
-        <tr><td><kbd>Esc</kbd></td><td>Reset PDF zoom &amp; pan</td></tr>
-      </tbody>
-    </table>
+    <p>
+      This warning appears because the app is not signed with a paid Apple
+      developer certificate. It is not a sign that anything is wrong. The full
+      source code is public, so anyone can check what the app does.
+    </p>
 
-    <!-- ───────── Services ───────── -->
-    <h2 class="section-heading" id="services">13. Services &amp; Menubar</h2>
-    <p>ReadAloudTTS integrates with macOS without needing the main window open.</p>
+    <h3 class="sub-heading">If the app still refuses to open</h3>
+    <p>
+      Open the Terminal app (find it with Spotlight by pressing
+      <kbd>Command</kbd> + <kbd>Space</kbd> and typing "Terminal"), paste the
+      line below, and press Return. It removes the quarantine flag macOS puts on
+      downloaded files.
+    </p>
+<pre><code>xattr -dr com.apple.quarantine /Applications/HumanReadTTS.app</code></pre>
 
-    <div class="screenshot shot-narrow">
-      <img src="assets/menubar-dropdown.png" alt="ReadAloudTTS menubar dropdown with Read Clipboard, Pause, Stop, Open ReadAloudTTS, and Quit ReadAloudTTS">
-      <div class="caption">The menubar dropdown carries transport controls, a global <em>Read Clipboard</em> entry, and direct access to the main window.</div>
+    <!-- 3 -->
+    <h2 class="section-heading" id="first-launch">3. The First Launch</h2>
+    <p>
+      The first time you open HumanReadTTS, a short welcome tour explains the
+      main parts of the window and offers to open a sample document so you can
+      hear the app working straight away. You can close the tour at any point
+      and reopen it later from the Help menu.
+    </p>
+    <p>
+      Once the tour is done you are looking at the main window. It has two
+      parts: your document list on the left, and the document you are reading in
+      the middle. Along the bottom sits the playback bar, which holds every
+      control you need while listening.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The full main window with a PDF open: document list on the left, document
+      in the middle, playback bar at the bottom. Use a neutral sample document,
+      not a personal file, because the document list shows file names.
     </div>
-
-    <ul>
-      <li><strong>Menubar item</strong> — always available while ReadAloudTTS is running. <em>Read Clipboard</em> reads whatever's currently on the clipboard; <em>Pause</em> and <em>Stop</em> act on the current reader.</li>
-      <li><strong>Global hotkey</strong> — <kbd>⌘⇧S</kbd> reads your clipboard from anywhere. No focus on ReadAloudTTS required.</li>
-      <li><strong>Services menu</strong> — highlight text in any app, choose <em>Services → Read with ReadAloudTTS</em>.</li>
-      <li><strong>URL handlers</strong> — <code>open -a ReadAloudTTS paper.pdf</code> and Finder double-click both route to the existing reader window.</li>
-    </ul>
 
     <div class="callout info">
-      <span class="callout-label">Enable the Service</span>
-      <p>If <em>Read with ReadAloudTTS</em> isn't in the Services menu after install, open <strong>System Settings → Keyboard → Keyboard Shortcuts → Services → Text</strong> and tick the checkbox next to it.</p>
+      <span class="callout-label">Note</span>
+      <p>
+        The app does not ask you to create an account or sign in, because there
+        is no account system. Nothing you do is tied to a login.
+      </p>
     </div>
 
-    <!-- ───────── Audiobook ───────── -->
-    <h2 class="section-heading" id="audiobook">14. Audiobook Export</h2>
-    <p><strong>File → Export Audiobook…</strong> (<kbd>⌘⇧E</kbd>) renders the current document to an audio file. The save panel's format picker offers:</p>
+    <!-- 4 -->
+    <h2 class="section-heading" id="open-docs">4. Opening a Document</h2>
+    <p>There are four ways to open something:</p>
     <ul>
-      <li><strong>M4A</strong> (AAC, 128 kbps) — universal, Apple Books–friendly, smallest files.</li>
-      <li><strong>WAV</strong> (uncompressed, 44.1 kHz) — for external MP3 conversion or DAW editing.</li>
+      <li>Drag a file from Finder onto the HumanReadTTS window.</li>
+      <li>Click <strong>Open</strong> at the top of the document list.</li>
+      <li>Press <kbd>Command</kbd> + <kbd>O</kbd>.</li>
+      <li>Control-click a file in Finder and choose <strong>Open With</strong>, then HumanReadTTS.</li>
     </ul>
+    <p>Everything you open is added to the list on the left, so you can jump back to it later without hunting through Finder.</p>
 
-    <p>Exports run in a background queue. Open it any time with <kbd>⌘⇧J</kbd>.</p>
+    <h3 class="sub-heading">Which file types work</h3>
+    <div class="table-scroll">
+    <table>
+      <tr><th>File type</th><th>What to expect</th></tr>
+      <tr><td>PDF</td><td>The best-supported format. Multi-column research papers are handled correctly, and citations and figure captions can be skipped automatically.</td></tr>
+      <tr><td>Word (.docx)</td><td>Text and headings are read. Complex layouts and tracked changes may not appear as they do in Word.</td></tr>
+      <tr><td>EPUB</td><td>Ebooks are read chapter by chapter.</td></tr>
+      <tr><td>Markdown (.md)</td><td>Shown either as formatted text or as raw source, whichever you prefer.</td></tr>
+      <tr><td>Plain text (.txt)</td><td>Read as-is.</td></tr>
+      <tr><td>Images</td><td>PNG, JPEG, HEIC and TIFF files have their text recognised and read. See <a href="#ocr">Reading Text in Images</a>.</td></tr>
+    </table>
+    </div>
 
-    <div class="screenshot shot-panel">
-      <img src="assets/export-queue.png" alt="Exports window showing an empty state with 'No exports yet.'">
-      <div class="caption">The Exports window. Each running job gets a progress bar; completed jobs get <em>Show in Finder</em> and <em>Play</em> buttons.</div>
+    <!-- 5 -->
+    <h2 class="section-heading" id="transport">5. The Playback Bar</h2>
+    <p>
+      The rounded bar along the bottom of the window holds every playback
+      control. From left to right: jump to the previous sentence, play or pause,
+      jump to the next sentence, how far through you are, how many pieces of
+      text are being skipped, the reading speed, the current voice, and a
+      settings button.
+    </p>
+
+    <div class="screenshot shot-wide">
+      <img src="assets/transport-hud.png" alt="The playback bar, showing skip back, play, skip forward, elapsed and remaining time, a skip counter, the speed control, the voice name, and a settings button.">
+      <div class="caption">The playback bar. Here the voice is Jessica (US English), the speed is normal, and four pieces of text are being skipped.</div>
+    </div>
+
+    <h3 class="sub-heading">The time readout</h3>
+    <p>
+      The top line shows how far you are into the document and how long it is in
+      total. The smaller line underneath shows how much is left. These estimates
+      are based on your chosen speed and get more accurate as the app learns how
+      quickly you actually listen.
+    </p>
+
+    <h3 class="sub-heading">The skip counter</h3>
+    <p>
+      The scissors icon shows how many pieces of text are currently being left
+      out of the reading, such as citation numbers. Click it to see and change
+      those rules. See <a href="#skip-rules">Skipping Citations and Clutter</a>.
+    </p>
+
+    <h3 class="sub-heading">The speed control</h3>
+    <p>
+      Shows the current speed, from a quarter of normal pace up to four times
+      normal. Click it to pick a different speed, or nudge it with
+      <kbd>Command</kbd> + <kbd>]</kbd> to speed up and
+      <kbd>Command</kbd> + <kbd>[</kbd> to slow down.
+    </p>
+
+    <h3 class="sub-heading">The voice control</h3>
+    <p>
+      Shows which voice is speaking. Click it to switch voices without stopping.
+      The app restarts the current sentence in the new voice so you do not miss
+      anything.
+    </p>
+
+    <div class="callout info">
+      <span class="callout-label">Note</span>
+      <p>
+        If you make the window narrow, the playback bar hides its less important
+        parts in order: first the time, then the voice name, then the speed. The
+        play controls and the progress slider always stay visible.
+      </p>
+    </div>
+
+    <!-- 6 -->
+    <h2 class="section-heading" id="highlighting">6. Highlighting and Click-to-Read</h2>
+    <p>
+      As the app reads, the sentence being spoken is washed in a soft amber
+      colour, and the exact word being spoken is picked out more brightly. The
+      page scrolls to follow along.
+    </p>
+    <p>
+      To start reading from a specific place, double-click any word. Reading
+      jumps there immediately. If you Control-click a word instead, a menu
+      appears with <strong>Read from here</strong> and
+      <strong>Read from here to end</strong>.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      A paragraph mid-read, showing the amber sentence highlight with the
+      brighter word highlight inside it. Crop to a few lines of text so the two
+      highlight levels are clearly visible.
     </div>
 
     <div class="callout tip">
-      <span class="callout-label">Long documents</span>
-      <p>A 30-page paper takes roughly 30 seconds to export with Kokoro on an M2; a 400-page EPUB can take several minutes. The queue is resumable across app restarts.</p>
+      <span class="callout-label">Tip</span>
+      <p>
+        If you scroll away to look at something else, the app stops following
+        the text and shows a button that takes you back to the sentence being
+        read. Your place is never lost.
+      </p>
     </div>
 
-    <hr class="section-break">
+    <!-- 7 -->
+    <h2 class="section-heading" id="resume">7. Picking Up Where You Left Off</h2>
+    <p>
+      Close the app in the middle of a document and reopen it later: you are
+      returned to the sentence where you stopped. Press the space bar to carry
+      on. This happens automatically for every document in your list.
+    </p>
 
-    <!-- ───────── FAQ ───────── -->
-    <h2 class="section-heading" id="faq">15. FAQ</h2>
+    <!-- 8 -->
+    <h2 class="section-heading" id="zoom">8. Zoom, Fit and Search</h2>
+    <p>
+      For PDFs, zoom in and out with <kbd>Command</kbd> + <kbd>+</kbd> and
+      <kbd>Command</kbd> + <kbd>-</kbd>. The app remembers the zoom level you
+      chose for each document, the same way Preview does, so a dense paper stays
+      enlarged next time you open it.
+    </p>
+    <p>
+      To fit the page back to the window, press <kbd>Escape</kbd> twice in quick
+      succession. A single press is ignored on purpose, so you do not lose your
+      zoom level by accident.
+    </p>
+    <p>
+      To find a word in the document, press <kbd>Command</kbd> + <kbd>F</kbd>.
+      Move between matches with <kbd>Command</kbd> + <kbd>G</kbd> for the next
+      one and <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> for the
+      previous. Press <kbd>Escape</kbd> to close the search bar.
+    </p>
 
-    <div class="faq-item">
-      <div class="faq-q">Does ReadAloudTTS upload my documents anywhere?</div>
-      <div class="faq-a">No. After the optional model downloads on first use, ReadAloudTTS never talks to the network. Everything — text extraction, segmentation, synthesis, forced alignment — runs on-device.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Why is my first Kokoro sentence slow?</div>
-      <div class="faq-a">The MLX runtime compiles the model graph on the first synthesis call of each session; subsequent sentences are fast. Quit and relaunch only pays this cost again on the next first-sentence.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">A sentence is skipped entirely — where did it go?</div>
-      <div class="faq-a">A skip rule probably matched the whole sentence. Open <strong>Settings → Skip Rules</strong>, paste the sentence into the preview box, and disable rules one by one until it reappears.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">The voice pronounces an author's name wrong.</div>
-      <div class="faq-a">Add a <strong>pronunciation override</strong> (§10). It applies to every engine.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Can I play at more than 4×?</div>
-      <div class="faq-a">Not currently. 4× is already at the edge of intelligibility for most neural voices; past that, stretch artefacts dominate. If you need faster, export to WAV and speed-shift in an external editor.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Where are ReadAloudTTS's files stored?</div>
-      <div class="faq-a">Settings, pronunciation dictionary, skip rules, and resume positions live in <code>~/Library/Containers/app.readaloudtts.mac/Data/Library/Application Support/ReadAloudTTS</code>. Model weights live under <code>models/</code> in the same container. ReadAloudTTS never touches your source documents.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">How do I reset everything?</div>
-      <div class="faq-a">Quit ReadAloudTTS, then remove <code>~/Library/Containers/app.readaloudtts.mac</code>. Next launch starts clean.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">I'm on an Intel Mac. Does ReadAloudTTS work?</div>
-      <div class="faq-a">The System engine works. Kokoro and Qwen3-TTS require Apple Silicon — they run through MLX, which is Apple Silicon only.</div>
+    <!-- 9 -->
+    <h2 class="section-heading" id="voices">9. Choosing a Voice</h2>
+    <p>
+      HumanReadTTS offers three kinds of voice. All of them run on your Mac, so
+      none of your text is sent over the internet.
+    </p>
+
+    <div class="table-scroll">
+    <table>
+      <tr><th>Voice type</th><th>Quality</th><th>Download needed</th></tr>
+      <tr><td>System voices</td><td>Basic. These are the voices already built into macOS.</td><td>None. Available immediately.</td></tr>
+      <tr><td>Kokoro</td><td>Natural and expressive. 28 English voices.</td><td>About 650 MB, one time.</td></tr>
+      <tr><td>Qwen3-TTS</td><td>Natural, and handles English and Chinese equally well. 6 voices.</td><td>About 1 GB, one time.</td></tr>
+    </table>
     </div>
 
-    <!-- ───────── Privacy ───────── -->
-    <h2 class="section-heading" id="privacy">16. Privacy</h2>
-    <p>ReadAloudTTS is sandboxed and hardened. The entitlements file grants:</p>
+    <p>
+      Change voice from the playback bar while reading, or from
+      <strong>Settings</strong> &rarr; <strong>Playback</strong>. Switching
+      mid-document is safe; the app restarts the current sentence in the new
+      voice and offers an Undo button for a few seconds in case you preferred
+      the old one.
+    </p>
+
+    <div class="callout info">
+      <span class="callout-label">Note</span>
+      <p>
+        If a downloaded voice fails for any reason, the app falls back to a
+        system voice, changes the icon on the voice control, and shows a brief
+        message. It heals itself as soon as the better voice works again, so
+        reading never simply stops.
+      </p>
+    </div>
+
+    <!-- 10 -->
+    <h2 class="section-heading" id="models">10. Downloading Better Voices</h2>
+    <p>
+      The natural-sounding voices are optional downloads, so the app itself
+      stays small. To get them, open <strong>Settings</strong> with
+      <kbd>Command</kbd> + <kbd>,</kbd> and choose the <strong>Models</strong>
+      tab. Each voice pack has a Download button and a progress bar.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The Models tab in Settings, showing the Kokoro and Qwen3-TTS voice packs
+      with their sizes and Download buttons. Include the full row of settings
+      tabs at the top.
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-label">Tip</span>
+      <p>
+        Download the voices once while you are on a good connection. After that
+        they work entirely offline, including on a plane or a train.
+      </p>
+    </div>
+
+    <!-- 11 -->
+    <h2 class="section-heading" id="bilingual">11. English and Chinese Together</h2>
+    <p>
+      If a document mixes English and Chinese, HumanReadTTS detects the language
+      of each sentence and switches voices automatically as it reads. You do not
+      have to do anything, and it is switched on by default.
+    </p>
+    <p>
+      For this to sound natural in both languages, use one of the Qwen3-TTS
+      voices, which are designed to handle both. See
+      <a href="#models">Downloading Better Voices</a>.
+    </p>
+
+    <!-- 12 -->
+    <h2 class="section-heading" id="pronunciation">12. Fixing Mispronounced Words</h2>
+    <p>
+      Technical terms, surnames and abbreviations sometimes come out wrong. You
+      can teach the app how to say them. Open <strong>Settings</strong> &rarr;
+      <strong>Pronunciation</strong>, click the add button, type the word as it
+      is written, then type it again spelled the way it should sound.
+    </p>
+    <p>
+      Your corrections apply to every voice and every document from then on.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The Pronunciation tab in Settings with two or three example entries filled
+      in, showing the written form and the spoken form side by side.
+    </div>
+
+    <!-- 13 -->
+    <h2 class="section-heading" id="comfort">13. Making Text Easier to Read</h2>
+    <p>
+      Open <strong>Settings</strong> &rarr; <strong>Reading</strong> to change
+      how the text looks. Every change previews live, so you can see the effect
+      before you commit to it.
+    </p>
     <ul>
-      <li><strong>User-selected files</strong> — read-only, only while you have the file open.</li>
-      <li><strong>Outgoing network</strong> — used <em>once per model</em> for the Kokoro, Qwen3-TTS, and Whisper downloads. Revoke in Little Snitch after first run if you like.</li>
-      <li><strong>Downloads folder (read-write)</strong> — for saving audiobook exports.</li>
+      <li><strong>Typeface</strong> — choose a serif, sans-serif, or monospaced face. Two typefaces designed for easier reading are included: OpenDyslexic and Atkinson Hyperlegible.</li>
+      <li><strong>Text size, line spacing and letter spacing</strong> — adjust each independently until long passages feel comfortable.</li>
+      <li><strong>Leading-bold reading</strong> — puts the first part of each word in bold, which some readers find helps the eye move along the line.</li>
+      <li><strong>Highlight colour</strong> — an alternative palette is available that stays distinguishable for the most common forms of colour blindness.</li>
     </ul>
-    <p>Reading stats are local-only and feed the transport's time estimates. Opt out in <strong>Settings → Analytics</strong>; ReadAloudTTS has no analytics endpoint to send them to even if you wanted.</p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The Reading tab in Settings, showing the typeface picker and the spacing
+      sliders with the live preview area below them.
+    </div>
+
+    <!-- 14 -->
+    <h2 class="section-heading" id="themes">14. Page Colours and Line Focus</h2>
+    <p>
+      The same Reading settings offer three page surfaces:
+    </p>
+    <ul>
+      <li><strong>System</strong> — follows whether your Mac is in light or dark mode.</li>
+      <li><strong>Sepia</strong> — a warm, paper-like background for daytime reading.</li>
+      <li><strong>Night</strong> — light text on a dim background, for reading in the dark.</li>
+    </ul>
+    <p>
+      There is also a <strong>line-focus ruler</strong>. When it is switched on,
+      everything except the line under your pointer is dimmed, which helps if
+      you lose your place easily on dense pages.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      Two images side by side, or one after the other: the same page shown in
+      Sepia and in Night. Use a neutral sample document, because the document
+      list is visible in the frame.
+    </div>
+
+    <!-- 15 -->
+    <h2 class="section-heading" id="translate">15. Translating a Word</h2>
+    <p>
+      While reading, hold <kbd>Option</kbd> and double-click any word. A small
+      panel opens with the translation, a button to hear it spoken, and a button
+      to save it to your vocabulary list along with the sentence it came from.
+      You can also Control-click a word and choose <strong>Translate</strong>.
+    </p>
+    <p>
+      Translation runs on your Mac using Apple's built-in translation. The first
+      time you use a particular pair of languages, macOS may ask to download
+      that language once.
+    </p>
+    <p>
+      Turn the feature on or off, and choose which language to translate into,
+      in <strong>Settings</strong> &rarr; <strong>Learning</strong>.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The translation panel open over a word in a document, showing the
+      translation, the speak button, and the save-to-vocabulary button.
+    </div>
+
+    <!-- 16 -->
+    <h2 class="section-heading" id="vocabulary">16. Your Vocabulary List</h2>
+    <p>
+      Every word you save appears in <strong>Settings</strong> &rarr;
+      <strong>Learning</strong>, together with its translation and the sentence
+      you found it in. Remove single entries with the button beside them, or
+      clear the whole list.
+    </p>
+    <p>
+      Click <strong>Export to Anki (CSV)</strong> to save the list as a file you
+      can import into Anki or any flashcard app. The columns are already laid
+      out as front, back, context and language, so no column matching is needed
+      on import.
+    </p>
+
+    <div class="screenshot">
+      <img src="assets/settings-learning.png" alt="The Learning tab in Settings, showing the tap-to-translate switch, the target language, a list of three saved words with their translations and example sentences, and buttons to export to Anki or clear the list.">
+      <div class="caption">The Learning tab. Saved words keep the sentence they came from, which is what makes them useful later as flashcards.</div>
+    </div>
+
+    <!-- 17 -->
+    <h2 class="section-heading" id="ocr">17. Reading Text in Images</h2>
+    <p>
+      Open a picture the same way you would open a document, by dragging it onto
+      the window or using <strong>Open</strong>. HumanReadTTS recognises the text
+      inside it and reads it aloud like any other file. It works out the correct
+      reading order, so a scanned page with two columns or a heading above the
+      body text is read in the order a person would read it.
+    </p>
+    <p>
+      Choose which languages to recognise in <strong>Settings</strong> &rarr;
+      <strong>Shortcuts</strong>.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      A screenshot or photograph of a page opened in HumanReadTTS, with the
+      recognised text being read and highlighted.
+    </div>
+
+    <div class="callout info">
+      <span class="callout-label">Note</span>
+      <p>
+        Text recognition works on image files that you open. Reading text
+        directly from a screenshot on the clipboard was removed in this version.
+      </p>
+    </div>
+
+    <!-- 18 -->
+    <h2 class="section-heading" id="anywhere">18. Reading From Any App</h2>
+    <p>
+      You do not have to open a file to hear something read. Select text in any
+      app, such as Safari, Mail or Notes, and press
+      <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd>. HumanReadTTS reads
+      the selection aloud. If nothing is selected it falls back to whatever you
+      last copied.
+    </p>
+    <p>
+      You can change that key combination in <strong>Settings</strong> &rarr;
+      <strong>Shortcuts</strong>.
+    </p>
+    <p>
+      There is also a menu-bar icon that appears while something is playing,
+      giving you play, pause and skip without switching back to the main window.
+      And in most apps you can select text, open the app's
+      <strong>Services</strong> menu, and choose
+      <strong>Read with HumanReadTTS</strong>.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The menu-bar icon clicked open, showing the playback controls and the Read
+      Selection item. The previous version of this screenshot showed a
+      Read Screenshot Text item that no longer exists, so it must be retaken.
+    </div>
+
+    <!-- 19 -->
+    <h2 class="section-heading" id="nowplaying">19. Media Keys and Sleep Timer</h2>
+    <p>
+      Whatever you are reading appears in Control Center and in the Now Playing
+      widget, just like music. The play, previous and next keys on your keyboard
+      control it, and so do the controls on AirPods and most headphones.
+    </p>
+    <p>
+      In <strong>Settings</strong> &rarr; <strong>Playback Controls</strong> you
+      will also find:
+    </p>
+    <ul>
+      <li><strong>Sleep timer</strong> — stops reading after a set number of minutes, or at the end of the current sentence.</li>
+      <li><strong>Reading queue</strong> — line up several documents so the next one starts automatically when the current one finishes.</li>
+    </ul>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The Playback Controls tab in Settings, showing the sleep timer options and
+      the reading queue.
+    </div>
+
+    <!-- 20 -->
+    <h2 class="section-heading" id="skip-rules">20. Skipping Citations and Clutter</h2>
+    <p>
+      Research papers are full of things that are useful on the page but
+      irritating to listen to, such as citation numbers in square brackets.
+      HumanReadTTS removes them before reading. Three rules are switched on from
+      the start:
+    </p>
+    <ul>
+      <li>Numbered citations, such as <code>[12]</code> or <code>[12, 13]</code></li>
+      <li>LaTeX commands left over from typesetting, such as <code>\cite{...}</code></li>
+      <li>Inline citation markers, such as <code>cite:smith2019</code></li>
+    </ul>
+    <p>
+      You can add your own in <strong>Settings</strong> &rarr;
+      <strong>Skip Rules</strong>. As you type a rule, a sample sentence shows
+      you exactly what would be removed, so you can check it before switching it
+      on. Changes take effect at the next sentence, without stopping playback.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The Skip Rules tab in Settings, with the three built-in rules visible and
+      the live preview showing text being removed from a sample sentence.
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-label">Tip</span>
+      <p>
+        The scissors number on the playback bar tells you how many rules are
+        active. If a document sounds like it is missing words, check there
+        first.
+      </p>
+    </div>
+
+    <!-- 21 -->
+    <h2 class="section-heading" id="shortcuts">21. Keyboard Shortcuts</h2>
+    <p>These work while the HumanReadTTS window is in front:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Keys</th><th>What it does</th></tr>
+      <tr><td><kbd>Space</kbd></td><td>Play or pause</td></tr>
+      <tr><td><kbd>Left</kbd> / <kbd>Right</kbd></td><td>Previous or next sentence</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>]</kbd> / <kbd>[</kbd></td><td>Speed up or slow down</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>O</kbd></td><td>Open a file</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>F</kbd></td><td>Find in document</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>G</kbd></td><td>Next search match</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>+</kbd> / <kbd>-</kbd></td><td>Zoom in or out</td></tr>
+      <tr><td><kbd>Escape</kbd> twice</td><td>Fit the page to the window</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd></td><td>Save as an audio file</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>J</kbd></td><td>Show the export list</td></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>,</kbd></td><td>Open Settings</td></tr>
+    </table>
+    </div>
+
+    <p>This one works everywhere, in any app:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Keys</th><th>What it does</th></tr>
+      <tr><td><kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd></td><td>Read the text you have selected in whichever app you are using</td></tr>
+    </table>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-label">Note</span>
+      <p>
+        The same combination appears in both tables. Inside HumanReadTTS it
+        saves an audio file; in any other app it reads your selection. You can
+        change the global one in <strong>Settings</strong> &rarr;
+        <strong>Shortcuts</strong> if you would rather they were different.
+      </p>
+    </div>
+
+    <!-- 22 -->
+    <h2 class="section-heading" id="audiobook">22. Saving as an Audio File</h2>
+    <p>
+      To listen later on a phone or a music player, turn a document into an audio
+      file. Choose <strong>File</strong> &rarr;
+      <strong>Export Audiobook</strong>, or press <kbd>Command</kbd> +
+      <kbd>Shift</kbd> + <kbd>E</kbd>. In the save window, pick a format:
+    </p>
+    <ul>
+      <li><strong>M4A</strong> — smaller files, plays on almost anything. Use this unless you have a reason not to.</li>
+      <li><strong>WAV</strong> — uncompressed and much larger. Useful if you plan to edit the audio or convert it yourself.</li>
+    </ul>
+    <p>
+      Exporting happens in the background, so you can carry on reading. Press
+      <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>J</kbd> to see the list of
+      exports, each with its own progress bar, a button to show the file in
+      Finder, and a button to play it.
+    </p>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The exports list with one finished item and one in progress. Use neutral
+      document names, because the file names are visible.
+    </div>
+
+    <!-- 23 -->
+    <h2 class="section-heading" id="faq">23. Questions and Answers</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">Does it cost anything?</div>
+      <div class="faq-a">No. It is free and open source under the Apache 2.0 licence. There is no subscription, no trial, and no paid tier.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Do my documents get uploaded anywhere?</div>
+      <div class="faq-a">No. Reading, translation and text recognition all happen on your Mac. The only time the app uses the internet is when you choose to download a voice pack.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Why does macOS warn me that the developer cannot be verified?</div>
+      <div class="faq-a">Because the app is not signed with a paid Apple certificate. Follow the Control-click step in <a href="#install">Installing the App</a> and the warning appears only once.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Will it run on my Intel Mac?</div>
+      <div class="faq-a">No. HumanReadTTS needs an Apple Silicon Mac, because the natural-sounding voices rely on that chip.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">The voice mispronounces a name I use constantly.</div>
+      <div class="faq-a">Add it to the pronunciation list. See <a href="#pronunciation">Fixing Mispronounced Words</a>.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">It is reading citation numbers out loud.</div>
+      <div class="faq-a">Check that the built-in skip rules are switched on in <strong>Settings</strong> &rarr; <strong>Skip Rules</strong>. If your document uses an unusual citation style, add a rule for it.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">It read the columns of my paper in the wrong order.</div>
+      <div class="faq-a">Most multi-column layouts are handled correctly, but some unusual ones are not. Reporting the specific PDF is the fastest way to get it fixed.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Where do I report a problem?</div>
+      <div class="faq-a">On the <a href="https://github.com/HarveyLijh/HumanReadTTS/issues">issues page</a>. If a particular document reads badly, attaching it helps enormously.</div>
+    </div>
+
+    <!-- 24 -->
+    <h2 class="section-heading" id="glossary">24. Glossary</h2>
+    <dl class="glossary">
+      <dt>Apple Silicon</dt>
+      <dd>The chips Apple has used in Macs since late 2020, named M1, M2, M3, M4 and so on. Check yours under the Apple menu, in About This Mac.</dd>
+
+      <dt>DMG</dt>
+      <dd>The file format Mac apps are usually distributed in. Double-clicking one opens a window you drag the app out of.</dd>
+
+      <dt>Gatekeeper</dt>
+      <dd>The macOS feature that checks downloaded apps and shows the warning about unverified developers.</dd>
+
+      <dt>Text recognition</dt>
+      <dd>Reading the letters out of a picture of text, so a scan or a photograph can be treated like a normal document. Often called OCR.</dd>
+
+      <dt>Skip rule</dt>
+      <dd>A pattern describing text that should be left out when reading aloud, such as citation numbers.</dd>
+
+      <dt>Voice pack</dt>
+      <dd>An optional download containing the natural-sounding voices. Once downloaded it works offline.</dd>
+    </dl>
+
+    <!-- 25 -->
+    <h2 class="section-heading" id="privacy">25. Privacy</h2>
+    <p>
+      HumanReadTTS has no servers. There is no account, no sign-in, and no
+      analytics sent anywhere.
+    </p>
+    <ul>
+      <li>Your documents stay on your Mac and are never uploaded.</li>
+      <li>Reading, translation and text recognition all run on the device.</li>
+      <li>The app connects to the internet only when you ask it to download a voice pack.</li>
+      <li>Reading statistics, used to estimate how long a document will take, are stored on your Mac. You can switch them off in <strong>Settings</strong> &rarr; <strong>Analytics</strong>.</li>
+    </ul>
 
     <footer>
-      <p>ReadAloudTTS <strong>v0.7.1</strong> · Apache-2.0 · <a href="https://github.com/HarveyLijh/ReadAloudTTS">GitHub</a> · <a href="https://github.com/HarveyLijh/ReadAloudTTS/issues">Report an issue</a></p>
-      <p style="margin-top: 6px;">This manual is part of the ReadAloudTTS source tree — edit <code>docs/manual/index.html</code> and send a pull request.</p>
+      <p>
+        HumanReadTTS &middot; Free and open source under the Apache 2.0 licence &middot;
+        <a href="https://github.com/HarveyLijh/HumanReadTTS">Source code on GitHub</a> &middot;
+        <a href="https://github.com/HarveyLijh/HumanReadTTS/issues">Report a problem</a>
+      </p>
+      <p>Made on an Apple Silicon Mac. No cloud, no account, no subscription.</p>
     </footer>
 
   </main>

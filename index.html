@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HumanReadTTS — Read anything aloud on your Mac</title>
+<meta name="description" content="A free, open-source reader for macOS that reads your PDFs, Word files and ebooks aloud in natural voices. Everything stays on your Mac.">
+<link rel="icon" type="image/png" href="docs/manual/assets/humanreadtts-icon.png">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0e1518;
+    --bg-soft:   #131c20;
+    --surface:   #19242a;
+    --ink:       #e8ede8;
+    --ink-soft:  #b8c4c2;
+    --muted:     #7a8a8a;
+    --rule:      #27353c;
+    --rule-soft: #1e2a31;
+    --accent:    #3dcfc2;
+    --accent-ink:#66e0d3;
+    --accent-dim:#1a4c48;
+    --accent-wash:rgba(61, 207, 194, 0.08);
+    --code-wash: #0b1114;
+    --kbd-bg:    #182228;
+    --kbd-rule:  #2c3940;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px; line-height: 1.7;
+    color: var(--ink); background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 28px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: var(--ink); font-weight: 650; }
+  p { color: var(--ink-soft); }
+
+  /* Top bar */
+  .topbar { border-bottom: 1px solid var(--rule-soft); background: var(--bg-soft); }
+  .topbar .wrap { display: flex; align-items: center; gap: 16px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+  .topbar img { width: 30px; height: 30px; border-radius: 7px; }
+  .topbar .name { font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+  .topbar nav { margin-left: auto; display: flex; gap: 22px; font-size: 14.5px; }
+  .topbar nav a { color: var(--ink-soft); }
+  .topbar nav a:hover { color: var(--accent); text-decoration: none; }
+
+  /* Hero */
+  .hero { padding: 76px 0 60px; text-align: center; }
+  .hero img.icon { width: 116px; height: 116px; border-radius: 26px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); margin-bottom: 26px; }
+  .hero h1 { font-size: 46px; font-weight: 850; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 14px; line-height: 1.15; }
+  .hero .tagline { font-size: 20px; color: var(--ink-soft); max-width: 640px; margin: 0 auto 12px; line-height: 1.5; }
+  .hero .sub { font-size: 16px; color: var(--muted); max-width: 620px; margin: 0 auto 32px; }
+
+  .dl-btn {
+    display: inline-block; background: var(--accent); color: #0b1114;
+    font-weight: 750; font-size: 17px; padding: 15px 34px; border-radius: 11px;
+    box-shadow: 0 6px 24px rgba(61, 207, 194, 0.25);
+  }
+  .dl-btn:hover { background: var(--accent-ink); text-decoration: none; }
+  .dl-note { font-size: 13.5px; color: var(--muted); margin-top: 14px; }
+  .dl-note a { color: var(--ink-soft); text-decoration: underline; }
+
+  /* Sections */
+  section { padding: 56px 0; border-top: 1px solid var(--rule-soft); }
+  h2 { font-size: 27px; font-weight: 800; color: var(--ink); letter-spacing: -0.015em; margin-bottom: 12px; }
+  h2 + p.section-lead { font-size: 17px; color: var(--ink-soft); max-width: 700px; margin-bottom: 30px; }
+  h3 { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 12px; }
+  .stepcard { background: var(--surface); border: 1px solid var(--rule); border-radius: 13px; padding: 24px 22px; }
+  .stepcard .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: #0e1518;
+    font-weight: 800; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .stepcard p { font-size: 14.5px; margin: 0; }
+
+  /* Feature grid */
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 34px; margin-top: 10px; }
+  .feature p { font-size: 15px; margin: 0; }
+
+  /* Screenshot */
+  .shot {
+    margin: 30px 0 8px; border-radius: 13px; overflow: hidden;
+    border: 1px solid var(--rule); background: var(--code-wash);
+    box-shadow: 0 10px 34px rgba(0,0,0,0.5);
+  }
+  .shot img { width: 100%; display: block; }
+  .shot .cap { background: var(--surface); border-top: 1px solid var(--rule); padding: 11px 17px; font-size: 13px; color: var(--muted); }
+
+  .shot-todo {
+    margin: 30px 0 8px; border: 1px dashed var(--rule); border-radius: 13px;
+    padding: 26px 22px; color: var(--muted); font-size: 13.5px; line-height: 1.55;
+    background: repeating-linear-gradient(135deg, var(--bg-soft) 0 8px, var(--surface) 8px 16px);
+  }
+  .shot-todo > strong:first-child { color: var(--ink-soft); display: block; margin-bottom: 4px; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .shot-todo strong { color: var(--ink-soft); font-weight: 650; }
+
+  /* Requirements / privacy list */
+  ul.plain { list-style: none; padding: 0; }
+  ul.plain li { color: var(--ink-soft); padding-left: 22px; position: relative; margin-bottom: 9px; font-size: 15.5px; }
+  ul.plain li::before { content: ""; position: absolute; left: 0; top: 10px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+  kbd { font-family: 'SF Mono', Consolas, monospace; background: var(--kbd-bg); border-radius: 4px; padding: 2px 7px; font-size: 12.5px; color: var(--ink); border: 1px solid var(--kbd-rule); white-space: nowrap; }
+  code { background: var(--code-wash); border-radius: 4px; padding: 2px 6px; font-size: 13px; font-family: 'SF Mono', Consolas, monospace; color: var(--ink); border: 1px solid var(--rule-soft); }
+
+  .cta-band { background: var(--accent-wash); border: 1px solid var(--accent-dim); border-radius: 14px; padding: 34px 30px; text-align: center; margin-top: 8px; }
+  .cta-band h2 { font-size: 23px; margin-bottom: 8px; }
+  .cta-band p { margin-bottom: 22px; }
+
+  footer { border-top: 1px solid var(--rule-soft); padding: 34px 0 56px; font-size: 13.5px; color: var(--muted); }
+  footer p { margin-bottom: 6px; font-size: 13.5px; }
+
+  @media (max-width: 800px) {
+    .steps, .features { grid-template-columns: 1fr; }
+    .hero { padding: 52px 0 44px; }
+    .hero h1 { font-size: 34px; }
+    .hero .tagline { font-size: 17.5px; }
+    .topbar nav { gap: 15px; font-size: 13.5px; width: 100%; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <img src="docs/manual/assets/humanreadtts-icon.png" alt="">
+    <span class="name">HumanReadTTS</span>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="docs/manual/index.html">Manual</a>
+      <a href="https://github.com/HarveyLijh/HumanReadTTS">GitHub</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <img class="icon" src="docs/manual/assets/humanreadtts-icon.png" alt="HumanReadTTS">
+    <h1>Read anything aloud<br>on your Mac</h1>
+    <p class="tagline">
+      Drop in a PDF, a Word file or an ebook and hear it read in a natural
+      voice, in English, Chinese, or both.
+    </p>
+    <p class="sub">
+      Free, open source, and completely offline. Your documents never leave
+      your Mac.
+    </p>
+    <a class="dl-btn" href="https://github.com/HarveyLijh/HumanReadTTS/releases/latest">Download for macOS</a>
+    <p class="dl-note">
+      Requires macOS 15 or later on an Apple Silicon Mac &middot;
+      <a href="docs/manual/index.html#install">Installation help</a>
+    </p>
+  </div>
+
+  <section id="how">
+    <h2>Three steps to your first document</h2>
+    <p class="section-lead">
+      There is no account to create and nothing to configure. Install it, open
+      a file, press the space bar.
+    </p>
+    <div class="steps">
+      <div class="stepcard">
+        <div class="num">1</div>
+        <h3>Install it</h3>
+        <p>
+          Open the downloaded file and drag HumanReadTTS onto your Applications
+          folder. The first time you open it, hold Control and click the icon,
+          then choose Open.
+        </p>
+      </div>
+      <div class="stepcard">
+        <div class="num">2</div>
+        <h3>Open a document</h3>
+        <p>
+          Drag a PDF, Word file, EPUB, Markdown or text file onto the window.
+          Pictures of text work too, and are recognised automatically.
+        </p>
+      </div>
+      <div class="stepcard">
+        <div class="num">3</div>
+        <h3>Press the space bar</h3>
+        <p>
+          Reading begins, and the sentence being spoken is highlighted as it
+          goes. Double-click any word to start from there instead.
+        </p>
+      </div>
+    </div>
+
+    <div class="shot-todo">
+      <strong>Screenshot to add</strong>
+      The full app window with a document open and a sentence highlighted
+      mid-read. Use a neutral sample document rather than a personal file,
+      because the document list on the left shows file names.
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>What it does</h2>
+    <p class="section-lead">
+      Built for people who read long, dense documents: research papers,
+      reports, and books.
+    </p>
+
+    <div class="features">
+      <div class="feature">
+        <h3>Voices that do not grate</h3>
+        <p>
+          Optional voice packs give you 28 English voices and 6 that handle
+          English and Chinese equally well. They run on your Mac, so they keep
+          working offline.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>English and Chinese in one document</h3>
+        <p>
+          When a document mixes the two, the voice switches language by itself,
+          sentence by sentence. Nothing to set up.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Built for research papers</h3>
+        <p>
+          Two-column layouts are read in the right order, and citation numbers,
+          LaTeX leftovers and figure captions are skipped instead of read out.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Follow along as it reads</h3>
+        <p>
+          The current sentence is highlighted and the exact word being spoken is
+          picked out. Scroll away to check something and one button brings you
+          back.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Easier on the eyes</h3>
+        <p>
+          Sepia and night reading surfaces, adjustable spacing, a line-focus
+          ruler, and the OpenDyslexic and Atkinson Hyperlegible typefaces
+          included.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>A study tool as well</h3>
+        <p>
+          Option-double-click a word for an on-device translation, hear it
+          spoken, and save it with its sentence. Export the lot to Anki as
+          flashcards.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Read from anywhere</h3>
+        <p>
+          Select text in Safari, Mail or anywhere else and press
+          <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd> to hear it,
+          without opening a file.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Listen like a podcast</h3>
+        <p>
+          Media keys and AirPods controls work, a sleep timer stops it after a
+          set time, and you can save any document as an audio file for later.
+        </p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <img src="docs/manual/assets/transport-hud.png" alt="The playback bar, showing skip back, play, skip forward, elapsed and remaining time, a skip counter, the speed control, the voice name, and a settings button.">
+      <div class="cap">Every playback control sits in one bar along the bottom: position, what is being skipped, speed, and the current voice.</div>
+    </div>
+
+    <div class="shot">
+      <img src="docs/manual/assets/settings-learning.png" alt="The Learning settings tab, showing the tap-to-translate switch, the target language, three saved words with translations and example sentences, and an Export to Anki button.">
+      <div class="cap">Words you look up are saved with the sentence you found them in, then exported straight into Anki.</div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <h2>Nothing leaves your Mac</h2>
+    <p class="section-lead">
+      Most reading apps upload your document to a server to turn it into speech.
+      This one does not, which means you can use it on drafts and unpublished
+      work.
+    </p>
+    <ul class="plain">
+      <li>No account, no sign-in, no subscription.</li>
+      <li>Reading, translation and text recognition all happen on the device.</li>
+      <li>The only network use is downloading a voice pack, when you ask for it.</li>
+      <li>Open source under the Apache 2.0 licence, so anyone can check.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="cta-band">
+      <h2>Ready to try it</h2>
+      <p>Free, and it takes about two minutes to get to your first document.</p>
+      <a class="dl-btn" href="https://github.com/HarveyLijh/HumanReadTTS/releases/latest">Download for macOS</a>
+      <p class="dl-note">
+        New to it? Start with the <a href="docs/manual/index.html">user manual</a>.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="docs/manual/index.html">User manual</a> &middot;
+      <a href="https://github.com/HarveyLijh/HumanReadTTS">Source code</a> &middot;
+      <a href="https://github.com/HarveyLijh/HumanReadTTS/issues">Report a problem</a> &middot;
+      <a href="https://github.com/HarveyLijh/HumanReadTTS/blob/main/LICENSE">Licence</a>
+    </p>
+    <p>Made on an Apple Silicon Mac. No cloud, no account, no subscription.</p>
+  </div>
+</footer>
+
+</body>
+</html>
