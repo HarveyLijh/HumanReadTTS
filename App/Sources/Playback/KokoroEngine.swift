@@ -78,7 +78,7 @@ final class KokoroEngine {
     /// string-range precondition and kills the app.
     private let gate = SynthGate()
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "kokoro")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "kokoro")
 
     private init() {}
 

@@ -351,7 +351,7 @@ struct ExportOptionsSheet: View {
         return "Based on measured performance from previous exports on this Mac."
     }
 
-    private var autoKey: String { "__readaloudtts.auto" }
+    private var autoKey: String { "__humanreadtts.auto" }
 
     private var systemVoices: [AVSpeechSynthesisVoice] {
         AVSpeechSynthesisVoice.speechVoices()

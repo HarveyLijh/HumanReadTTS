@@ -1,6 +1,6 @@
 import XCTest
 import PDFKit
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 final class PDFTextExtractorTests: XCTestCase {
 

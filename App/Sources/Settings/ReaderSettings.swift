@@ -111,16 +111,16 @@ final class ReaderSettings {
     }
 
     private let defaults: UserDefaults
-    private let fontScaleKey = "app.readaloudtts.mac.reader.fontScale.v1"
-    private let highlightPaletteKey = "app.readaloudtts.mac.reader.highlightPalette.v1"
-    private let highlightOpacityKey = "app.readaloudtts.mac.reader.highlightOpacity.v1"
-    private let fontFaceKey = "app.readaloudtts.mac.reader.fontFace.v1"
-    private let lineSpacingMultipleKey = "app.readaloudtts.mac.reader.lineSpacingMultiple.v1"
-    private let letterSpacingKey = "app.readaloudtts.mac.reader.letterSpacing.v1"
-    private let leadingBoldKey = "app.readaloudtts.mac.reader.leadingBold.v1"
-    private let readingThemeKey = "app.readaloudtts.mac.reader.readingTheme.v1"
-    private let lineFocusEnabledKey = "app.readaloudtts.mac.reader.lineFocusEnabled.v1"
-    private let lineFocusHeightKey = "app.readaloudtts.mac.reader.lineFocusHeight.v1"
+    private let fontScaleKey = "app.humanreadtts.mac.reader.fontScale.v1"
+    private let highlightPaletteKey = "app.humanreadtts.mac.reader.highlightPalette.v1"
+    private let highlightOpacityKey = "app.humanreadtts.mac.reader.highlightOpacity.v1"
+    private let fontFaceKey = "app.humanreadtts.mac.reader.fontFace.v1"
+    private let lineSpacingMultipleKey = "app.humanreadtts.mac.reader.lineSpacingMultiple.v1"
+    private let letterSpacingKey = "app.humanreadtts.mac.reader.letterSpacing.v1"
+    private let leadingBoldKey = "app.humanreadtts.mac.reader.leadingBold.v1"
+    private let readingThemeKey = "app.humanreadtts.mac.reader.readingTheme.v1"
+    private let lineFocusEnabledKey = "app.humanreadtts.mac.reader.lineFocusEnabled.v1"
+    private let lineFocusHeightKey = "app.humanreadtts.mac.reader.lineFocusHeight.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

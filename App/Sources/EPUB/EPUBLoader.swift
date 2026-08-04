@@ -35,7 +35,7 @@ enum EPUBLoader {
         }
     }
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "epub")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "epub")
 
     @MainActor
     static func load(url: URL) async throws -> NSAttributedString {

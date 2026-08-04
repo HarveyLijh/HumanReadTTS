@@ -4,11 +4,11 @@ import KeyboardShortcuts
 
 /// Bridges into `NSApplication` lifecycle to register bits that
 /// SwiftUI's `App` protocol doesn't expose: the Services provider
-/// (for the system "Read with ReadAloudTTS" menu item) and the global
+/// (for the system "Read with HumanReadTTS" menu item) and the global
 /// "read selection from anywhere" hotkey (default ⌘⇧E, rebindable in
 /// Settings → Shortcuts).
 ///
-/// Wired via `@NSApplicationDelegateAdaptor` in `ReadAloudTTSApp`.
+/// Wired via `@NSApplicationDelegateAdaptor` in `HumanReadTTSApp`.
 final class AppDelegateShim: NSObject, NSApplicationDelegate {
     private var servicesProvider: ServicesProvider?
     private var fontShortcutMonitor: Any?
@@ -130,7 +130,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// LaunchServices routes `open -a ReadAloudTTS file.pdf` and Finder
+    /// LaunchServices routes `open -a HumanReadTTS file.pdf` and Finder
     /// double-clicks here. Without this override, SwiftUI's
     /// `WindowGroup` spawns a new window per URL event — wrong for
     /// a reader that keeps one document visible at a time. We
@@ -166,7 +166,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
         // The reader window carries the WindowGroup title. Settings
         // and auxiliary panels use other titles or aren't NSWindow
         // subclasses we care about here.
-        window.title == "ReadAloudTTS"
+        window.title == "HumanReadTTS"
     }
 
     /// Prevent the "dock-click-to-open-new-untitled-window" behavior
@@ -174,7 +174,7 @@ final class AppDelegateShim: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(
         _ sender: NSApplication, hasVisibleWindows flag: Bool
     ) -> Bool {
-        if !flag, let window = NSApp.windows.first(where: { $0.title == "ReadAloudTTS" }) {
+        if !flag, let window = NSApp.windows.first(where: { $0.title == "HumanReadTTS" }) {
             window.makeKeyAndOrderFront(nil)
             return false
         }
@@ -226,7 +226,7 @@ final class DirtyCloseGuard: NSObject, NSWindowDelegate {
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         // Auxiliary panels (Settings, Exports, Onboarding) don't own a
         // markdown buffer; let them close immediately.
-        guard sender.title == "ReadAloudTTS" || sender.title.isEmpty else {
+        guard sender.title == "HumanReadTTS" || sender.title.isEmpty else {
             return upstream?.windowShouldClose?(sender) ?? true
         }
         guard MarkdownSavePrompt.confirmAllDirty() else { return false }
@@ -318,11 +318,11 @@ enum MarkdownSavePrompt {
 extension Notification.Name {
     /// Posted by `AppDelegateShim.application(_:open:)` so the main
     /// SwiftUI scene can adopt the URL without spawning a new window.
-    static let readAloudTTSOpenURL = Notification.Name("app.readaloudtts.mac.openURL")
+    static let readAloudTTSOpenURL = Notification.Name("app.humanreadtts.mac.openURL")
 
     /// Posted by the Settings "Show Welcome Tour" button and the
     /// Help menu entry so the RootView (which owns an
     /// `openWindow` environment handle) can raise the onboarding
     /// window without direct SwiftUI plumbing.
-    static let readAloudTTSShowOnboarding = Notification.Name("app.readaloudtts.mac.showOnboarding")
+    static let readAloudTTSShowOnboarding = Notification.Name("app.humanreadtts.mac.showOnboarding")
 }

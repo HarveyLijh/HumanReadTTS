@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build (and optionally run) ReadAloudTTS.app from the command line.
+# Build (and optionally run) HumanReadTTS.app from the command line.
 #
 # Two paths, auto-detected:
 #   1. If full Xcode is installed (xcode-select -p points inside Xcode.app),
@@ -15,7 +15,7 @@
 #
 # Usage:
 #   Scripts/build.sh                  # Debug build, do not launch
-#   Scripts/build.sh --run            # Debug build + open ReadAloudTTS.app
+#   Scripts/build.sh --run            # Debug build + open HumanReadTTS.app
 #   Scripts/build.sh --release --run  # Release build + open
 #   Scripts/build.sh --clean          # Wipe build/ first
 #   Scripts/build.sh -h               # Help
@@ -25,8 +25,8 @@ set -euo pipefail
 
 # ─── Constants ──────────────────────────────────────────────────────────────
 
-APP_NAME="ReadAloudTTS"
-BUNDLE_ID="app.readaloudtts.mac"
+APP_NAME="HumanReadTTS"
+BUNDLE_ID="app.humanreadtts.mac"
 DEPLOYMENT_TARGET="15.0"
 SWIFT_VERSION="6"
 MARKETING_VERSION="0.1.0"
@@ -51,12 +51,12 @@ note()  { printf "  %s%s%s\n" "$c_dim" "$1" "$c_reset"; }
 
 usage() {
     cat <<EOF
-${c_bold}Build ReadAloudTTS.app${c_reset}
+${c_bold}Build HumanReadTTS.app${c_reset}
 
 Usage: Scripts/build.sh [options]
 
 Options:
-  --run        Open ReadAloudTTS.app after building
+  --run        Open HumanReadTTS.app after building
   --clean      Remove build/ before building
   --release    Build with optimizations (default: debug)
   -h, --help   Show this help
@@ -113,8 +113,8 @@ if [[ $use_xcodebuild -eq 1 ]]; then
     set -o pipefail
     if command -v xcbeautify >/dev/null 2>&1; then
         xcodebuild \
-            -project ReadAloudTTS.xcodeproj \
-            -scheme ReadAloudTTS \
+            -project HumanReadTTS.xcodeproj \
+            -scheme HumanReadTTS \
             -configuration "$xc_config" \
             -derivedDataPath "$derived_data" \
             -destination 'platform=macOS' \
@@ -123,8 +123,8 @@ if [[ $use_xcodebuild -eq 1 ]]; then
             build | xcbeautify
     else
         xcodebuild \
-            -project ReadAloudTTS.xcodeproj \
-            -scheme ReadAloudTTS \
+            -project HumanReadTTS.xcodeproj \
+            -scheme HumanReadTTS \
             -configuration "$xc_config" \
             -derivedDataPath "$derived_data" \
             -destination 'platform=macOS' \
@@ -186,7 +186,7 @@ else
         -target "arm64-apple-macos${DEPLOYMENT_TARGET}"
         -swift-version "$SWIFT_VERSION"
         -strict-concurrency=complete
-        -D READALOUDTTS_CLI_BUILD
+        -D HUMANREADTTS_CLI_BUILD
         -module-name "$APP_NAME"
         -emit-executable
         -o "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
@@ -219,7 +219,7 @@ else
     <key>NSHighResolutionCapable</key><true/>
     <key>CFBundleSupportedPlatforms</key>
     <array><string>MacOSX</string></array>
-    <key>NSHumanReadableCopyright</key><string>Copyright © 2026 The ReadAloudTTS Authors</string>
+    <key>NSHumanReadableCopyright</key><string>Copyright © 2026 The HumanReadTTS Authors</string>
 </dict>
 </plist>
 PLIST
@@ -237,15 +237,15 @@ fi
 # ─── Launch (optional) ──────────────────────────────────────────────────────
 
 if [[ $run -eq 1 ]]; then
-    say "Launching ReadAloudTTS.app"
+    say "Launching HumanReadTTS.app"
     # Direct exec instead of `open` because LaunchServices
     # validates the ad-hoc signature against TCC state and can
     # stall for 30+ seconds on every fresh signature when the
     # bundle lives under ~/Documents. Direct exec skips that.
-    "$APP_BUNDLE/Contents/MacOS/ReadAloudTTS" >/dev/null 2>&1 &
+    "$APP_BUNDLE/Contents/MacOS/HumanReadTTS" >/dev/null 2>&1 &
     disown
     note "Launched via direct exec. Quit the app to return."
 fi
 
-printf "\n%s%sNext:%s drop a .pdf or .md file onto the ReadAloudTTS window — the path appears.\n" \
+printf "\n%s%sNext:%s drop a .pdf or .md file onto the HumanReadTTS window — the path appears.\n" \
     "$c_amber" "$c_bold" "$c_reset"

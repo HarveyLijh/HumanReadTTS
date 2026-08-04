@@ -34,7 +34,7 @@ final class OnboardingState {
     let totalSteps: Int = 6
 
     private let defaults: UserDefaults
-    private let completedKey = "app.readaloudtts.mac.onboarding.completedVersion.v1"
+    private let completedKey = "app.humanreadtts.mac.onboarding.completedVersion.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

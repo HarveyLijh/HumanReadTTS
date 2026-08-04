@@ -181,10 +181,10 @@ struct LibrarySidebarView: View {
     private var emptyRow: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("No documents yet")
-                .font(ReadAloudTTSFont.ui(13))
+                .font(HumanReadTTSFont.ui(13))
                 .foregroundStyle(.secondary)
             Text("Drop a PDF, Markdown, EPUB, DOCX, or text file anywhere in the window.")
-                .font(ReadAloudTTSFont.ui(11))
+                .font(HumanReadTTSFont.ui(11))
                 .foregroundStyle(.tertiary)
         }
         .padding(.vertical, 4)
@@ -201,12 +201,12 @@ struct LibrarySidebarView: View {
                         .help("Unsaved changes")
                 }
                 Text(entry.title)
-                    .font(ReadAloudTTSFont.ui(13))
+                    .font(HumanReadTTSFont.ui(13))
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
             Text(Self.formatted(entry.lastOpened))
-                .font(ReadAloudTTSFont.ui(11))
+                .font(HumanReadTTSFont.ui(11))
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)

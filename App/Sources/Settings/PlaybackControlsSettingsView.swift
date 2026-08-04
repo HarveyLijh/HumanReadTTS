@@ -16,7 +16,7 @@ struct PlaybackControlsSettingsView: View {
             } header: {
                 Text("System Integration")
             } footer: {
-                Text("Publishes the current read to Control Center and the menu-bar Now Playing widget, and lets F7/F8/F9 and AirPods controls drive playback when ReadAloudTTS was the last app to play audio.")
+                Text("Publishes the current read to Control Center and the menu-bar Now Playing widget, and lets F7/F8/F9 and AirPods controls drive playback when HumanReadTTS was the last app to play audio.")
                     .foregroundStyle(.secondary)
             }
 

@@ -2,7 +2,7 @@ import Foundation
 
 /// On-disk layout for downloaded models.
 ///
-///   ~/Library/Application Support/ReadAloudTTS/models/
+///   ~/Library/Application Support/HumanReadTTS/models/
 ///     ├─ kokoro-82m-mlx/
 ///     │    ├─ config.json
 ///     │    ├─ kokoro-v0_19.safetensors
@@ -15,7 +15,7 @@ import Foundation
 /// (network drop mid-stream, app quit) is detectable as "directory
 /// present but no marker."
 enum ModelStorage {
-    static let modelsDirectoryName = "ReadAloudTTS/models"
+    static let modelsDirectoryName = "HumanReadTTS/models"
     static let installedMarker = ".installed"
 
     static var modelsDirectory: URL {

@@ -23,7 +23,7 @@ struct ImageOCRReaderView: View {
 
     private enum Status { case recognizing, ready, empty, failed }
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "ocr")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "ocr")
 
     var body: some View {
         VStack(spacing: 0) {
@@ -129,7 +129,7 @@ struct ImageOCRReaderView: View {
                 .controlSize(.large)
                 .tint(Color.readAloudTTSAccent)
             Text("Recognizing text…")
-                .font(ReadAloudTTSFont.ui(13))
+                .font(HumanReadTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -141,7 +141,7 @@ struct ImageOCRReaderView: View {
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text(text)
-                .font(ReadAloudTTSFont.serif(18))
+                .font(HumanReadTTSFont.serif(18))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
         }

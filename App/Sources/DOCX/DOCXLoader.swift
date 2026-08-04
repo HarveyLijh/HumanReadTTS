@@ -38,7 +38,7 @@ enum DOCXLoader {
         }
     }
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "docx")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "docx")
 
     @MainActor
     static func load(url: URL) async throws -> NSAttributedString {

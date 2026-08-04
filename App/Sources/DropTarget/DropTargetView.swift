@@ -10,16 +10,16 @@ struct DropTargetView: View {
                 .font(.system(size: 48, weight: .light))
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text("Drop a PDF, Markdown, EPUB, DOCX, or text file")
-                .font(ReadAloudTTSFont.serif(22))
+                .font(HumanReadTTSFont.serif(22))
                 .foregroundStyle(.primary)
             Text("We'll read it aloud.")
-                .font(ReadAloudTTSFont.ui(13))
+                .font(HumanReadTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
     }
 }
 
-#if DEBUG && !READALOUDTTS_CLI_BUILD
+#if DEBUG && !HUMANREADTTS_CLI_BUILD
 #Preview {
     DropTargetView()
         .frame(width: 800, height: 600)

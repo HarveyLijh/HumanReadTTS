@@ -1,5 +1,5 @@
 import XCTest
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 /// Pure-logic coverage of the new `SpeechPlayer` surface added in
 /// PR1: `playFromSentence`, `setVoice`, `setRate`, and the

@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 
 /// Standard macOS Settings window. Opens with ⌘, for free because
-/// it lives in the `Settings` scene declared in `ReadAloudTTSApp`.
+/// it lives in the `Settings` scene declared in `HumanReadTTSApp`.
 ///
 /// Per-voice memory (remembering speed/pitch separately for each
 /// voice) is deferred — most users want one global pace that

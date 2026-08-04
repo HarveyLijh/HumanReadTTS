@@ -1,5 +1,5 @@
 import XCTest
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 /// Exercises `Library` record → persist → resolve with a real file
 /// on disk and a throwaway `UserDefaults` suite. The key case is
@@ -15,7 +15,7 @@ final class LibraryTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        suiteName = "app.readaloudtts.mac.tests.\(UUID().uuidString)"
+        suiteName = "app.humanreadtts.mac.tests.\(UUID().uuidString)"
         defaults = UserDefaults(suiteName: suiteName)
 
         tempFile = URL.temporaryDirectory.appending(path: "\(UUID().uuidString).md")

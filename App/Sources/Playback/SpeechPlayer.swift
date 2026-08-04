@@ -114,7 +114,7 @@ final class SpeechPlayer {
     /// the next sentence.
     private var alignmentTask: Task<Void, Never>?
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "playback")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "playback")
 
     init() {
         delegate.player = self

@@ -19,7 +19,7 @@ final class PCMAudioPlayer {
     private var inputFormat: AVAudioFormat
     private var isStarted = false
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "audio")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "audio")
 
     init(sampleRate: Double) {
         self.inputFormat = AVAudioFormat(

@@ -18,13 +18,13 @@ hardware. Updated as each PR lands.
 The two earlier blockers (wedged XCTest runner, asleep display) cleared after a
 reboot/unlock. Current state:
 
-- **XCTest runner healthy.** `xcodebuild test -scheme ReadAloudTTS -destination
+- **XCTest runner healthy.** `xcodebuild test -scheme HumanReadTTS -destination
   'platform=macOS'` runs green: **227 tests, 3 skipped, 0 failures**.
 - **Display awake.** Live reader windows and the Settings window screenshot
   normally. Captures land in `docs/verification-assets/`.
 
 Screenshot recipe: seed a pref (e.g.
-`defaults write app.readaloudtts.mac app.readaloudtts.mac.reader.readingTheme.v1 -string sepia`),
+`defaults write app.humanreadtts.mac app.humanreadtts.mac.reader.readingTheme.v1 -string sepia`),
 `open -a <built app> <sample.md>`, capture the window region with
 `screencapture -x -R<x,y,w,h>`, then delete the key to restore.
 

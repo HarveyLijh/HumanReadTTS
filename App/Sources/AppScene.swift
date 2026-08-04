@@ -6,28 +6,28 @@ struct AppScene: Scene {
     /// invoke its flows. NotificationCenter keeps command→view
     /// plumbing decoupled so the command can originate from any
     /// window without threading bindings through the hierarchy.
-    static let exportNotification = Notification.Name("app.readaloudtts.mac.export")
-    static let showExportsNotification = Notification.Name("app.readaloudtts.mac.showExports")
-    static let playPauseNotification = Notification.Name("app.readaloudtts.mac.playPause")
-    static let nextSentenceNotification = Notification.Name("app.readaloudtts.mac.nextSentence")
-    static let prevSentenceNotification = Notification.Name("app.readaloudtts.mac.prevSentence")
-    static let openFileNotification = Notification.Name("app.readaloudtts.mac.openFile")
-    static let newScratchpadNotification = Notification.Name("app.readaloudtts.mac.newScratchpad")
-    static let speedFasterNotification = Notification.Name("app.readaloudtts.mac.speedFaster")
-    static let speedSlowerNotification = Notification.Name("app.readaloudtts.mac.speedSlower")
-    static let saveNotification = Notification.Name("app.readaloudtts.mac.save")
-    static let findNotification = Notification.Name("app.readaloudtts.mac.find")
-    static let increaseFontNotification = Notification.Name("app.readaloudtts.mac.increaseFont")
-    static let decreaseFontNotification = Notification.Name("app.readaloudtts.mac.decreaseFont")
-    static let resetFontNotification = Notification.Name("app.readaloudtts.mac.resetFont")
-    static let zoomToFitNotification = Notification.Name("app.readaloudtts.mac.zoomToFit")
+    static let exportNotification = Notification.Name("app.humanreadtts.mac.export")
+    static let showExportsNotification = Notification.Name("app.humanreadtts.mac.showExports")
+    static let playPauseNotification = Notification.Name("app.humanreadtts.mac.playPause")
+    static let nextSentenceNotification = Notification.Name("app.humanreadtts.mac.nextSentence")
+    static let prevSentenceNotification = Notification.Name("app.humanreadtts.mac.prevSentence")
+    static let openFileNotification = Notification.Name("app.humanreadtts.mac.openFile")
+    static let newScratchpadNotification = Notification.Name("app.humanreadtts.mac.newScratchpad")
+    static let speedFasterNotification = Notification.Name("app.humanreadtts.mac.speedFaster")
+    static let speedSlowerNotification = Notification.Name("app.humanreadtts.mac.speedSlower")
+    static let saveNotification = Notification.Name("app.humanreadtts.mac.save")
+    static let findNotification = Notification.Name("app.humanreadtts.mac.find")
+    static let increaseFontNotification = Notification.Name("app.humanreadtts.mac.increaseFont")
+    static let decreaseFontNotification = Notification.Name("app.humanreadtts.mac.decreaseFont")
+    static let resetFontNotification = Notification.Name("app.humanreadtts.mac.resetFont")
+    static let zoomToFitNotification = Notification.Name("app.humanreadtts.mac.zoomToFit")
 
     var body: some Scene {
-        WindowGroup("ReadAloudTTS") {
+        WindowGroup("HumanReadTTS") {
             RootView()
                 .frame(minWidth: 600, minHeight: 400)
                 .handlesExternalEvents(
-                    preferring: ["readaloudtts-main"], allowing: ["readaloudtts-main"]
+                    preferring: ["humanreadtts-main"], allowing: ["humanreadtts-main"]
                 )
                 .background(WindowAccessor { window in
                     // Let vibrancy and the content flow up under the
@@ -48,7 +48,7 @@ struct AppScene: Scene {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 800, height: 600)
-        .handlesExternalEvents(matching: ["readaloudtts-main"])
+        .handlesExternalEvents(matching: ["humanreadtts-main"])
         .commands {
             // Replace the default ⌘N "New Window" (one reader window
             // per process is the mental model) with ⌘N "New

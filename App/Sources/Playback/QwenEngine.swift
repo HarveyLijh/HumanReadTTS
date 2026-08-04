@@ -50,7 +50,7 @@ final class QwenEngine {
     /// `PCMAudioPlayer` can be reused.
     static let sampleRate: Double = 24_000
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "qwen")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "qwen")
 
     private init() {
         voices = Self.makeVoiceCatalog()

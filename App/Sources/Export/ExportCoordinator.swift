@@ -77,7 +77,7 @@ final class ExportCoordinator {
     }
 
     private var isProcessing = false
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "export")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "export")
 
     /// Present a save panel (with format picker) and, if accepted,
     /// enqueue the job. Returns immediately; progress is observable

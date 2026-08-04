@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ReadAloudTTSApp: App {
+struct HumanReadTTSApp: App {
     @NSApplicationDelegateAdaptor(AppDelegateShim.self) private var appDelegate
     @State private var menuBar = MenuBarCommand.shared
     @State private var sleepTimer = SleepTimer.shared
@@ -60,16 +60,16 @@ struct ReadAloudTTSApp: App {
 
             Divider()
 
-            Button("Open ReadAloudTTS") {
+            Button("Open HumanReadTTS") {
                 NSApp.activate(ignoringOtherApps: true)
-                if let window = NSApp.windows.first(where: { $0.title == "ReadAloudTTS" }) {
+                if let window = NSApp.windows.first(where: { $0.title == "HumanReadTTS" }) {
                     window.makeKeyAndOrderFront(nil)
                 }
             }
 
             Divider()
 
-            Button("Quit ReadAloudTTS") {
+            Button("Quit HumanReadTTS") {
                 NSApplication.shared.terminate(nil)
             }
             .keyboardShortcut("q")

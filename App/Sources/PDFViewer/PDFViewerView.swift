@@ -212,10 +212,10 @@ struct PDFViewerView: View {
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text("Couldn't open \(url.lastPathComponent).")
-                .font(ReadAloudTTSFont.serif(18))
+                .font(HumanReadTTSFont.serif(18))
                 .foregroundStyle(.primary)
             Text("Drop another file to try again.")
-                .font(ReadAloudTTSFont.ui(13))
+                .font(HumanReadTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
         .padding(32)

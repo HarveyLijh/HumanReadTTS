@@ -23,7 +23,7 @@ struct TextReaderView: View {
 
     @Bindable private var readerSettings = ReaderSettings.shared
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "text")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "text")
 
     var body: some View {
         VStack(spacing: 0) {
@@ -207,12 +207,12 @@ struct TextReaderView: View {
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text(errorMessage.isEmpty ? "Couldn't open \(url.lastPathComponent)." : errorMessage)
-                .font(ReadAloudTTSFont.serif(18))
+                .font(HumanReadTTSFont.serif(18))
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Text("Drop another file to try again.")
-                .font(ReadAloudTTSFont.ui(13))
+                .font(HumanReadTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
         .padding(32)

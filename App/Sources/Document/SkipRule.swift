@@ -40,7 +40,7 @@ struct SkipRule: Identifiable, Codable, Equatable, Hashable, Sendable {
         (try? NSRegularExpression(pattern: pattern)) != nil
     }
 
-    /// The three canonical built-ins ReadAloudTTS ships with, enabled by
+    /// The three canonical built-ins HumanReadTTS ships with, enabled by
     /// default. Users can disable them in the Skip Rules tab (they
     /// can't delete them — toggling off is the "safe" affordance).
     static var builtIns: [SkipRule] {

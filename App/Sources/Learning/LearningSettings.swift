@@ -31,8 +31,8 @@ final class LearningSettings {
     ]
 
     private let defaults: UserDefaults
-    private let tapToTranslateKey = "app.readaloudtts.mac.learning.tapToTranslate.v1"
-    private let targetLanguageKey = "app.readaloudtts.mac.learning.targetLanguage.v1"
+    private let tapToTranslateKey = "app.humanreadtts.mac.learning.tapToTranslate.v1"
+    private let targetLanguageKey = "app.humanreadtts.mac.learning.targetLanguage.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

@@ -12,7 +12,7 @@ struct AnalyticsSettingsView: View {
             } header: {
                 Text("Privacy")
             } footer: {
-                Text("All stats are stored locally in your user defaults. Nothing leaves this Mac — ReadAloudTTS has no analytics endpoint.")
+                Text("All stats are stored locally in your user defaults. Nothing leaves this Mac — HumanReadTTS has no analytics endpoint.")
                     .foregroundStyle(.secondary)
             }
 
@@ -38,9 +38,9 @@ struct AnalyticsSettingsView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Analytics are off")
-                            .font(ReadAloudTTSFont.serif(16))
+                            .font(HumanReadTTSFont.serif(16))
                         Text("Turn on the toggle above to start recording time spent and words read.")
-                            .font(ReadAloudTTSFont.ui(12))
+                            .font(HumanReadTTSFont.ui(12))
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 6)

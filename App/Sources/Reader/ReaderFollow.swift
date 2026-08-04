@@ -114,7 +114,7 @@ struct JumpToCurrentButton: View {
                     followState.jumpToCurrent()
                 } label: {
                     Label("Jump to current", systemImage: "scope")
-                        .font(ReadAloudTTSFont.ui(12).weight(.medium))
+                        .font(HumanReadTTSFont.ui(12).weight(.medium))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
                 }

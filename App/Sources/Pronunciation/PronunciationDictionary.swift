@@ -29,7 +29,7 @@ final class PronunciationDictionary {
     private(set) var entries: [Entry] = []
 
     private let defaults: UserDefaults
-    private let key = "app.readaloudtts.mac.pronunciation.entries.v1"
+    private let key = "app.humanreadtts.mac.pronunciation.entries.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

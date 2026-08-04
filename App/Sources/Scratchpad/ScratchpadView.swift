@@ -57,7 +57,7 @@ struct ScratchpadView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text("Scratchpad")
-                .font(ReadAloudTTSFont.serif(16))
+                .font(HumanReadTTSFont.serif(16))
                 .foregroundStyle(.primary)
             Text(characterSummary)
                 .font(.system(size: 11))

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Run the ReadAloudTTS test suite via xcodebuild and summarise results.
+# Run the HumanReadTTS test suite via xcodebuild and summarise results.
 # Requires full Xcode (the swiftc CLI fallback can't host XCTest).
 #
 # Usage:
@@ -28,7 +28,7 @@ fail()  { printf "%s✗%s %s\n" "$c_red" "$c_reset" "$1" >&2; exit 1; }
 
 usage() {
     cat <<EOF
-${c_bold}Run ReadAloudTTS tests${c_reset}
+${c_bold}Run HumanReadTTS tests${c_reset}
 
 Usage: Scripts/test.sh [options]
 
@@ -62,7 +62,7 @@ done
 
 # Filesystem sentinel is how network tests opt in (env vars
 # don't propagate into the xcodebuild-hosted test runner on macOS).
-sentinel="/tmp/readaloudtts-run-network-tests"
+sentinel="/tmp/humanreadtts-run-network-tests"
 if [[ $network -eq 1 ]]; then
     say "Enabling network tests (touching $sentinel)"
     touch "$sentinel"
@@ -83,8 +83,8 @@ say "Running tests via xcodebuild"
 
 cmd=(
     xcodebuild
-    -project ReadAloudTTS.xcodeproj
-    -scheme ReadAloudTTS
+    -project HumanReadTTS.xcodeproj
+    -scheme HumanReadTTS
     -destination 'platform=macOS'
     -derivedDataPath "$BUILD_DIR/DerivedData"
     -resultBundlePath "$RESULTS_DIR"
@@ -93,12 +93,12 @@ cmd=(
 )
 
 if [[ -n "$only" ]]; then
-    cmd+=(-only-testing:"ReadAloudTTSTests/$only")
+    cmd+=(-only-testing:"HumanReadTTSTests/$only")
 fi
 
 # Run, capture all output for parsing, but stream a filtered subset
 # to the terminal so the human can see progress.
-tmplog="$(mktemp -t readaloudtts-test.XXXXXX)"
+tmplog="$(mktemp -t humanreadtts-test.XXXXXX)"
 trap 'rm -f "$tmplog"' EXIT
 
 set +e
@@ -109,7 +109,7 @@ set -e
 # Per-suite summary lines (Xcode prints "Test Suite '...' passed/failed").
 printf "\n%s%sSummary%s\n" "$c_amber" "$c_bold" "$c_reset"
 grep -E "Test Suite '[^']+' (passed|failed)" "$tmplog" \
-    | grep -v "Selected tests\|All tests\|ReadAloudTTSTests.xctest" \
+    | grep -v "Selected tests\|All tests\|HumanReadTTSTests.xctest" \
     | while IFS= read -r line; do
         if [[ "$line" == *"passed"* ]]; then
             suite="$(printf '%s' "$line" | sed -E "s/.*Test Suite '([^']+)'.*/\\1/")"

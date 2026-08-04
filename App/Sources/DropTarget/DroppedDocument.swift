@@ -1,10 +1,10 @@
 import Foundation
 
-/// A file the user dropped onto the ReadAloudTTS window.
+/// A file the user dropped onto the HumanReadTTS window.
 ///
 /// Construction is failable: only readable formats are accepted.
 /// The validation belongs here (not in the view) so the Sources build
-/// phase has one well-tested boundary for "is this a file ReadAloudTTS
+/// phase has one well-tested boundary for "is this a file HumanReadTTS
 /// can read?" Today: PDF, Markdown, EPUB, plain text, DOCX, and images
 /// (read via on-device OCR).
 struct DroppedDocument: Equatable, Hashable {

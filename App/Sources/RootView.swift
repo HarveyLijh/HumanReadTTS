@@ -124,7 +124,7 @@ struct RootView: View {
             NotificationCenter.default.publisher(for: .readAloudTTSOpenURL)
         ) { note in
             // Routed via `AppDelegateShim.application(_:open:)` so
-            // `open -a ReadAloudTTS file.pdf` and Finder double-clicks swap
+            // `open -a HumanReadTTS file.pdf` and Finder double-clicks swap
             // the document in the existing window rather than
             // triggering `WindowGroup` to spawn a new scene. Also
             // used by the welcome tour to hand off its sample.
@@ -359,7 +359,7 @@ struct RootView: View {
             Image(systemName: "waveform.slash")
                 .foregroundStyle(.orange)
             Text(fallbackBannerText)
-                .font(ReadAloudTTSFont.ui(12))
+                .font(HumanReadTTSFont.ui(12))
                 .foregroundStyle(.primary)
         }
         .padding(.horizontal, 12)
@@ -418,7 +418,7 @@ struct RootView: View {
             Image(systemName: "arrow.triangle.2.circlepath")
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text(undoBannerText)
-                .font(ReadAloudTTSFont.ui(12))
+                .font(HumanReadTTSFont.ui(12))
                 .foregroundStyle(.primary)
             Button("Undo") {
                 undoDismissTask?.cancel()
@@ -429,7 +429,7 @@ struct RootView: View {
                 undoPrevious = nil
             }
             .buttonStyle(.plain)
-            .font(ReadAloudTTSFont.ui(12).weight(.semibold))
+            .font(HumanReadTTSFont.ui(12).weight(.semibold))
             .foregroundStyle(Color.readAloudTTSAccent)
         }
         .padding(.horizontal, 12)
@@ -461,10 +461,10 @@ struct RootView: View {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text(message)
-                .font(ReadAloudTTSFont.ui(12))
+                .font(HumanReadTTSFont.ui(12))
             Button("Dismiss") { exporter.dismissAlert() }
                 .buttonStyle(.plain)
-                .font(ReadAloudTTSFont.ui(12))
+                .font(HumanReadTTSFont.ui(12))
                 .foregroundStyle(Color.readAloudTTSAccent)
         }
         .padding(10)
@@ -505,7 +505,7 @@ struct RootView: View {
     /// Called from the File → Export Audiobook menu command.
     func startExport() {
         let sentences = currentSentences()
-        let suggestion = document?.url.deletingPathExtension().lastPathComponent ?? "ReadAloudTTS Export"
+        let suggestion = document?.url.deletingPathExtension().lastPathComponent ?? "HumanReadTTS Export"
         exporter.exportWithPrompt(sentences: sentences, suggestedName: suggestion)
     }
 

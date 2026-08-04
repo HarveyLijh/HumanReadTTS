@@ -14,7 +14,7 @@ final class VocabularyStore {
     private(set) var entries: [VocabEntry] = []
 
     private let defaults: UserDefaults
-    private let key = "app.readaloudtts.mac.learning.vocab.v1"
+    private let key = "app.humanreadtts.mac.learning.vocab.v1"
 
     var isEmpty: Bool { entries.isEmpty }
     var count: Int { entries.count }

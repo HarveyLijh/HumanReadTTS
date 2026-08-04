@@ -30,13 +30,13 @@ final class ReadingStats {
     // MARK: keys
 
     private let defaults: UserDefaults
-    private let enabledKey = "app.readaloudtts.mac.stats.enabled.v1"
-    private let totalWordsKey = "app.readaloudtts.mac.stats.totalWords.v1"
-    private let totalSecondsKey = "app.readaloudtts.mac.stats.totalSeconds.v1"
-    private let todayWordsKey = "app.readaloudtts.mac.stats.todayWords.v1"
-    private let todaySecondsKey = "app.readaloudtts.mac.stats.todaySeconds.v1"
-    private let streakKey = "app.readaloudtts.mac.stats.streak.v1"
-    private let lastDayKey = "app.readaloudtts.mac.stats.lastDay.v1"
+    private let enabledKey = "app.humanreadtts.mac.stats.enabled.v1"
+    private let totalWordsKey = "app.humanreadtts.mac.stats.totalWords.v1"
+    private let totalSecondsKey = "app.humanreadtts.mac.stats.totalSeconds.v1"
+    private let todayWordsKey = "app.humanreadtts.mac.stats.todayWords.v1"
+    private let todaySecondsKey = "app.humanreadtts.mac.stats.todaySeconds.v1"
+    private let streakKey = "app.humanreadtts.mac.stats.streak.v1"
+    private let lastDayKey = "app.humanreadtts.mac.stats.lastDay.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

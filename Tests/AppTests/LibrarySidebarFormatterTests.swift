@@ -1,5 +1,5 @@
 import XCTest
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 /// `LibrarySidebarView.formatted` replaces the auto-ticking
 /// relative-date `Text`. These tests pin the rules for the

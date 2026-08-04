@@ -16,8 +16,8 @@ enum OnboardingSampleLoader {
     /// User-visible filename. Shown in the sidebar, the window
     /// title, and the resume position database, so we pick a
     /// name that reads well in those surfaces — "Welcome to
-    /// ReadAloudTTS.md" rather than the internal bundle name.
-    static let filename = "Welcome to ReadAloudTTS.md"
+    /// HumanReadTTS.md" rather than the internal bundle name.
+    static let filename = "Welcome to HumanReadTTS.md"
 
     enum LoadError: Error {
         case resourceMissing
@@ -48,7 +48,7 @@ enum OnboardingSampleLoader {
             appropriateFor: nil,
             create: true
         )
-        let readAloudTTSDir = supportDir.appendingPathComponent("ReadAloudTTS", isDirectory: true)
+        let readAloudTTSDir = supportDir.appendingPathComponent("HumanReadTTS", isDirectory: true)
         if !FileManager.default.fileExists(atPath: readAloudTTSDir.path) {
             try FileManager.default.createDirectory(
                 at: readAloudTTSDir, withIntermediateDirectories: true

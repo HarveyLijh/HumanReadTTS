@@ -55,7 +55,7 @@ struct ShortcutsSettingsView: View {
             } header: {
                 Text("Permissions")
             } footer: {
-                Text("Reading the selection directly from other apps may require granting ReadAloudTTS Accessibility access in System Settings → Privacy & Security. Without it, the shortcut still reads your clipboard.")
+                Text("Reading the selection directly from other apps may require granting HumanReadTTS Accessibility access in System Settings → Privacy & Security. Without it, the shortcut still reads your clipboard.")
                     .foregroundStyle(.secondary)
             }
         }

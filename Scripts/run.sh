@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Launch the latest dev build of ReadAloudTTS from wherever Xcode stashed it.
+# Launch the latest dev build of HumanReadTTS from wherever Xcode stashed it.
 #
 # Xcode's DerivedData path has a scheme-specific hash in it
-# (ReadAloudTTS-<hash>/Build/Products/Debug/ReadAloudTTS.app), which is tedious to
+# (HumanReadTTS-<hash>/Build/Products/Debug/HumanReadTTS.app), which is tedious to
 # type. This script asks xcodebuild for the canonical BUILT_PRODUCTS_DIR
 # and launches the .app from there.
 #
@@ -41,7 +41,7 @@ for arg in "$@"; do
 done
 
 if [ "$SHOULD_BUILD" -eq 1 ]; then
-    xcodebuild -project ReadAloudTTS.xcodeproj -scheme ReadAloudTTS \
+    xcodebuild -project HumanReadTTS.xcodeproj -scheme HumanReadTTS \
                -configuration "$CONFIG" \
                -destination 'platform=macOS' \
                build | tail -3
@@ -49,20 +49,20 @@ fi
 
 # Ask xcodebuild for the canonical build product path. -showBuildSettings
 # reports BUILT_PRODUCTS_DIR which includes the DerivedData hash.
-APP_PATH="$(xcodebuild -project ReadAloudTTS.xcodeproj -scheme ReadAloudTTS \
+APP_PATH="$(xcodebuild -project HumanReadTTS.xcodeproj -scheme HumanReadTTS \
                        -configuration "$CONFIG" \
                        -destination 'platform=macOS' \
                        -showBuildSettings 2>/dev/null \
-            | awk -F'= ' '/ BUILT_PRODUCTS_DIR /{print $2; exit}')/ReadAloudTTS.app"
+            | awk -F'= ' '/ BUILT_PRODUCTS_DIR /{print $2; exit}')/HumanReadTTS.app"
 
 if [ ! -d "$APP_PATH" ]; then
-    echo "ReadAloudTTS.app not found at $APP_PATH — try --build first" >&2
+    echo "HumanReadTTS.app not found at $APP_PATH — try --build first" >&2
     exit 1
 fi
 
 # Kill any running instance first so the freshly-built version launches
 # rather than re-fronting a stale one.
-pkill -9 -f "ReadAloudTTS.app/Contents/MacOS/ReadAloudTTS" 2>/dev/null || true
+pkill -9 -f "HumanReadTTS.app/Contents/MacOS/HumanReadTTS" 2>/dev/null || true
 sleep 0.3
 echo "Opening $APP_PATH"
 open "$APP_PATH"

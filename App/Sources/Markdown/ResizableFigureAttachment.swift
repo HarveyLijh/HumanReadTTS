@@ -1,13 +1,13 @@
 import AppKit
 import os
 
-private let figureLog = Logger(subsystem: "app.readaloudtts.mac", category: "resizable-figure")
+private let figureLog = Logger(subsystem: "app.humanreadtts.mac", category: "resizable-figure")
 
 /// File-type sentinel used to look up our view provider class.
 /// `ResizableFigureAttachment` returns this from its overridden
 /// `fileType` getter; AppKit then resolves it to
 /// `ResizableFigureViewProvider` via `registerViewProviderClass`.
-let kResizableFigureFileType = "app.readaloudtts.figure"
+let kResizableFigureFileType = "app.humanreadtts.figure"
 
 /// Registers `ResizableFigureViewProvider` so AppKit knows to ask it
 /// for views whenever it sees an attachment with our file type. Calling

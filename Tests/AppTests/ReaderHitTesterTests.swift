@@ -1,5 +1,5 @@
 import XCTest
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 final class ReaderHitTesterTests: XCTestCase {
     private func sentence(

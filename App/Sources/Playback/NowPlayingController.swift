@@ -6,7 +6,7 @@ import Observation
 /// (Control Center, the lock screen, the menu-bar Now Playing module)
 /// and wires the hardware transport — `MPRemoteCommandCenter`'s
 /// play / pause / next / previous / stop, which also back the F7/F8/F9
-/// media keys and AirPods controls when ReadAloudTTS is the active
+/// media keys and AirPods controls when HumanReadTTS is the active
 /// Now-Playing app.
 ///
 /// This is the *system-integration* layer only. The in-window transport
@@ -162,7 +162,7 @@ final class NowPlayingController {
 
     // MARK: - Pure mapping (unit-tested without a live info center)
 
-    static let appTitle = "ReadAloudTTS"
+    static let appTitle = "HumanReadTTS"
 
     /// Maps player-derived metadata to the `MPNowPlayingInfoCenter`
     /// dictionary. Elapsed/duration are already wall-clock seconds (the

@@ -15,7 +15,7 @@ final class Library {
     private(set) var entries: [LibraryEntry] = []
 
     private let defaults: UserDefaults
-    private let key = "app.readaloudtts.mac.library.entries.v1"
+    private let key = "app.humanreadtts.mac.library.entries.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

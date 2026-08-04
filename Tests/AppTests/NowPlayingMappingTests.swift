@@ -1,6 +1,6 @@
 import XCTest
 import MediaPlayer
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 @MainActor
 final class NowPlayingMappingTests: XCTestCase {
@@ -11,12 +11,12 @@ final class NowPlayingMappingTests: XCTestCase {
 
     func test_infoDictionary_mapsAllKeys() {
         let meta = NowPlayingMetadata(
-            title: "Hello there", albumTitle: "ReadAloudTTS",
+            title: "Hello there", albumTitle: "HumanReadTTS",
             elapsed: 12, duration: 60, isPlaying: true
         )
         let info = NowPlayingController.makeInfoDictionary(meta)
         XCTAssertEqual(info[MPMediaItemPropertyTitle] as? String, "Hello there")
-        XCTAssertEqual(info[MPMediaItemPropertyAlbumTitle] as? String, "ReadAloudTTS")
+        XCTAssertEqual(info[MPMediaItemPropertyAlbumTitle] as? String, "HumanReadTTS")
         XCTAssertEqual(info[MPMediaItemPropertyPlaybackDuration] as? Double, 60)
         XCTAssertEqual(info[MPNowPlayingInfoPropertyElapsedPlaybackTime] as? Double, 12)
         XCTAssertEqual(info[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1.0,
@@ -43,8 +43,8 @@ final class NowPlayingMappingTests: XCTestCase {
     }
 
     func test_title_fallsBackToAppNameWhenOutOfRangeOrEmpty() {
-        XCTAssertEqual(NowPlayingController.title(for: [], index: 0), "ReadAloudTTS")
-        XCTAssertEqual(NowPlayingController.title(for: [sentence("   ")], index: 0), "ReadAloudTTS")
+        XCTAssertEqual(NowPlayingController.title(for: [], index: 0), "HumanReadTTS")
+        XCTAssertEqual(NowPlayingController.title(for: [sentence("   ")], index: 0), "HumanReadTTS")
     }
 
     func test_remoteCommands_disabledWhenNothingLoaded() {

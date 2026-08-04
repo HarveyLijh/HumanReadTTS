@@ -103,16 +103,16 @@ final class SpeechSettings {
     }
 
     private let defaults: UserDefaults
-    private let rateKey = "app.readaloudtts.mac.speech.rate.v1"
-    private let pitchKey = "app.readaloudtts.mac.speech.pitch.v1"
-    private let voiceKey = "app.readaloudtts.mac.speech.voice.v1"
-    private let stripCitationsKey = "app.readaloudtts.mac.speech.stripCitations.v1"
-    private let skipFigureCaptionsKey = "app.readaloudtts.mac.speech.skipFigureCaptions.v1"
-    private let skipRulesKey = "app.readaloudtts.mac.speech.skipRules.v1"
-    private let restoreClipboardKey = "app.readaloudtts.mac.shortcuts.restoreClipboard.v1"
-    private let sleepTimerMinutesKey = "app.readaloudtts.mac.playback.sleepTimerMinutes.v1"
-    private let showInNowPlayingKey = "app.readaloudtts.mac.playback.showInNowPlaying.v1"
-    private let ocrLanguagesKey = "app.readaloudtts.mac.ocr.recognitionLanguages.v1"
+    private let rateKey = "app.humanreadtts.mac.speech.rate.v1"
+    private let pitchKey = "app.humanreadtts.mac.speech.pitch.v1"
+    private let voiceKey = "app.humanreadtts.mac.speech.voice.v1"
+    private let stripCitationsKey = "app.humanreadtts.mac.speech.stripCitations.v1"
+    private let skipFigureCaptionsKey = "app.humanreadtts.mac.speech.skipFigureCaptions.v1"
+    private let skipRulesKey = "app.humanreadtts.mac.speech.skipRules.v1"
+    private let restoreClipboardKey = "app.humanreadtts.mac.shortcuts.restoreClipboard.v1"
+    private let sleepTimerMinutesKey = "app.humanreadtts.mac.playback.sleepTimerMinutes.v1"
+    private let showInNowPlayingKey = "app.humanreadtts.mac.playback.showInNowPlaying.v1"
+    private let ocrLanguagesKey = "app.humanreadtts.mac.ocr.recognitionLanguages.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

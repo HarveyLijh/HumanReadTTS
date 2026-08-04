@@ -14,7 +14,7 @@ final class MenuBarCommand {
     let player = SpeechPlayer()
 
     private let defaults = UserDefaults.standard
-    private let hintShownKey = "app.readaloudtts.mac.shortcuts.didShowSelectionHint.v1"
+    private let hintShownKey = "app.humanreadtts.mac.shortcuts.didShowSelectionHint.v1"
 
     private init() {
         // When a menu-bar read finishes on its own, pull the next queued
@@ -158,8 +158,8 @@ final class MenuBarCommand {
 
         let alert = NSAlert()
         alert.alertStyle = .informational
-        alert.messageText = "ReadAloudTTS read your clipboard"
-        alert.informativeText = "To read the selected text directly from other apps, grant ReadAloudTTS Accessibility access in System Settings. Until then, copy text (⌘C) and press the shortcut to hear it."
+        alert.messageText = "HumanReadTTS read your clipboard"
+        alert.informativeText = "To read the selected text directly from other apps, grant HumanReadTTS Accessibility access in System Settings. Until then, copy text (⌘C) and press the shortcut to hear it."
         alert.addButton(withTitle: "Open System Settings")
         alert.addButton(withTitle: "Not Now")
         NSApp.activate(ignoringOtherApps: true)

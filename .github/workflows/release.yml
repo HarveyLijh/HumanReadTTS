@@ -59,7 +59,7 @@ jobs:
           swift --version
           sw_vers
 
-      # ReadAloudTTS ships a Local.xcconfig example. The hand-maintained
+      # HumanReadTTS ships a Local.xcconfig example. The hand-maintained
       # .xcodeproj references Configs/Local.xcconfig, so CI needs a
       # concrete copy (with DEVELOPMENT_TEAM left blank when we're
       # not signing — the unsigned path in package.sh is fine).
@@ -80,7 +80,7 @@ jobs:
           path: |
             ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved', 'ReadAloudTTS.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved', 'HumanReadTTS.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: |
             spm-${{ runner.os }}-
 
@@ -144,7 +144,7 @@ jobs:
       - name: Upload DMG artifact (for workflow_dispatch builds)
         uses: actions/upload-artifact@v5
         with:
-          name: readaloudtts-dmg
+          name: humanreadtts-dmg
           path: |
             dist/*.dmg
             dist/*.dmg.sha256
@@ -166,11 +166,11 @@ jobs:
               git log --pretty="- %s (%h)" --max-count=25 "${TAG_NAME}"
             fi
             printf '\n## Install\n\n'
-            printf '1. Download `%s` below, mount, drag ReadAloudTTS into **/Applications**.\n' "$DMG_NAME"
-            printf '2. **First launch:** right-click ReadAloudTTS.app → **Open** (Gatekeeper asks once).\n'
+            printf '1. Download `%s` below, mount, drag HumanReadTTS into **/Applications**.\n' "$DMG_NAME"
+            printf '2. **First launch:** right-click HumanReadTTS.app → **Open** (Gatekeeper asks once).\n'
             printf '   Or strip the quarantine flag:\n\n'
             printf '   ```sh\n'
-            printf '   xattr -dr com.apple.quarantine /Applications/ReadAloudTTS.app\n'
+            printf '   xattr -dr com.apple.quarantine /Applications/HumanReadTTS.app\n'
             printf '   ```\n\n'
             printf '## Checksum\n\n'
             printf '```\n%s  %s\n```\n' "$DMG_SHA256" "$DMG_NAME"
@@ -187,7 +187,7 @@ jobs:
           body_path: release-notes.md
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
-          name: "ReadAloudTTS ${{ github.ref_name }}"
+          name: "HumanReadTTS ${{ github.ref_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

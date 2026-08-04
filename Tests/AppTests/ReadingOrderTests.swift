@@ -1,6 +1,6 @@
 import XCTest
 import CoreGraphics
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 final class ReadingOrderTests: XCTestCase {
 

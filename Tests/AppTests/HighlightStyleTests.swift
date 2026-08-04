@@ -1,6 +1,6 @@
 import XCTest
 import AppKit
-@testable import ReadAloudTTS
+@testable import HumanReadTTS
 
 final class HighlightStyleTests: XCTestCase {
 

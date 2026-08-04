@@ -63,7 +63,7 @@ struct MarkdownReaderView: View {
         var id: Self { self }
     }
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "markdown")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "markdown")
 
     var body: some View {
         VStack(spacing: 0) {
@@ -502,10 +502,10 @@ struct MarkdownReaderView: View {
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(Color.readAloudTTSAccent)
             Text("Couldn't read \(url.lastPathComponent).")
-                .font(ReadAloudTTSFont.serif(18))
+                .font(HumanReadTTSFont.serif(18))
                 .foregroundStyle(.primary)
             Text("Drop another file to try again.")
-                .font(ReadAloudTTSFont.ui(13))
+                .font(HumanReadTTSFont.ui(13))
                 .foregroundStyle(.secondary)
         }
         .padding(32)
@@ -1576,7 +1576,7 @@ private func makeReadOnlyTextScrollView(
         width: 0, height: CGFloat.greatestFiniteMagnitude
     )
 
-    Logger(subsystem: "app.readaloudtts.mac", category: "resizable-figure")
+    Logger(subsystem: "app.humanreadtts.mac", category: "resizable-figure")
         .debug("preview NSTextView using TK2 = \(textView.textLayoutManager != nil)")
 
     scroll.documentView = textView
@@ -1757,7 +1757,7 @@ private func applySearchHighlightsRaw(
 final class MermaidWebRenderer: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
     static let shared = MermaidWebRenderer()
 
-    private static let log = Logger(subsystem: "app.readaloudtts.mac", category: "mermaid")
+    private static let log = Logger(subsystem: "app.humanreadtts.mac", category: "mermaid")
 
     private struct Pending {
         let continuation: CheckedContinuation<NSImage, Error>

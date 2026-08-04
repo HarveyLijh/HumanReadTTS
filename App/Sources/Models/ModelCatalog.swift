@@ -1,6 +1,6 @@
 import Foundation
 
-/// The curated set of models ReadAloudTTS knows how to manage. Adding a
+/// The curated set of models HumanReadTTS knows how to manage. Adding a
 /// new model is a code change — by design, so the user doesn't
 /// paste arbitrary URLs into Settings.
 ///

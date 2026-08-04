@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 /// A tiny, non-activating heads-up panel shown near the menu bar when
-/// the user triggers "read from anywhere" while ReadAloudTTS is in the
+/// the user triggers "read from anywhere" while HumanReadTTS is in the
 /// background. It confirms the app heard the hotkey (showing the first
 /// words being read) and offers a Stop button — crucially **without
 /// stealing focus** from the frontmost app, so the user stays where
