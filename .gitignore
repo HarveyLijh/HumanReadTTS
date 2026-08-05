@@ -25,7 +25,10 @@ playground.xcworkspace
 .build/
 Packages/*/.build/
 .swiftpm/
-Package.resolved
+# The app's Package.resolved IS tracked on purpose — CI has no lockfile
+# otherwise and resolves dependencies fresh, which is how the v0.7.2
+# release build broke. Only ignore resolved files inside checkouts.
+**/SourcePackages/**/Package.resolved
 
 # Local config (signing identity, team ID)
 Configs/Local.xcconfig
