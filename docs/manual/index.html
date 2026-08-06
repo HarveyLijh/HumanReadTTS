@@ -429,17 +429,17 @@
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-title">Open it and drag the app across</div>
+          <div class="step-title">Open it and move the app to Applications</div>
           <p>
             Double-click the downloaded <code>.dmg</code> file. A window opens
-            showing the HumanReadTTS icon next to a shortcut to your Applications
-            folder. Drag the icon onto that folder.
+            containing the HumanReadTTS app. Drag it into your
+            <strong>Applications</strong> folder — open a second Finder window
+            and drag it across, or drag it onto Applications in the Finder
+            sidebar.
           </p>
-          <div class="shot-todo">
-            <strong>Screenshot to add</strong>
-            The opened disk image window, showing the HumanReadTTS icon on the
-            left and the Applications folder shortcut on the right, with an
-            arrow between them. Capture at the default window size.
+          <div class="screenshot shot-panel">
+            <img src="assets/install-dmg.png" alt="The mounted disk image window in Finder, containing a single item: the HumanReadTTS application.">
+            <div class="caption">The disk image contains just the app. Drag it to your Applications folder.</div>
           </div>
         </div>
       </div>
@@ -504,11 +504,14 @@
       control you need while listening.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The full main window with a PDF open: document list on the left, document
-      in the middle, playback bar at the bottom. Use a neutral sample document,
-      not a personal file, because the document list shows file names.
+    <div class="screenshot shot-panel">
+      <img src="assets/welcome-tour.png" alt="The welcome tour window, headed Welcome to HumanReadTTS, listing three points: fully on-device, bilingual English and Chinese, and audiobook export.">
+      <div class="caption">The welcome tour on first launch. Click Skip at any point, or Get Started to step through it.</div>
+    </div>
+
+    <div class="screenshot shot-wide">
+      <img src="assets/main-window.png" alt="The main window with a PDF open: the document list on the left, the document in the middle, and the playback bar along the bottom.">
+      <div class="caption">The main window. Documents you have opened are listed on the left, the current one fills the middle, and the playback bar sits along the bottom.</div>
     </div>
 
     <div class="callout info">
@@ -611,11 +614,9 @@
       <strong>Read from here to end</strong>.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      A paragraph mid-read, showing the amber sentence highlight with the
-      brighter word highlight inside it. Crop to a few lines of text so the two
-      highlight levels are clearly visible.
+    <div class="screenshot shot-wide">
+      <img src="assets/highlight-playing.png" alt="The reader mid-playback: the sentence being read is washed in a lighter band, with the word currently being spoken picked out more brightly inside it.">
+      <div class="caption">Mid-read. The sentence being spoken carries a soft wash, and the exact word is picked out more brightly inside it.</div>
     </div>
 
     <div class="callout tip">
@@ -679,6 +680,11 @@
       the old one.
     </p>
 
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-playback.png" alt="The Playback tab in Settings, where the voice, speed and bilingual auto-switch behaviour are set.">
+      <div class="caption">The Playback tab. Setting the voice to Auto lets the app pick per sentence in a bilingual document.</div>
+    </div>
+
     <div class="callout info">
       <span class="callout-label">Note</span>
       <p>
@@ -698,11 +704,9 @@
       tab. Each voice pack has a Download button and a progress bar.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The Models tab in Settings, showing the Kokoro and Qwen3-TTS voice packs
-      with their sizes and Download buttons. Include the full row of settings
-      tabs at the top.
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-models.png" alt="The Models tab in Settings, listing the downloadable voice packs with their sizes and download controls.">
+      <div class="caption">The Models tab. Voice packs download once and then work offline.</div>
     </div>
 
     <div class="callout tip">
@@ -738,10 +742,9 @@
       Your corrections apply to every voice and every document from then on.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The Pronunciation tab in Settings with two or three example entries filled
-      in, showing the written form and the spoken form side by side.
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-pronunciation.png" alt="The Pronunciation tab in Settings, where words are paired with the spelling that should be spoken.">
+      <div class="caption">The Pronunciation tab. Corrections apply to every voice and every document.</div>
     </div>
 
     <!-- 13 -->
@@ -758,10 +761,9 @@
       <li><strong>Highlight colour</strong> — an alternative palette is available that stays distinguishable for the most common forms of colour blindness.</li>
     </ul>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The Reading tab in Settings, showing the typeface picker and the spacing
-      sliders with the live preview area below them.
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-reading.png" alt="The Reading tab in Settings: a font picker, sliders for size, line spacing and letter spacing, a leading-bold switch, and a live preview sentence.">
+      <div class="caption">The Reading tab. The preview sentence updates live, so you can judge a change before keeping it.</div>
     </div>
 
     <!-- 14 -->
@@ -780,11 +782,14 @@
       you lose your place easily on dense pages.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      Two images side by side, or one after the other: the same page shown in
-      Sepia and in Night. Use a neutral sample document, because the document
-      list is visible in the frame.
+    <div class="screenshot shot-wide">
+      <img src="assets/reading-theme-sepia.png" alt="The reader with the Sepia surface: a warm, paper-coloured page behind dark text.">
+      <div class="caption">Sepia warms the page for daytime reading.</div>
+    </div>
+
+    <div class="screenshot shot-wide">
+      <img src="assets/reading-theme-night.png" alt="The reader with the Night surface: light text on a dim background.">
+      <div class="caption">Night dims the page for reading in the dark. Both surfaces apply to Markdown and plain text; PDFs keep their own page colour.</div>
     </div>
 
     <!-- 15 -->
@@ -870,8 +875,14 @@
     </p>
     <p>
       You can change that key combination in <strong>Settings</strong> &rarr;
-      <strong>Shortcuts</strong>.
+      <strong>Shortcuts</strong>. The same tab chooses which languages are
+      recognised in images.
     </p>
+
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-shortcuts.png" alt="The Shortcuts tab in Settings, showing the read-selection hotkey, a switch to restore the clipboard afterwards, and the list of image recognition languages.">
+      <div class="caption">The Shortcuts tab. The hotkey is rebindable, and the language list controls text recognition in images.</div>
+    </div>
     <p>
       There is also a menu-bar icon that appears while something is playing,
       giving you play, pause and skip without switching back to the main window.
@@ -903,10 +914,9 @@
       <li><strong>Reading queue</strong> — line up several documents so the next one starts automatically when the current one finishes.</li>
     </ul>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The Playback Controls tab in Settings, showing the sleep timer options and
-      the reading queue.
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-playback-controls.png" alt="The Playback Controls tab in Settings, with the sleep timer and reading queue options.">
+      <div class="caption">The Playback Controls tab, holding the sleep timer and the reading queue.</div>
     </div>
 
     <!-- 20 -->
@@ -929,10 +939,9 @@
       on. Changes take effect at the next sentence, without stopping playback.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The Skip Rules tab in Settings, with the three built-in rules visible and
-      the live preview showing text being removed from a sample sentence.
+    <div class="screenshot shot-panel">
+      <img src="assets/settings-skip-rules.png" alt="The Skip Rules tab in Settings, listing the built-in citation rules with switches and a live preview of what gets removed.">
+      <div class="caption">The Skip Rules tab. The preview shows exactly what a rule removes before you switch it on.</div>
     </div>
 
     <div class="callout tip">
@@ -1001,10 +1010,9 @@
       Finder, and a button to play it.
     </p>
 
-    <div class="shot-todo">
-      <strong>Screenshot to add</strong>
-      The exports list with one finished item and one in progress. Use neutral
-      document names, because the file names are visible.
+    <div class="screenshot shot-panel">
+      <img src="assets/exports-queue.png" alt="The Exports window, which lists each audio export with its own progress and buttons to reveal or play the finished file.">
+      <div class="caption">The Exports window. Each job has its own progress, with buttons to show it in Finder or play it.</div>
     </div>
 
     <!-- 23 -->
